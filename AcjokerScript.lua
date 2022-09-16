@@ -6,74 +6,7 @@
    --credits to aaronlink127#0127 for the ScaleformLib script and help with executing it
    --Script made by acjoker8818
    -------------------------------------------------------------------------
-   local localVer = 1.00 -- all credits for the updater go to Prisuhm#7717 Thank You
-   async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/AcjokerScriptVersion", function(output)
-       currentVer = tonumber(output)
-       response = true
-       if localVer ~= currentVer then
-           AClang.toast("New AcjokerScript version is available, update the lua to get the newest version.")
-           AClang.action(menu.my_root(), AClang.str_trans("Update Lua"), {}, "", function()
-   
-               local lang = {
-                   'ACPortuguese.lua',
-                   'ACFrench.lua',
-                   'ACLithuanian.lua',
-                   'ACGerman.lua',
-                   'ACDutch.lua',
-                   'ACSpanish.lua',
-                   'ACPolish.lua',
-                   'ACChinese.lua'
-               }
-       
-               for _, file in ipairs(lang) do
-                   async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/'.. file,function(a)
-                       local err = select(2,load(a))
-                       if err then
-                           AClang.toast("Languages failed to download. Please try again later. If this continues to happen then manually update via github.")
-                       return end
-                       local f = io.open(filesystem.store_dir() .. 'AcjokerScript\\Languages\\'.. file, "wb")
-                       f:write(a)
-                       f:close()
-                   end)
-                   async_http.dispatch() 
-               end
-               util.yield(100)
-   
-       async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/AcjokerScript.lua',function(b)
-           local err = select(2,load(b))
-           if err then
-               AClang.toast("Main Script failed to download. Please try again later. If this continues to happen then manually update via github.")
-           return end
-           local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
-           f:write(b)
-           f:close()
-       end)
-       async_http.dispatch()
-       util.yield(100)
-   
-       async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/AClangLib.lua',function(c)
-           local err = select(2,load(c))
-           if err then
-               AClang.toast("AClanglib.lua failed to download. Please try again later. If this continues to happen then manually update via github.")
-           return end
-           local f = io.open(filesystem.scripts_dir()..'\\lib\\AClangLib.lua', "wb")
-           f:write(c)
-           f:close()
-           AClang.toast("Successfully updated AcjokerScript :)")
-           util.restart_script()
-       end)
-       async_http.dispatch()  
-   
-           end)
-       end
-   end, function() response = true end)
-   async_http.dispatch()
-   repeat 
-       util.yield()
-   until response
 
-
-   
 --github
 util.keep_running()
 util.require_natives(1651208000)
@@ -3740,5 +3673,72 @@ Dlcp = {
 }
 
 players.dispatch_on_join()
+
+local localVer = 1.00 -- all credits for the updater go to Prisuhm#7717 Thank You
+async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/AcjokerScriptVersion", function(output)
+    currentVer = tonumber(output)
+    response = true
+    if localVer ~= currentVer then
+        AClang.toast("New AcjokerScript version is available, update the lua to get the newest version.")
+        AClang.action(menu.my_root(), AClang.str_trans("Update Lua"), {}, "", function()
+
+            local lang = {
+                'ACPortuguese.lua',
+                'ACFrench.lua',
+                'ACLithuanian.lua',
+                'ACGerman.lua',
+                'ACDutch.lua',
+                'ACSpanish.lua',
+                'ACPolish.lua',
+                'ACChinese.lua'
+            }
+    
+            for _, file in ipairs(lang) do
+                async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/'.. file,function(a)
+                    local err = select(2,load(a))
+                    if err then
+                        AClang.toast("Languages failed to download. Please try again later. If this continues to happen then manually update via github.")
+                    return end
+                    local f = io.open(filesystem.store_dir() .. 'AcjokerScript\\Languages\\'.. file, "wb")
+                    f:write(a)
+                    f:close()
+                end)
+                async_http.dispatch() 
+            end
+            util.yield(100)
+
+    async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/AcjokerScript.lua',function(b)
+        local err = select(2,load(b))
+        if err then
+            AClang.toast("Main Script failed to download. Please try again later. If this continues to happen then manually update via github.")
+        return end
+        local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
+        f:write(b)
+        f:close()
+    end)
+    async_http.dispatch()
+    util.yield(100)
+
+    async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/AClangLib.lua',function(c)
+        local err = select(2,load(c))
+        if err then
+            AClang.toast("AClanglib.lua failed to download. Please try again later. If this continues to happen then manually update via github.")
+        return end
+        local f = io.open(filesystem.scripts_dir()..'\\lib\\AClangLib.lua', "wb")
+        f:write(c)
+        f:close()
+        AClang.toast("Successfully updated AcjokerScript :)")
+        util.restart_script()
+    end)
+    async_http.dispatch()  
+
+        end)
+    end
+end, function() response = true end)
+async_http.dispatch()
+repeat 
+    util.yield()
+until response
+
 
 
