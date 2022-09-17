@@ -848,7 +848,7 @@ players.on_join(function(pid)
 
 
 
-    menu.action(vehmenu, AClang.str_trans('Spectate ').. players.get_name(pid), {''}, AClang.str_trans('Turn on/off spectating of ').. players.get_name(pid), function ()
+    AClang.action(vehmenu, 'Spectate Player', {''}, AClang.str_trans('Turn on/off spectating of player'), function ()
         menu.trigger_commands("spectate".. players.get_name(pid))
     end)
 
