@@ -1606,9 +1606,7 @@ end)
     'Cargo Plane',
     'Ferris Wheel',
     'Tug Boat',
-    'hei_po1_01_shipmain',
-    'po1_07_ship',
-    'sc1_33_tower01'
+
  }
 
  Bigobj = {
@@ -1617,9 +1615,7 @@ end)
     'cargoplane',
     'prop_ld_ferris_wheel',
     'hei_prop_heist_tug',
-    'hei_po1_01_shipmain',
-    'po1_07_ship',
-    'sc1_33_tower01'
+
  }
 
  ----------------------------------------------------------------------------------
