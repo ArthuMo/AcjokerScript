@@ -14,7 +14,16 @@ util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
 LANG_SETTINGS = {}
 SEC = ENTITY.SET_ENTITY_COORDS
-
+OnlineRoot = AClang.list(menu.my_root(), 'Online', {}, '')
+VehRoot = AClang.list(menu.my_root(), 'Vehicles', {}, '')
+AClang.action(menu.my_root(), 'Player Options', {}, 'Redirects you to the Player list in Stand for the Trolling and Friendly options', function ()
+    menu.trigger_commands("players")
+end)
+SetRoot = AClang.list(menu.my_root(), 'Settings', {}, '')
+local set = {alert = true}
+AClang.toggle(SetRoot, 'Alerts Off', {'ACAlert'}, 'Turn off the alerts you get from AcjokerScript', function (on)
+    set.alert = not on
+end)
  ------------------
 
 
@@ -81,9 +90,6 @@ end
 
 
 function Pedspawn(pedhash, tar1)
-
-   
-   
     Streament(pedhash)
     local pedS = entities.create_ped(1, pedhash, tar1, 0)
     ENTITY.SET_ENTITY_INVINCIBLE(pedS, true)
@@ -117,34 +123,26 @@ function Teabagtime(p1, p2, p3, p4, p5, p6, p7, p8)
         end)
 end
 
-function Trevortime(p1, p2, p3, p4, p5, p6, p7, p8)
+function Trevortime(ped_tab)
     util.create_tick_handler (function ()
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p1, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p2, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p3, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p4, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p5, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p6, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p7, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p8, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
---AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p1, 'HS3LE_ANAB', 'LESTER', 'SPEECH_PARAMS_FORCE_SHOUTED', 1)
-        util.yield(100)
+        for _, pi in ipairs(ped_tab) do
+            AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(pi, 'TR2_ABAJ', 'TREVOR', 'SPEECH_PARAMS_FORCE', 1)
+            util.yield(100)
+        end
     end)
 end
 
 function Fuckyou(ped_tab)
-util.create_tick_handler (function ()
-
-    for _, pi in ipairs(ped_tab) do
-        AUDIO.PLAY_PED_AMBIENT_SPEECH_NATIVE(pi, 'GENERIC_FUCK_YOU', 'SPEECH_PARAMS_FORCE', 1)
-        util.yield(100)
-    end
+    util.create_tick_handler (function ()
+        for _, pi in ipairs(ped_tab) do
+            AUDIO.PLAY_PED_AMBIENT_SPEECH_NATIVE(pi, 'GENERIC_FUCK_YOU', 'SPEECH_PARAMS_FORCE', 1)
+            util.yield(100)
+        end
     end)
 end
 
 function Insulthigh(ped_tab)
     util.create_tick_handler (function ()
-
         for _, pi in ipairs(ped_tab) do
             AUDIO.PLAY_PED_AMBIENT_SPEECH_NATIVE(pi, 'Generic_Insult_High', 'SPEECH_PARAMS_FORCE', 1)
             util.yield(100)
@@ -186,7 +184,7 @@ function Stopsound()
     end
 end
 
-function IPM(targets, tar1, set, pname, cage_table, pid)
+function IPM(targets, tar1, pname, cage_table, pid)
             local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
             local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tar1.x, tar1.y, tar1.z)
             if disbet <= 0.5  then
@@ -243,16 +241,19 @@ function Vmod(vmod, plate)
 end
 
 function Vspawn(mod, pCoor, pedSi, plate)
+    Streament(mod)
    local vmod = VEHICLE.CREATE_VEHICLE(mod, pCoor.x, pCoor.y, pCoor.z, 0, true, true, false)
     PED.SET_PED_INTO_VEHICLE(pedSi, vmod, -1)
-    VEHICLE.SET_VEHICLE_COLOURS(vmod, 118, 0)
+    VEHICLE.SET_VEHICLE_COLOURS(vmod, math.random(0, 160), math.random(0, 160))
     Vmod(vmod, plate)
+    local CV = CAM.GET_GAMEPLAY_CAM_RELATIVE_HEADING()
+    ENTITY.SET_ENTITY_HEADING(vmod, CV)
 end
 
-function Delcar(vic, set)
+function Delcar(vic)
     if PED.IS_PED_IN_ANY_VEHICLE(vic) ==true then
         local tarcar = PED.GET_VEHICLE_PED_IS_IN(vic, true)
-        GetControl(tarcar, set)
+        GetControl(tarcar)
         ENTITY.SET_ENTITY_AS_MISSION_ENTITY(tarcar)
         entities.delete_by_handle(tarcar)
     end
@@ -301,7 +302,7 @@ function JuggleCar(Vehj_h, tar1,  invisjugc, jugr)
      entities.delete_by_handle(CC)
 end
 
-function GetControl(vic, set)
+function GetControl(vic)
     while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) do
         local nid = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(vic)
         NETWORK.SET_NETWORK_ID_CAN_MIGRATE(nid, true)
@@ -327,16 +328,16 @@ end
 
 function Specon(pid)
     menu.trigger_commands("spectate".. players.get_name(pid).. ' on')
-    util.yield(2000)
+    util.yield(3000)
 end
 
 function Specoff(pid)
     menu.trigger_commands("spectate".. players.get_name(pid).. ' off')
 end
 
-function Maxoutcar(pedm, set)
+function Maxoutcar(pedm)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod, set)
+    GetControl(vmod)
      Vmod(vmod, AClang.str_trans("URWLCUM"))
      VEHICLE.SET_VEHICLE_WHEEL_TYPE(vmod, math.random(0, 7))
      VEHICLE.SET_VEHICLE_MOD(vmod, 23, math.random(-1, 50))
@@ -345,32 +346,34 @@ function Maxoutcar(pedm, set)
 
 end
 
-function Platechange(pedm, set, cusplate)
+function Platechange(pedm, cusplate)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod, set)
+    GetControl(vmod)
     VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(vmod, cusplate)
 end
 
-function Fixveh(pedm, set)
+function Fixveh(pedm)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod, set)
+    GetControl(vmod)
     VEHICLE.SET_VEHICLE_FIXED(vmod)
 end
 
-function Accelveh(pedm, set, speed)
+function Accelveh(pedm, speed)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod, set)
+    GetControl(vmod)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, speed)
 end
 
-function Stopveh(pedm, set)
+function Stopveh(pedm)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod, set)
+    GetControl(vmod)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, -1000)
     ENTITY.SET_ENTITY_VELOCITY(vmod, 0, 0, 0)
 end
 
-function GetPlayVeh(pid, pedm, opt, set)
+
+
+function GetPlayVeh(pid, pedm, opt)
     if Disbet(pid) > 750000  then
         Specon(pid)
     if PED.IS_PED_IN_ANY_VEHICLE(pedm, true) then
@@ -400,18 +403,33 @@ end
 
  -------------------
 
-OnlineRoot = AClang.list(menu.my_root(), 'Online', {}, '')
-VehRoot = AClang.list(menu.my_root(), 'Vehicles', {}, '')
-AClang.action(menu.my_root(), 'Player Options', {}, 'Redirects you to the Player list in Stand for the Trolling and Friendly options', function ()
-    menu.trigger_commands("players")
-end)
-SetRoot = AClang.list(menu.my_root(), 'Settings', {}, '')
-local set = {alert = true}
-AClang.toggle(SetRoot, 'Alerts Off', {'ACAlert'}, 'Turn off the alerts you get from AcjokerScript', function (on)
-    set.alert = not on
-end)
+
 AClang.hyperlink(SetRoot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
 
+Credroot = AClang.list(SetRoot, 'Credits', {}, '')
+AClang.action(Credroot, 'Jerry123', {}, 'For major help with multiple portions of the script and his LangLib for translations', function ()
+end)
+AClang.action(Credroot, 'Keramis', {}, 'For the tutorial I would have had a harder time without it', function ()
+end)
+AClang.action(Credroot, 'aaron', {}, 'For the ScaleformLib script and help with executing it', function ()
+end)
+AClang.action(Credroot, 'Nowiry', {}, 'For their script it was a heavy influence on the Charger weapon', function ()
+end)
+AClang.action(Credroot, 'hexarobi', {}, 'For all the help with the script they are always a big help', function ()
+end)
+AClang.action(Credroot, 'Prisuhm', {}, 'For the auto updater and help with it', function ()
+end)
+Troot = AClang.list(Credroot, 'Translators', {}, '')
+AClang.action(Troot, 'lu_zi', {}, 'For the Chinese translations', function ()
+end)
+AClang.action(Troot, 'akaitawa', {}, 'For the Portuguese translations', function ()
+end)
+AClang.action(Troot, '- THEKING -', {}, 'For the German translations', function ()
+end)
+AClang.action(Troot, 'Laavi', {}, 'For the Dutch translations', function ()
+end)
+AClang.action(Troot, 'akatozi and BloodyStall_', {}, 'For the French translations', function ()
+end)
  -------------------------------------------------------------------------------------------------------
 
 -------------------------------- Teleports---------------------------------------------------
@@ -740,8 +758,6 @@ end)
 
 players.on_join(function(pid)
 
-
-
     AClang.divider(menu.player_root(pid), 'AcjokerScript')
     local frienm = AClang.list(menu.player_root(pid), 'Friendly', {}, '')
     local vehmenu = AClang.list(frienm, 'Vehicles', {}, 'If you are too far away from them it will spectate them to complete task')
@@ -781,72 +797,68 @@ players.on_join(function(pid)
         menu.trigger_commands("arm".. players.get_name(pid))
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
-    AClang.action(vehmenu, 'Max out their Vehicle', {}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
+    AClang.action(vehmenu, 'Max out their Vehicle', {'maxv'}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_command_name("spectate".. players.get_name(pid)))
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         GetPlayVeh(pid, pedm, function ()
-            Maxoutcar(pedm, set)
+            Maxoutcar(pedm)
             if not spec then
                 Specoff(pid)
             end
         end)
-
-     end)
+     end, nil, nil, COMMANDPERM_FRIENDLY)
 
 
     AClang.text_input(vehmenu, 'Change their license plate', {'lplate'}, 'Change the license plate to a custom text', function (cusplate)
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_command_name("spectate".. players.get_name(pid)))
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         GetPlayVeh(pid, pedm, function ()
-           Platechange(pedm, set, cusplate)
+           Platechange(pedm, cusplate)
             if not spec then
                 Specoff(pid)
             end
         end)
-   
     end)
 
 
-    AClang.action(vehmenu, 'Repair Vehicle', {}, 'Repair their vehicle', function ()
+    AClang.action(vehmenu, 'Repair Vehicle', {'repv'}, 'Repair their vehicle', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_command_name("spectate".. players.get_name(pid)))
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         GetPlayVeh(pid, pedm, function ()
-            Fixveh(pedm, set)
+            Fixveh(pedm)
             if not spec then
                 Specoff(pid)
             end
         end)
-
-     end)
+     end, nil, nil, COMMANDPERM_FRIENDLY)
 
      
-     AClang.click_slider(vehmenu, 'Accelerate Vehicle', {''}, 'Accelerate Vehicle Forward by your set amount (actual speed is roughly double the number in MPH)', 10, 150, 40, 10, function (s)
+     AClang.click_slider(vehmenu, 'Accelerate Vehicle', {'accel'}, 'Accelerate Vehicle Forward by your set amount (actual speed is roughly double the number in MPH)', 10, 150, 40, 10, function (s)
        local  speed = s
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_command_name("spectate".. players.get_name(pid)))
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         GetPlayVeh(pid, pedm, function ()
-           Accelveh(pedm, set, speed)
+           Accelveh(pedm, speed)
            util.yield(1000)
            if not spec then
                 Specoff(pid)
             end
         end)
-
     end)
 
-    AClang.toggle_loop(vehmenu, 'Slow Vehicle Down', {''}, 'Does not freeze them just slows down the vehicles velocity', function ()
+    AClang.toggle_loop(vehmenu, 'Slow Vehicle Down', {'slowv'}, 'Does not freeze them just slows down the vehicles velocity', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_command_name("spectate".. players.get_name(pid)))
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         GetPlayVeh(pid, pedm, function ()
-            Stopveh(pedm, set)
+            Stopveh(pedm)
             if not spec then
                 Specoff(pid)
             end
         end)
+        util.yield(250)
     end)
 
-
-
+ 
 
     AClang.action(vehmenu, 'Spectate Player', {''}, AClang.str_trans('Turn on/off spectating of player'), function ()
         menu.trigger_commands("spectate".. players.get_name(pid))
@@ -1116,11 +1128,8 @@ end)
         local pname = PLAYER.GET_PLAYER_NAME(pid)
         local UV = ENTITY.GET_ENTITY_UPRIGHT_VALUE(targets)
 
-
         Delcar(targets)
         Streament(vehaset.vehasel)
-
-
 
         if ENTITY.IS_ENTITY_UPRIGHT(targets, UV) then
             SmashCar(vehaset.vehasel, tar1, vehaset.invis_aveh, vehaset.vehra)
@@ -1322,7 +1331,7 @@ end, 'toreador')
     if pedhash == util.joaat('IG_LesterCrest')  then
         Teabagtime(p1, p2, p3, p4, p5, p6, p7, p8)
     elseif pedhash == util.joaat('player_two') then
-        Trevortime(p1, p2, p3, p4, p5, p6, p7, p8)
+        Trevortime(peds)
     elseif pedhash ~= util.joaat('IG_LesterCrest') or util.joaat('player_two') then
     if AUDIO.DOES_CONTEXT_EXIST_FOR_THIS_PED(p1, 'GENERIC_FUCK_YOU') ==true
     then Fuckyou(peds)
@@ -1371,7 +1380,7 @@ end, 'toreador')
     end --if not cage_table[pid] end
 
    while cage_table[pid] do
-    IPM(targets, tar1, set, pname, cage_table, pid)
+    IPM(targets, tar1, pname, cage_table, pid)
 
 
    end
@@ -1460,7 +1469,7 @@ local hsel = util.joaat(objset.mdl)
         obj_table[pid] = objs
     end
 while obj_table[pid] do
-    IPM(targets, tar1, set, pname, obj_table, pid)
+    IPM(targets, tar1, pname, obj_table, pid)
 end
 
 if not players.exists(pid) then
@@ -3670,7 +3679,7 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.00 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 1.01 -- all credits for the updater go to Prisuhm#7717 Thank You
 async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/AcjokerScriptVersion", function(output)
     currentVer = tonumber(output)
     response = true
