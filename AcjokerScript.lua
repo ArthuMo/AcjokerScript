@@ -3679,7 +3679,7 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.01 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 1.1 -- all credits for the updater go to Prisuhm#7717 Thank You
 async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/AcjokerScriptVersion", function(output)
     currentVer = tonumber(output)
     response = true
