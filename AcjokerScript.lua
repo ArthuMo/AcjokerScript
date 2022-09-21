@@ -302,19 +302,30 @@ function JuggleCar(Vehj_h, tar1,  invisjugc, jugr)
      entities.delete_by_handle(CC)
 end
 
-function GetControl(vic)
+function GetControl(vic, spec, pid)
+    local tick = 0
+    NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
     while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) do
         local nid = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(vic)
         NETWORK.SET_NETWORK_ID_CAN_MIGRATE(nid, true)
         NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
         util.yield()
+        tick =  tick + 1
+        if tick > 10 then
+            if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) then
+                if set.alert then
+                    AClang.toast('Could not gain control')
+                end
+                if not spec then
+                    Specoff(pid)
+                end
+                util.stop_thread()
+            end
+        
+        end
     end
-    if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) then
-    if set.alert then
-        AClang.toast('Could not gain control')
-    end
-    else
-    end
+
+
 end
 
 function Disbet(pid)
@@ -335,43 +346,52 @@ function Specoff(pid)
     menu.trigger_commands("spectate".. players.get_name(pid).. ' off')
 end
 
-function Maxoutcar(pedm)
+function Maxoutcar(pedm, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod)
+    GetControl(vmod, spec, pid)
      Vmod(vmod, AClang.str_trans("URWLCUM"))
      VEHICLE.SET_VEHICLE_WHEEL_TYPE(vmod, math.random(0, 7))
      VEHICLE.SET_VEHICLE_MOD(vmod, 23, math.random(-1, 50))
      ENTITY.SET_ENTITY_INVINCIBLE(vmod, true)
-     util.yield(1000)
-
+     AClang.toast('Vehicle Maxed out')
 end
 
-function Platechange(pedm, cusplate)
+function Platechange(pedm, cusplate, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod)
+    GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(vmod, cusplate)
+    AClang.toast('Vehicle plate changed')
 end
 
-function Fixveh(pedm)
+function Fixveh(pedm, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod)
+    GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FIXED(vmod)
+    AClang.toast('Vehicle Repaired')
 end
 
-function Accelveh(pedm, speed)
+function Accelveh(pedm, speed, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod)
+    GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, speed)
+    AClang.toast('Vehicle Accelerated')
 end
 
-function Stopveh(pedm)
+function Stopveh(pedm, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
-    GetControl(vmod)
+    GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, -1000)
     ENTITY.SET_ENTITY_VELOCITY(vmod, 0, 0, 0)
+    VEHICLE.SET_VEHICLE_ENGINE_ON(vmod, false, false, false)
+    AClang.toast('Slowing down Vehicle')
 end
 
-
+function Rpaint(pedm, spec, pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+    GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_COLOURS(vmod, math.random(0, 160), math.random(0, 160))
+    AClang.toast('Vehicle Painted')
+end
 
 function GetPlayVeh(pid, pedm, opt)
     if Disbet(pid) > 750000  then
@@ -800,8 +820,9 @@ players.on_join(function(pid)
     AClang.action(vehmenu, 'Max out their Vehicle', {'maxv'}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        AClang.toast('Getting control of vehicle')
         GetPlayVeh(pid, pedm, function ()
-            Maxoutcar(pedm)
+            Maxoutcar(pedm, spec, pid)
             if not spec then
                 Specoff(pid)
             end
@@ -812,8 +833,9 @@ players.on_join(function(pid)
     AClang.text_input(vehmenu, 'Change their license plate', {'lplate'}, 'Change the license plate to a custom text', function (cusplate)
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        AClang.toast('Getting control of vehicle')
         GetPlayVeh(pid, pedm, function ()
-           Platechange(pedm, cusplate)
+           Platechange(pedm, cusplate, spec, pid)
             if not spec then
                 Specoff(pid)
             end
@@ -824,8 +846,9 @@ players.on_join(function(pid)
     AClang.action(vehmenu, 'Repair Vehicle', {'repv'}, 'Repair their vehicle', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        AClang.toast('Getting control of vehicle')
         GetPlayVeh(pid, pedm, function ()
-            Fixveh(pedm)
+            Fixveh(pedm, spec, pid)
             if not spec then
                 Specoff(pid)
             end
@@ -837,8 +860,9 @@ players.on_join(function(pid)
        local  speed = s
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        AClang.toast('Getting control of vehicle')
         GetPlayVeh(pid, pedm, function ()
-           Accelveh(pedm, speed)
+           Accelveh(pedm, speed, spec, pid)
            util.yield(1000)
            if not spec then
                 Specoff(pid)
@@ -849,16 +873,45 @@ players.on_join(function(pid)
     AClang.toggle_loop(vehmenu, 'Slow Vehicle Down', {'slowv'}, 'Does not freeze them just slows down the vehicles velocity', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        AClang.toast('Getting control of vehicle')
         GetPlayVeh(pid, pedm, function ()
-            Stopveh(pedm)
+            Stopveh(pedm, spec, pid)
             if not spec then
                 Specoff(pid)
             end
         end)
-        util.yield(250)
     end)
 
- 
+    local cvmenu = AClang.list(vehmenu, 'Give Them a Vehicle', {}, '')
+
+    local cus = {veh = util.joaat('toreador')}
+    AClang.action(cvmenu, 'Spawn Vehicle', {'spv'}, 'Spawn them a custom vehicle the default is toreador', function ()
+        local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
+        Vspawn(cus.veh, tar1, targets, 'custveh')
+    end, nil, nil, COMMANDPERM_FRIENDLY)
+
+    AClang.text_input(cvmenu, 'Enter Custom Vehicle Hash', {'cussmash'}, 'Enter Vehicle Hash to change Vehicle given to player', function(cusveh)
+        if STREAMING.IS_MODEL_A_VEHICLE(util.joaat(cusveh)) then
+           cus.veh = util.joaat(cusveh)
+        else
+           if set.alert then
+               AClang.toast('Improper Vehicle Name (check the spelling)')
+           end
+        end
+    end, 'toreador')
+
+    AClang.action(vehmenu, 'Randomize Paint', {'rpaint'}, 'Randomize the Paint of their vehicle', function ()
+        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        AClang.toast('Getting control of vehicle')
+        GetPlayVeh(pid, pedm, function ()
+            Rpaint(pedm, spec, pid)
+            if not spec then
+                Specoff(pid)
+            end
+        end)
+    end, nil, nil, COMMANDPERM_FRIENDLY)
 
     AClang.action(vehmenu, 'Spectate Player', {''}, AClang.str_trans('Turn on/off spectating of player'), function ()
         menu.trigger_commands("spectate".. players.get_name(pid))
