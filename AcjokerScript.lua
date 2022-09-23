@@ -9,7 +9,7 @@
 
 --github
 util.keep_running()
-util.require_natives(1651208000)
+util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
 LANG_SETTINGS = {}
@@ -20,10 +20,12 @@ AClang.action(menu.my_root(), 'Player Options', {}, 'Redirects you to the Player
     menu.trigger_commands("players")
 end)
 SetRoot = AClang.list(menu.my_root(), 'Settings', {}, '')
+
 local set = {alert = true}
 AClang.toggle(SetRoot, 'Alerts Off', {'ACAlert'}, 'Turn off the alerts you get from AcjokerScript', function (on)
     set.alert = not on
 end)
+
  ------------------
 
 
@@ -83,7 +85,7 @@ function SF() --Scaleform Full credits to aaron
     memory.write_int(memory.script_global(1645739+1121), 1)
     sf.CLEAR_ALL()
     sf.TOGGLE_MOUSE_BUTTONS(false)
-    sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTON(0, 86, true), AClang.str_trans('Push Away or Blow up'))
+    sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 86, true), AClang.str_trans('Push Away or Blow up'))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
@@ -234,7 +236,7 @@ function Vmod(vmod, plate)
         VEHICLE.TOGGLE_VEHICLE_MOD(vmod, 18, true)
         VEHICLE.TOGGLE_VEHICLE_MOD(vmod, 20, true)
         VEHICLE.SET_VEHICLE_TYRE_SMOKE_COLOR(vmod, 0, 0, 0)
-        VEHICLE._SET_VEHICLE_MAX_SPEED(vmod, 100)
+        VEHICLE.SET_VEHICLE_MAX_SPEED(vmod, 100)
         VEHICLE.MODIFY_VEHICLE_TOP_SPEED(vmod, 40)
         VEHICLE.SET_VEHICLE_BURNOUT(vmod, false)
     end
@@ -353,28 +355,36 @@ function Maxoutcar(pedm, spec, pid)
      VEHICLE.SET_VEHICLE_WHEEL_TYPE(vmod, math.random(0, 7))
      VEHICLE.SET_VEHICLE_MOD(vmod, 23, math.random(-1, 50))
      ENTITY.SET_ENTITY_INVINCIBLE(vmod, true)
+     if set.alert then
      AClang.toast('Vehicle Maxed out')
+     end
 end
 
 function Platechange(pedm, cusplate, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(vmod, cusplate)
+    if set.alert then
     AClang.toast('Vehicle plate changed')
+    end
 end
 
 function Fixveh(pedm, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FIXED(vmod)
+    if set.alert then
     AClang.toast('Vehicle Repaired')
+    end
 end
 
 function Accelveh(pedm, speed, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, speed)
+    if set.alert then
     AClang.toast('Vehicle Accelerated')
+    end
 end
 
 function Stopveh(pedm, spec, pid)
@@ -383,14 +393,19 @@ function Stopveh(pedm, spec, pid)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, -1000)
     ENTITY.SET_ENTITY_VELOCITY(vmod, 0, 0, 0)
     VEHICLE.SET_VEHICLE_ENGINE_ON(vmod, false, false, false)
+    if set.alert then
     AClang.toast('Slowing down Vehicle')
+    end
 end
 
 function Rpaint(pedm, spec, pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
     VEHICLE.SET_VEHICLE_COLOURS(vmod, math.random(0, 160), math.random(0, 160))
+    if set.alert then
     AClang.toast('Vehicle Painted')
+    end
 end
 
 function GetPlayVeh(pid, pedm, opt)
@@ -421,36 +436,7 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
- -------------------
 
-
-AClang.hyperlink(SetRoot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
-
-Credroot = AClang.list(SetRoot, 'Credits', {}, '')
-AClang.action(Credroot, 'Jerry123', {}, 'For major help with multiple portions of the script and his LangLib for translations', function ()
-end)
-AClang.action(Credroot, 'Keramis', {}, 'For the tutorial I would have had a harder time without it', function ()
-end)
-AClang.action(Credroot, 'aaron', {}, 'For the ScaleformLib script and help with executing it', function ()
-end)
-AClang.action(Credroot, 'Nowiry', {}, 'For their script it was a heavy influence on the Charger weapon', function ()
-end)
-AClang.action(Credroot, 'hexarobi', {}, 'For all the help with the script they are always a big help', function ()
-end)
-AClang.action(Credroot, 'Prisuhm', {}, 'For the auto updater and help with it', function ()
-end)
-Troot = AClang.list(Credroot, 'Translators', {}, '')
-AClang.action(Troot, 'lu_zi', {}, 'For the Chinese translations', function ()
-end)
-AClang.action(Troot, 'akaitawa', {}, 'For the Portuguese translations', function ()
-end)
-AClang.action(Troot, '- THEKING -', {}, 'For the German translations', function ()
-end)
-AClang.action(Troot, 'Laavi', {}, 'For the Dutch translations', function ()
-end)
-AClang.action(Troot, 'akatozi and BloodyStall_', {}, 'For the French translations', function ()
-end)
- -------------------------------------------------------------------------------------------------------
 
 -------------------------------- Teleports---------------------------------------------------
 TeleRoot = AClang.list(OnlineRoot, 'Teleports', {}, '')
@@ -620,9 +606,8 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
     end)
 
     AClang.action(TeleRoot, 'TP to Exotic Export Dock', {'tpEED'}, 'Teleport to Exotic Export Dock', function ()
-        if HUD.DOES_BLIP_EXIST(HUD._GET_CLOSEST_BLIP_OF_TYPE(780)) then
-           local eDock = HUD.GET_BLIP_COORDS(HUD._GET_CLOSEST_BLIP_OF_TYPE(780))
-
+        if HUD.DOES_BLIP_EXIST(HUD.GET_CLOSEST_BLIP_INFO_ID(780)) then
+           local eDock = HUD.GET_BLIP_COORDS(HUD.GET_CLOSEST_BLIP_INFO_ID(780))
            if  eDock.x == 0 and eDock.y == 0 and eDock.z == 0
            then
             if set.alert then
@@ -630,9 +615,7 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
            end
             elseif eDock.x ~= 0 and eDock.y ~= 0 and eDock.z ~= 0 then
                 PED.SET_PED_COORDS_KEEP_VEHICLE(players.user_ped(), 1169.5736, -2971.932, 5.9021106)
-
             end
-
         end
     end)
  ------------------------------------------
@@ -820,7 +803,9 @@ players.on_join(function(pid)
     AClang.action(vehmenu, 'Max out their Vehicle', {'maxv'}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if set.alert then
         AClang.toast('Getting control of vehicle')
+        end
         GetPlayVeh(pid, pedm, function ()
             Maxoutcar(pedm, spec, pid)
             if not spec then
@@ -833,7 +818,9 @@ players.on_join(function(pid)
     AClang.text_input(vehmenu, 'Change their license plate', {'lplate'}, 'Change the license plate to a custom text', function (cusplate)
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if set.alert then
         AClang.toast('Getting control of vehicle')
+        end
         GetPlayVeh(pid, pedm, function ()
            Platechange(pedm, cusplate, spec, pid)
             if not spec then
@@ -846,7 +833,9 @@ players.on_join(function(pid)
     AClang.action(vehmenu, 'Repair Vehicle', {'repv'}, 'Repair their vehicle', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if set.alert then
         AClang.toast('Getting control of vehicle')
+        end
         GetPlayVeh(pid, pedm, function ()
             Fixveh(pedm, spec, pid)
             if not spec then
@@ -860,7 +849,9 @@ players.on_join(function(pid)
        local  speed = s
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if set.alert then
         AClang.toast('Getting control of vehicle')
+        end
         GetPlayVeh(pid, pedm, function ()
            Accelveh(pedm, speed, spec, pid)
            util.yield(1000)
@@ -873,13 +864,18 @@ players.on_join(function(pid)
     AClang.toggle_loop(vehmenu, 'Slow Vehicle Down', {'slowv'}, 'Does not freeze them just slows down the vehicles velocity', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if set.alert then
         AClang.toast('Getting control of vehicle')
+        end
         GetPlayVeh(pid, pedm, function ()
             Stopveh(pedm, spec, pid)
-            if not spec then
-                Specoff(pid)
-            end
+
         end)
+    end, function (spec)
+        
+        if not spec then
+            Specoff(pid)
+        end
     end)
 
     local cvmenu = AClang.list(vehmenu, 'Give Them a Vehicle', {}, '')
@@ -904,7 +900,9 @@ players.on_join(function(pid)
     AClang.action(vehmenu, 'Randomize Paint', {'rpaint'}, 'Randomize the Paint of their vehicle', function ()
         local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if set.alert then
         AClang.toast('Getting control of vehicle')
+        end
         GetPlayVeh(pid, pedm, function ()
             Rpaint(pedm, spec, pid)
             if not spec then
@@ -931,7 +929,6 @@ players.on_join(function(pid)
         menu.trigger_commands("PCAGE".. players.get_name(pid))
         menu.trigger_commands("ObjCage".. players.get_name(pid))
     end)
-
 
  local mir = {weap = 'WEAPON_SNOWBALL', speed = 1000}
   local mirloop =  AClang.toggle_loop(mrplaym, AClang.str_trans('Make it Rain ').. AClang.str_trans(': Snowballs'), {'rain'}, 'Make it Rain your choice of weapon in all directions', function ()
@@ -973,7 +970,8 @@ players.on_join(function(pid)
         menu.trigger_commands("JuggleC".. players.get_name(pid))
     end)
 
-    
+
+
 local bigolist = {} 
 local bigobjset  = {obj= util.joaat('prop_asteroid_01'), ptfx = false, exp = false, speed = 1000}
 AClang.toggle_loop(metmenu, 'Big Object Shower', {'Oshower'}, 'Make Objects rain down from the sky', function ()
@@ -3732,7 +3730,39 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.2 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 1.3 -- all credits for the updater go to Prisuhm#7717 Thank You
+
+ -------------------
+
+
+ AClang.hyperlink(SetRoot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
+
+ Credroot = AClang.list(SetRoot, 'Credits', {}, '')
+ AClang.action(Credroot, 'Jerry123', {}, 'For major help with multiple portions of the script and his LangLib for translations', function ()
+ end)
+ AClang.action(Credroot, 'Keramis', {}, 'For the tutorial I would have had a harder time without it', function ()
+ end)
+ AClang.action(Credroot, 'aaron', {}, 'For the ScaleformLib script and help with executing it', function ()
+ end)
+ AClang.action(Credroot, 'Nowiry', {}, 'For their script it was a heavy influence on the Charger weapon', function ()
+ end)
+ AClang.action(Credroot, 'hexarobi', {}, 'For all the help with the script they are always a big help', function ()
+ end)
+ AClang.action(Credroot, 'Prisuhm', {}, 'For the auto updater and help with it', function ()
+ end)
+ Troot = AClang.list(Credroot, 'Translators', {}, '')
+ AClang.action(Troot, 'lu_zi', {}, 'For the Chinese translations', function ()
+ end)
+ AClang.action(Troot, 'akaitawa', {}, 'For the Portuguese translations', function ()
+ end)
+ AClang.action(Troot, '- THEKING -', {}, 'For the German translations', function ()
+ end)
+ AClang.action(Troot, 'Laavi', {}, 'For the Dutch translations', function ()
+ end)
+ AClang.action(Troot, 'akatozi and BloodyStall_', {}, 'For the French translations', function ()
+ end)
+  -------------------------------------------------------------------------------------------------------
+
 async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/AcjokerScriptVersion", function(output)
     currentVer = tonumber(output)
     response = true
@@ -3761,6 +3791,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
                     f:write(a)
                     f:close()
                 end)
+                util.yield(100)
                 async_http.dispatch() 
             end
             util.yield(100)
@@ -3789,7 +3820,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         util.restart_script()
     end)
     async_http.dispatch()  
-
+    util.yield(100)
         end)
     end
 end, function() response = true end)
