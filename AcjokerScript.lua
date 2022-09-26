@@ -6,7 +6,7 @@
    --credits to aaronlink127#0127 for the ScaleformLib script and help with executing it
    --Script made by acjoker8818
    -------------------------------------------------------------------------
-
+   
 --github
 util.keep_running()
 util.require_natives(1663599433)
@@ -14,15 +14,16 @@ util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
 LANG_SETTINGS = {}
 SEC = ENTITY.SET_ENTITY_COORDS
-OnlineRoot = AClang.list(menu.my_root(), 'Online', {}, '')
-VehRoot = AClang.list(menu.my_root(), 'Vehicles', {}, '')
+local set = {alert = true}
+
 AClang.action(menu.my_root(), 'Player Options', {}, 'Redirects you to the Player list in Stand for the Trolling and Friendly options', function ()
     menu.trigger_commands("players")
 end)
-SetRoot = AClang.list(menu.my_root(), 'Settings', {}, '')
 
-local set = {alert = true}
-AClang.toggle(SetRoot, 'Alerts Off', {'ACAlert'}, 'Turn off the alerts you get from AcjokerScript', function (on)
+local onlineroot = AClang.list(menu.my_root(), 'Online', {}, '')
+local vehroot = AClang.list(menu.my_root(), 'Vehicles', {}, '')
+local setroot = AClang.list(menu.my_root(), 'Settings', {}, '')
+AClang.toggle(setroot, 'Alerts Off', {'ACAlert'}, 'Turn off the alerts you get from AcjokerScript', function (on)
     set.alert = not on
 end)
 
@@ -252,10 +253,10 @@ function Vspawn(mod, pCoor, pedSi, plate)
     ENTITY.SET_ENTITY_HEADING(vmod, CV)
 end
 
-function Delcar(vic)
+function Delcar(vic, spec, pid)
     if PED.IS_PED_IN_ANY_VEHICLE(vic) ==true then
         local tarcar = PED.GET_VEHICLE_PED_IS_IN(vic, true)
-        GetControl(tarcar)
+        GetControl(tarcar, spec, pid)
         ENTITY.SET_ENTITY_AS_MISSION_ENTITY(tarcar)
         entities.delete_by_handle(tarcar)
     end
@@ -432,6 +433,12 @@ function GetPlayVeh(pid, pedm, opt)
     end
 end
 
+function RGBNeonKit(pedm)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+    for i = 0, 3 do
+        VEHICLE.SET_VEHICLE_NEON_ENABLED(vmod, i, true)
+    end
+end
 
 
 -------------------------------------------------------------------------------------------------------
@@ -439,7 +446,7 @@ end
 
 
 -------------------------------- Teleports---------------------------------------------------
-TeleRoot = AClang.list(OnlineRoot, 'Teleports', {}, '')
+TeleRoot = AClang.list(onlineroot, 'Teleports', {}, '')
 AClang.action(TeleRoot, 'TP into Avenger', {'tpaven'}, 'Teleport into Avengers holding area/facility', function ()
     SEC(players.user_ped(), 514.31335, 4750.5264, -68.99592, false, false, false, false)
     end)
@@ -618,6 +625,17 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
             end
         end
     end)
+
+    local forw = {amount = 0.5} --credits to lance#8011
+    AClang.action(TeleRoot, 'TP Foward', {'tpforw'}, 'Teleport Forward your set amount', function ()
+        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), 0, forw.amount, -1.0)
+        SEC(players.user_ped(), fv.x , fv.y, fv.z, false, false, false, false)
+    end)
+
+    AClang.slider(TeleRoot, 'TP Forward Amount', {''}, 'Adjust the amount you teleport forward by', 1, 100, 1, 1, function (a)
+        forw.amount = a*0.1
+    end)
+
  ------------------------------------------
  ------------------------------------------
 
@@ -625,7 +643,9 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
 
  --------------------------------------------------------
 -- Vehicles
+
 ---------------------------------- FF9 Charger ----------------------------------
+local charroot = AClang.list(vehroot, 'Charger', {}, 'Duke O Death with Electro Magnet capabilities')
 local charger = {charg = util.joaat('dukes2'), emp = util.joaat('hei_prop_heist_emp')}
 local function Ccreate(pCoor, pedSi)
 
@@ -649,17 +669,26 @@ local function Ccreate(pCoor, pedSi)
 
     local magtf = {true, false}
     local maglist = {AClang.str_trans('Push Away'), AClang.str_trans('Blow Up')}
-    local magval = {mag_v = true}
+    local magval = {scale = 5000, nodam = true}
     function Magout()
         if  PAD.IS_CONTROL_PRESSED(0, 86) then
         local car = ENTITY.GET_ENTITY_COORDS(players.user_ped())
-        FIRE.ADD_EXPLOSION(car.x, car.y, car.z, 81, 5000.0, false, true, 0.0, magval.mag_v)
+        for x = 0, 10 do
+            FIRE.ADD_EXPLOSION(car.x + x, car.y, car.z, 81, magval.scale, false, true, 0.0, magval.nodam)
+        end
+        for y = 0, 10 do
+            FIRE.ADD_EXPLOSION(car.x, car.y + y, car.z, 81, magval.scale, false, true, 0.0, magval.nodam)
+        end
         end
     util.yield()
 end
-    Mag_int = menu.list_action(VehRoot, AClang.str_trans('Magnet Intensity'), {'Magint'}, AClang.str_trans('Changes Magnet to Push Away or Blow up'), maglist, function(magint)
-        magval.mag_v = magtf[magint]
+    Mag_int = menu.list_action(charroot, AClang.str_trans('Magnet Intensity'), {'Magint'}, AClang.str_trans('Changes Magnet to Push Away or Blow up'), maglist, function(magint)
+        magval.nodam = magtf[magint]
         end)
+
+    Mag_sca = AClang.slider(charroot, 'Magnet Push Away Scale', {}, 'Change how far you push away objects', 0, 10000, 5000, 5000, function (s)
+        magval.scale = s
+    end)    
       util.create_tick_handler(function ()
             if PED.IS_PED_IN_VEHICLE(players.user_ped(), FFchar, false) ==true then
             VEHICLE.SET_VEHICLE_DIRT_LEVEL(FFchar, 0)
@@ -669,7 +698,7 @@ end
             end
         end)
     end
- Spawn = AClang.toggle_loop(VehRoot, 'Spawn FF9 EMP Charger', {'FF9Wspawn'}, 'Spawn Charger from FF9 with Electro Magnet capabilities', function ()
+ Spawn = AClang.toggle_loop(charroot, 'Spawn FF9 EMP Charger', {'FF9Wspawn'}, 'Spawn Charger from FF9 with Electro Magnet capabilities', function ()
 
     Streament(charger.charg)
     Streament(charger.emp)
@@ -718,6 +747,7 @@ if PED.IS_PED_GETTING_INTO_A_VEHICLE(players.user_ped()) ==false and PED.IS_PED_
               ENTITY.SET_ENTITY_AS_MISSION_ENTITY(Empa)
               entities.delete_by_handle(Empa)
               menu.delete(Mag_int)
+              menu.delete(Mag_sca)
             STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(charger.charg)
             STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(charger.emp)
 
@@ -731,7 +761,7 @@ end)
 
 
 
-AClang.action(OnlineRoot, 'Snowball Fight', {}, 'Gives everyone in the lobby Snowballs and notifies them via text', function ()
+AClang.action(onlineroot, 'Snowball Fight', {}, 'Gives everyone in the lobby Snowballs and notifies them via text', function ()
     local plist = players.list()
     local snowballs = util.joaat('WEAPON_SNOWBALL')
     for i = 1, #plist do
@@ -745,7 +775,7 @@ AClang.action(OnlineRoot, 'Snowball Fight', {}, 'Gives everyone in the lobby Sno
 end)
 
 
-AClang.action(OnlineRoot, 'Murica', {}, 'Gives everyone in the lobby Firework Launchers and notifies them via text', function ()
+AClang.action(onlineroot, 'Murica', {}, 'Gives everyone in the lobby Firework Launchers and notifies them via text', function ()
     local plist = players.list()
     local fireworks = util.joaat('weapon_firework')
     for i = 1, #plist do
@@ -755,6 +785,24 @@ AClang.action(OnlineRoot, 'Murica', {}, 'Gives everyone in the lobby Firework La
         players.send_sms(plist[i], players.user(), AClang.str_trans('Murica f*** ya! You now have Fireworks'))
         util.yield()
     end
+   
+end)
+
+AClang.toggle_loop(onlineroot, 'Money Trail', {}, 'Everywhere you walk fake money appears', function ()
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+    local tar1 = ENTITY.GET_ENTITY_COORDS(players.user_ped(), true)
+    Streamptfx('scr_exec_ambient_fm')
+    if TASK.IS_PED_WALKING(targets) or TASK.IS_PED_RUNNING(targets) or TASK.IS_PED_SPRINTING(targets) then
+        GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('scr_ped_foot_banknotes', tar1.x, tar1.y, tar1.z - 1, 0, 0, 0, 1.0, true, true, true)
+    end
+    
+end)
+
+AClang.action(onlineroot, 'Stop Spectating', {'sspect'}, 'Stop Spectating anyone in the lobby', function ()
+    Specon(players.user())
+    Specoff(players.user())
+        util.yield(250)
+
    
 end)
 -------------------------------Player Options-----------------------------------------------
@@ -793,6 +841,13 @@ players.on_join(function(pid)
               util.stop_thread()
           end
       end)
+
+AClang.toggle_loop(frienm, 'Fake Money Rain', {}, 'Rains Fake Money on the Player', function ()
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
+    Streamptfx('core')
+    GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD( 'ent_brk_banknotes', tar1.x, tar1.y, tar1.z + 1, 0, 0, 0, 3.0, true, true, true)
+end)
 
     AClang.action(plamenu, 'Max Protect Player', {'max'}, 'Turns on Auto Heal, All Weapons, and Never wanted commands all at once', function ()
         menu.trigger_commands("bail".. players.get_name(pid))
@@ -915,6 +970,9 @@ players.on_join(function(pid)
         menu.trigger_commands("spectate".. players.get_name(pid))
     end)
 
+
+
+    
     local trollm = AClang.list(menu.player_root(pid), 'Trolling', {}, '' )
     local pcagem = AClang.list(trollm, 'Cages', {}, '')
     local cplaym = AClang.list(trollm, 'Vehicular Assault', {}, '')
@@ -922,6 +980,8 @@ players.on_join(function(pid)
     local mrplaym = AClang.list(trollm, 'Make it Rain', {}, '')
     local eplaym = AClang.list(trollm, 'Explode Player', {}, '')
     local metmenu = AClang.list(trollm, 'Big Object Shower', {}, '')
+    local ptfxmenu = AClang.list(trollm, 'PTFX Spam', {}, '')
+
 
 
     AClang.action(trollm, 'The Full Monty', {}, 'Activate ped cage, object cage, and explode loop at the same time', function ()
@@ -935,7 +995,8 @@ players.on_join(function(pid)
         local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
         local weap = util.joaat(mir.weap)
-        Delcar(targets)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        Delcar(targets, spec, pid)
         WEAPON.REQUEST_WEAPON_ASSET(weap)
         MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z, tar1.x , tar1.y, tar1.z - 2.0, 200, 0, weap, 0, true, false, mir.speed)
         MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 1.0, tar1.x , tar1.y, tar1.z, 200, 0, weap, 0, true, false, mir.speed)
@@ -970,7 +1031,13 @@ players.on_join(function(pid)
         menu.trigger_commands("JuggleC".. players.get_name(pid))
     end)
 
-
+    AClang.action(trollm, 'Stop the Madness', {}, 'Turn off The Full Monty and Katy Perry and stop them from being targeted', function ()
+        menu.trigger_commands("FreePedcage".. players.get_name(pid))
+        menu.trigger_commands("FreeObjcage".. players.get_name(pid))
+        menu.trigger_commands("EXPL".. players.get_name(pid)..' off')
+        menu.trigger_commands("rain".. players.get_name(pid)..' off')
+        menu.trigger_commands("JuggleC".. players.get_name(pid)..' off')
+    end)
 
 local bigolist = {} 
 local bigobjset  = {obj= util.joaat('prop_asteroid_01'), ptfx = false, exp = false, speed = 1000}
@@ -1025,6 +1092,24 @@ end)
 AClang.list_action(metmenu, 'Object List', {''}, 'Changes Objects used for Big Object Shower', Bigobjlist, function(objsel)
     bigobjset.obj = util.joaat(Bigobj[objsel])
 end)
+
+
+
+
+local ptfx = {lib = 'scr_rcbarry2', sel = 'scr_clown_appears'}
+AClang.toggle_loop(ptfxmenu, 'PTFX Spam', {}, 'Spam your selection of Particle Effects', function ()
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
+    Streamptfx(ptfx.lib)
+    GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD( ptfx.sel, tar1.x, tar1.y, tar1.z + 1, 0, 0, 0, 10.0, true, true, true)
+end)
+
+AClang.list_action(ptfxmenu, 'Ptfx List', {''}, 'Choose a PTFX from the list', Fxcorelist, function(fxsel)
+    ptfx.sel = Fxha[fxsel]
+    ptfx.lib = 'core'
+end)
+
+
 
 
 
@@ -1178,8 +1263,8 @@ end)
         local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
         local pname = PLAYER.GET_PLAYER_NAME(pid)
         local UV = ENTITY.GET_ENTITY_UPRIGHT_VALUE(targets)
-
-        Delcar(targets)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        Delcar(targets, spec, pid)
         Streament(vehaset.vehasel)
 
         if ENTITY.IS_ENTITY_UPRIGHT(targets, UV) then
@@ -1300,8 +1385,8 @@ end)
     local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
     local pname = PLAYER.GET_PLAYER_NAME(pid)
 
-
-        Delcar(targets)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    Delcar(targets, spec, pid)
         Streament(juglset.jugsel)
 
     if not PED.IS_PED_RAGDOLL(targets) then
@@ -1357,7 +1442,8 @@ end, 'toreador')
     if not cage_table[pid] then
         local peds = {}
         local pedhash = util.joaat(pedset.mdl)
-        Delcar(targets)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        Delcar(targets, spec, pid)
 
 
     local p1 = Pedspawn(pedhash, tar1)
@@ -1477,7 +1563,8 @@ end, 'toreador')
     if not obj_table[pid] then
         local objs = {}
 
-Delcar(targets)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        Delcar(targets, spec, pid)
         
 local hsel = util.joaat(objset.mdl)
         Streament(hsel)
@@ -1657,7 +1744,95 @@ end)
 
 
 --------------------------------------------Tables-----------------------------------------------------------
+ ----------------------------------------PTFX-------------------------------------------------------------------
+Fxcorelist = {
 
+    "Concrete Smash",
+    "Grenade",
+    "Flashbang",
+    "Gobstoppers",
+    "Blood(Turn them into Carrie)",
+    "Metal Fragment",
+    "Water",
+    "Oil(will start glitching out)",
+    "Paparazzi Flash",
+    "Gasoline Pump Explosion",
+    "Molotov",
+    "Cig Exhale(Chain Smoker)",
+    "Wood",
+    "Electrical Fire",
+    "Water Splash",
+    "Polystyrene",
+    "Gasoline",
+    "Flame(Human Torch)",
+    "Casino Chips",
+    "Flying Cigarettes",
+    "Rain Oranges",
+    "Vehicle Respray Smoke(Very Laggy)",
+    "Sparking Wires",
+    "Sub Large Explosion",
+    "Dust(Turn them into Pig-Pen)",
+    "Show them they are TRASH",
+    "Extinguisher(Very Laggy)",
+    "Splash Pee",
+    "Bubbles Everywhere",
+    "Water Mist(Very Laggy)",
+    "Coins",
+    "Foundry Steam",
+    "Mail",
+    "XS Ray",
+    "Extinguisher Water(starts glitching)",
+    "Smoke Grenade",
+    "Telegraph Pole",
+    "Launched Emp",
+    "Electrical Box",
+}
+
+ Fxha = {
+
+    "ent_dst_concrete_large",
+    "exp_grd_grenade_lod",
+    "exp_arc_grd_flashbang_lod",
+    "ent_dst_gen_gobstop",
+    "blood_stab",
+    "ent_brk_metal_frag",
+    "bul_water_heli",
+    "ent_sht_oil",
+    "ent_anim_paparazzi_flash",
+    "exp_grd_petrol_pump",
+    "exp_air_molotov",
+    "ent_anim_cig_exhale_mth_car",
+    "ent_dst_wood_chunky",
+    "ent_dst_elec_fire_sp",
+    "water_splash_plane_in",
+    "ent_dst_polystyrene",
+    "ent_sht_petrol",
+    "ent_sht_flame",
+    "ent_dst_casino_chips",
+    "ent_dst_cig_packets",
+    "ent_col_tree_oranges",
+    "veh_respray_smoke",
+    "ent_brk_sparking_wires",
+    "exp_grd_sub_large",
+    "ent_anim_dusty_hands",
+    "ent_dst_rubbish",
+    "exp_extinguisher",
+    "liquid_splash_pee",
+    "water_boat_exit",
+    "ent_anim_bm_water_mist",
+    "ent_brk_coins",
+    "ent_amb_foundry_steam_spawn",
+    "ent_dst_mail",
+    "exp_xs_ray",
+    "ent_sht_extinguisher_water",
+    "weap_smoke_grenade",
+    "ent_sht_telegraph_pole",
+    "exp_sec_launched_emp",
+    "ent_sht_electrical_box",
+ }
+
+
+ ---------------------------------------------------------------------------------------------------------
  ------------------------------Big Object List------------------------------------------------------------
 
  Bigobjlist =  {
@@ -3730,14 +3905,15 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.3 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 1.4 -- all credits for the updater go to Prisuhm#7717 Thank You
 
  -------------------
+ AClang.action(setroot, 'Version Number', {}, tostring(localVer), function ()
+ end)
 
+ AClang.hyperlink(setroot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
 
- AClang.hyperlink(SetRoot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
-
- Credroot = AClang.list(SetRoot, 'Credits', {}, '')
+ Credroot = AClang.list(setroot, 'Credits', {}, '')
  AClang.action(Credroot, 'Jerry123', {}, 'For major help with multiple portions of the script and his LangLib for translations', function ()
  end)
  AClang.action(Credroot, 'Keramis', {}, 'For the tutorial I would have had a harder time without it', function ()
@@ -3749,6 +3925,12 @@ local localVer = 1.3 -- all credits for the updater go to Prisuhm#7717 Thank You
  AClang.action(Credroot, 'hexarobi', {}, 'For all the help with the script they are always a big help', function ()
  end)
  AClang.action(Credroot, 'Prisuhm', {}, 'For the auto updater and help with it', function ()
+ end)
+ AClang.action(Credroot, 'lance', {}, 'For a couple functions in this script', function ()
+ end)
+ AClang.action(Credroot, '=)', {}, 'For the peeing animation for Trevor', function ()
+ end)
+ AClang.action(Credroot, 'ICYPhoenix', {}, 'For the Ped Facing Ped function used in Ped Cage', function ()
  end)
  Troot = AClang.list(Credroot, 'Translators', {}, '')
  AClang.action(Troot, 'lu_zi', {}, 'For the Chinese translations', function ()
