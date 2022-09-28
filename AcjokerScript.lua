@@ -3905,7 +3905,7 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.5 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 1.4 -- all credits for the updater go to Prisuhm#7717 Thank You
 
  -------------------
  AClang.action(setroot, 'Version Number', {}, tostring(localVer), function ()
