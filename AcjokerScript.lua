@@ -305,6 +305,27 @@ function JuggleCar(Vehj_h, tar1,  invisjugc, jugr)
      entities.delete_by_handle(CC)
 end
 
+function Getveh(vic)
+    local tick = 0
+    NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
+    while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) do
+        local nid = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(vic)
+        NETWORK.SET_NETWORK_ID_CAN_MIGRATE(nid, true)
+        NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
+        util.yield()
+        tick =  tick + 1
+        if tick > 10 then
+            if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) then
+                if set.alert then
+                    AClang.toast('Could not gain control')
+                end
+                util.stop_thread()
+            end
+        
+        end
+    end
+end
+
 function GetControl(vic, spec, pid)
     local tick = 0
     NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
@@ -644,6 +665,64 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
  --------------------------------------------------------
 -- Vehicles
 
+
+local rgbvm = AClang.list(vehroot, 'RGB Vehicle', {}, '')
+local rgb = {cus = 100}
+
+    
+
+    AClang.toggle_loop(rgbvm, 'Custom RGB Synced', {}, 'Change the vehicle color and neon lights to custom RGB with a synced color', function ()
+       if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), true) ~= 0 then
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
+        RGBNeonKit(players.user_ped())
+        local red = (math.random(0, 255))
+        local green = (math.random(0, 255))
+        local blue = (math.random(0, 255))
+        VEHICLE.SET_VEHICLE_NEON_COLOUR(vmod, red, green, blue)
+        VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(vmod, red, green, blue)
+        VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(vmod, red, green, blue)
+        util.yield(rgb.cus)
+       end
+    end)
+
+    AClang.slider(rgbvm, 'Custom RGB Speed', {''}, 'Adjust the speed of the custom RGB', 1, 1000, 100, 10, function (c)
+        rgb.cus = c
+    end)
+
+
+    local srgb = {cus = 100}
+    AClang.toggle_loop(rgbvm, 'Synced Color with Headlights', {}, 'Change the neons, headlights, interior and vehicle color to the same color', function ()
+        local color = {
+          {64, 1}, --blue
+          {73, 2}, --eblue  
+          {51, 3}, --mgreen
+          {92, 4}, --lgreen
+          {89, 5}, --yellow
+          {88, 6}, --gshower
+          {38, 7}, --orange
+          {39 , 8}, --red
+          {137, 9}, --ponypink
+          {135, 10}, --hotpink
+          {145, 11}, --purple
+          {142, 12} --blacklight
+        }
+       if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) ~= 0 then
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
+        RGBNeonKit(players.user_ped())
+        local rcolor = math.random(1, 12)
+        VEHICLE.TOGGLE_VEHICLE_MOD(vmod, 22, true)
+        VEHICLE.SET_VEHICLE_NEON_INDEX_COLOUR(vmod, color[rcolor][1])
+        VEHICLE.SET_VEHICLE_COLOURS(vmod, color[rcolor][1], color[rcolor][1])
+        VEHICLE.SET_VEHICLE_EXTRA_COLOURS(vmod, 0, color[rcolor][1])
+        VEHICLE.SET_VEHICLE_EXTRA_COLOUR_5(vmod, color[rcolor][1])
+        VEHICLE.SET_VEHICLE_XENON_LIGHT_COLOR_INDEX(vmod, color[rcolor][2])
+        util.yield(srgb.cus)
+       end
+    end)
+  
+    AClang.slider(rgbvm, 'Synced RGB Speed', {''}, 'Adjust the speed of the synced RGB', 1, 1000, 100, 10, function (c)
+        srgb.cus = c
+    end)
 ---------------------------------- FF9 Charger ----------------------------------
 local charroot = AClang.list(vehroot, 'Charger', {}, 'Duke O Death with Electro Magnet capabilities')
 local charger = {charg = util.joaat('dukes2'), emp = util.joaat('hei_prop_heist_emp')}
@@ -801,10 +880,14 @@ end)
 AClang.action(onlineroot, 'Stop Spectating', {'sspect'}, 'Stop Spectating anyone in the lobby', function ()
     Specon(players.user())
     Specoff(players.user())
-        util.yield(250)
-
-   
+        util.yield(100)
 end)
+
+AClang.action(onlineroot, 'Stop Sounds', {'ssound'}, 'Stop all sounds incase they are going off constantly', function ()
+    Stopsound()
+        util.yield(100)
+end)
+
 -------------------------------Player Options-----------------------------------------------
 
 players.on_join(function(pid)
@@ -3905,7 +3988,7 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.4 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 1.5 -- all credits for the updater go to Prisuhm#7717 Thank You
 
  -------------------
  AClang.action(setroot, 'Version Number', {}, tostring(localVer), function ()
