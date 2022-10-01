@@ -765,7 +765,7 @@ end
         magval.nodam = magtf[magint]
         end)
 
-    Mag_sca = AClang.slider(charroot, 'Magnet Push Away Scale', {}, 'Change how far you push away objects', 0, 10000, 5000, 5000, function (s)
+    Mag_sca = AClang.slider(charroot, AClang.str_trans('Magnet Push Away Scale'), {}, AClang.str_trans('Change how far you push away objects'), 0, 10000, 5000, 5000, function (s)
         magval.scale = s
     end)    
       util.create_tick_handler(function ()
@@ -3988,7 +3988,7 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.6 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 1.7 -- all credits for the updater go to Prisuhm#7717 Thank You
 
  -------------------
  AClang.action(setroot, 'Version Number', {}, tostring(localVer), function ()
