@@ -8,7 +8,8 @@
    -------------------------------------------------------------------------
    
 --github
-util.keep_running()
+Load = true
+local localVer = 1.8 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -16,9 +17,15 @@ LANG_SETTINGS = {}
 SEC = ENTITY.SET_ENTITY_COORDS
 local set = {alert = true}
 
+
+AClang.action(menu.my_root(), 'Restart Script', {}, 'Restarts the script to check for updates', function ()
+    util.restart_script()
+end)
+
 AClang.action(menu.my_root(), 'Player Options', {}, 'Redirects you to the Player list in Stand for the Trolling and Friendly options', function ()
     menu.trigger_commands("players")
 end)
+
 
 local onlineroot = AClang.list(menu.my_root(), 'Online', {}, '')
 local vehroot = AClang.list(menu.my_root(), 'Vehicles', {}, '')
@@ -124,6 +131,17 @@ function Teabagtime(p1, p2, p3, p4, p5, p6, p7, p8)
 --AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(p1, 'HS3LE_ANAB', 'LESTER', 'SPEECH_PARAMS_FORCE_SHOUTED', 1)
         util.yield(100)
         end)
+end
+
+
+
+function Jesuslovesyou(ped_tab)
+    util.create_tick_handler (function ()
+        for _, pi in ipairs(ped_tab) do
+            AUDIO.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE(pi, 'BUMP', 'JESSE', 'SPEECH_PARAMS_FORCE', 1)
+            util.yield(250)
+        end
+    end)
 end
 
 function Trevortime(ped_tab)
@@ -327,6 +345,9 @@ function Getveh(vic)
 end
 
 function GetControl(vic, spec, pid)
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
     local tick = 0
     NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
     while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) do
@@ -357,7 +378,6 @@ function Disbet(pid)
     local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
     local play = ENTITY.GET_ENTITY_COORDS(players.user_ped(), true)
     local disbet = SYSTEM.VDIST2(play.x, play.y, play.z, tar1.x, tar1.y, tar1.z)
-
     return disbet
 end
 
@@ -370,7 +390,9 @@ function Specoff(pid)
     menu.trigger_commands("spectate".. players.get_name(pid).. ' off')
 end
 
-function Maxoutcar(pedm, spec, pid)
+function Maxoutcar(pid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
      Vmod(vmod, AClang.str_trans("URWLCUM"))
@@ -382,7 +404,9 @@ function Maxoutcar(pedm, spec, pid)
      end
 end
 
-function Platechange(pedm, cusplate, spec, pid)
+function Platechange(cusplate, pid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_NUMBER_PLATE_TEXT(vmod, cusplate)
@@ -391,7 +415,9 @@ function Platechange(pedm, cusplate, spec, pid)
     end
 end
 
-function Fixveh(pedm, spec, pid)
+function Fixveh(pid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FIXED(vmod)
@@ -400,7 +426,9 @@ function Fixveh(pedm, spec, pid)
     end
 end
 
-function Accelveh(pedm, speed, spec, pid)
+function Accelveh( speed, pid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, speed)
@@ -409,7 +437,9 @@ function Accelveh(pedm, speed, spec, pid)
     end
 end
 
-function Stopveh(pedm, spec, pid)
+function Stopveh(pid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, -1000)
@@ -420,7 +450,9 @@ function Stopveh(pedm, spec, pid)
     end
 end
 
-function Rpaint(pedm, spec, pid)
+function Rpaint(pid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FIXED(vmod)
@@ -430,11 +462,22 @@ function Rpaint(pedm, spec, pid)
     end
 end
 
-function GetPlayVeh(pid, pedm, opt)
+function GetPlayVeh(pid, opt)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if set.alert then
+        AClang.toast('Getting control of vehicle')
+    end
     if Disbet(pid) > 750000  then
         Specon(pid)
     if PED.IS_PED_IN_ANY_VEHICLE(pedm, true) then
         opt()
+        if not spec then
+            Specoff(pid)
+        end
         return
     else
         if set.alert then
@@ -445,6 +488,9 @@ function GetPlayVeh(pid, pedm, opt)
     elseif Disbet(pid) < 750000 then
         if PED.IS_PED_IN_ANY_VEHICLE(pedm, true) then
             opt()
+            if not spec then
+                Specoff(pid)
+            end
         return
         end
     else
@@ -461,9 +507,140 @@ function RGBNeonKit(pedm)
     end
 end
 
+function Changewheel(pid, wtype, wheel)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local vhash = ENTITY.GET_ENTITY_MODEL(vmod)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    if VEHICLE.IS_THIS_MODEL_A_BIKE(vhash) then
+        VEHICLE.SET_VEHICLE_WHEEL_TYPE(vmod, wtype)
+        VEHICLE.SET_VEHICLE_MOD(vmod, 23, wheel)
+        VEHICLE.SET_VEHICLE_MOD(vmod, 24, wheel)
+    else
+        VEHICLE.SET_VEHICLE_WHEEL_TYPE(vmod, wtype)
+        VEHICLE.SET_VEHICLE_MOD(vmod, 23, wheel)
+    end
+end
 
+
+function Changehead(pid, color)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    VEHICLE.TOGGLE_VEHICLE_MOD(vmod, 22, true)
+    VEHICLE.SET_VEHICLE_XENON_LIGHT_COLOR_INDEX(vmod, color)
+end
+
+function Changeneon(pid, color)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    RGBNeonKit(pedm)
+    VEHICLE.SET_VEHICLE_NEON_INDEX_COLOUR(vmod, color)
+
+end
+
+function Changetint(pid, tint)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
+    VEHICLE.SET_VEHICLE_WINDOW_TINT(vmod, tint)
+end
+
+
+function Changecolor(pid, color)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
+    VEHICLE.SET_VEHICLE_COLOURS(vmod, color.prim, color.sec)
+end
+
+
+function Changewhepercolor(pid, color)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
+    VEHICLE.SET_VEHICLE_EXTRA_COLOURS(vmod, color.per, color.whe)
+end
+
+function Changeintcolor(pid, color)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
+    VEHICLE.SET_VEHICLE_EXTRA_COLOUR_5(vmod, color)
+end
+
+function Changedashcolor(pid, color)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
+    VEHICLE.SET_VEHICLE_EXTRA_COLOUR_6(vmod, color)
+end
+
+function Changemod(pid, modtype, mod)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+    if PED.IS_PED_IN_ANY_VEHICLE(pedm) ==true then
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+        GetControl(vmod, spec, pid)
+        VEHICLE.GET_NUM_MOD_KITS(vmod)
+        VEHICLE.GET_VEHICLE_MOD_KIT(vmod)
+        VEHICLE.SET_VEHICLE_MOD_KIT(vmod, 0)
+        VEHICLE.SET_VEHICLE_MOD(vmod, modtype, mod, false)
+    end
+end
+
+function Getmodcou(pid, mod)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+    if PED.IS_PED_IN_ANY_VEHICLE(pedm) ==true then
+        local max = VEHICLE.GET_NUM_VEHICLE_MODS(vmod, mod)
+        
+        return max
+    end
+    
+end
 -------------------------------------------------------------------------------------------------------
-
 
 
 -------------------------------- Teleports---------------------------------------------------
@@ -880,12 +1057,10 @@ end)
 AClang.action(onlineroot, 'Stop Spectating', {'sspect'}, 'Stop Spectating anyone in the lobby', function ()
     Specon(players.user())
     Specoff(players.user())
-        util.yield(100)
 end)
 
 AClang.action(onlineroot, 'Stop Sounds', {'ssound'}, 'Stop all sounds incase they are going off constantly', function ()
     Stopsound()
-        util.yield(100)
 end)
 
 -------------------------------Player Options-----------------------------------------------
@@ -930,6 +1105,9 @@ AClang.toggle_loop(frienm, 'Fake Money Rain', {}, 'Rains Fake Money on the Playe
     local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
     Streamptfx('core')
     GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD( 'ent_brk_banknotes', tar1.x, tar1.y, tar1.z + 1, 0, 0, 0, 3.0, true, true, true)
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
 end)
 
     AClang.action(plamenu, 'Max Protect Player', {'max'}, 'Turns on Auto Heal, All Weapons, and Never wanted commands all at once', function ()
@@ -938,29 +1116,386 @@ end)
         menu.trigger_commands("arm".. players.get_name(pid))
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
-    AClang.action(vehmenu, 'Max out their Vehicle', {'maxv'}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
-        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if set.alert then
-        AClang.toast('Getting control of vehicle')
-        end
-        GetPlayVeh(pid, pedm, function ()
-            Maxoutcar(pedm, spec, pid)
-            if not spec then
-                Specoff(pid)
+
+
+    local lscm = AClang.list(vehmenu, 'Los Santos Customs', {}, 'Works better/faster if you are near them')
+
+  local bodym = AClang.list(lscm, 'Body Modifications', {}, 'Only shows what is available to be changed. If they get in a new vehicle back out of Body Modifications to refresh options')
+
+  local lighm = AClang.list(lscm, 'Lights', {}, '')
+
+    local colm  = AClang.list(lscm, 'Vehicle Colors', {}, '')
+
+    local wmenu = AClang.list(lscm, 'Wheels', {}, '')
+
+
+
+      local vehmenus = {}
+      local  vehopts = { 
+        {1 , AClang.trans("Spoilers")},
+        {2 , AClang.trans("Front Bumper / Countermeasures")},
+        {3 , AClang.trans("Rear Bumper")},
+        {4 , AClang.trans("Side Skirt")},
+        {5 , AClang.trans("Exhaust")},
+        {6 , AClang.trans("Frame")},
+        {7 , AClang.trans("Grille")},
+        {8 , AClang.trans("Hood")},
+        {9 , AClang.trans("Fender")},
+        {10 , AClang.trans("Right Fender")},
+        {11 , AClang.trans("Roof / Weapons")},
+        {12 , AClang.trans("Engine")},
+        {13 , AClang.trans("Brakes")},
+        {14 , AClang.trans("Transmission")},
+        {15 , AClang.trans("Horns")},
+        {16 , AClang.trans("Suspension")},
+        {17 , AClang.trans("Armour")},
+        {24 , AClang.trans("Front Wheels")},
+        {25 , AClang.trans("Motorcycle Back Wheel Design")},
+        {26 , AClang.trans("Plate Holders")},
+        {28 , AClang.trans("Trim Design")},
+        {29 , AClang.trans("Ornaments")},
+        {31 , AClang.trans("Dial Design")},
+        {34 , AClang.trans("Steering Wheel")},
+        {35 , AClang.trans("Shifter Leavers")},
+        {36 , AClang.trans("Plaques")},
+        {39 , AClang.trans("Hydraulics")},
+        {49 , AClang.trans("Livery")},
+        }
+
+
+        local vehtogs = {
+        {19 , AClang.trans("Turbo")},
+        {21 , AClang.trans("Tire Smoke")},
+        {23 , AClang.trans("Xenon Headlights")},
+        }
+     
+
+        menu.on_focus(bodym, function ()
+            for _, m in ipairs(vehmenus) do
+                menu.delete(m)
             end
+            vehmenus = {}
+            if not players.exists(pid) then
+                util.stop_thread()
+            end
+            local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+            if PED.IS_PED_IN_ANY_VEHICLE(pedm, false) then    
+                GetPlayVeh(pid, function ()
+                for _, v in pairs(vehopts) do
+                    local current = VEHICLE.GET_VEHICLE_MOD(vmod, v[1] -1)
+                    local maxmods = Getmodcou(pid, v[1] - 1)
+                    if maxmods > 0  then
+                        local modnames = v[2]
+                        local s = menu.slider(bodym, modnames , {''}, '',  -1, maxmods  , current, 1, function (mod)
+                            Changemod(pid, v[1] -1, mod)
+                        end)
+              
+                     
+                      table.insert(vehmenus, s)
+                    util.yield()
+                    end
+                end
+
+                  for i, v in pairs(vehtogs) do
+                    local current = VEHICLE.IS_TOGGLE_MOD_ON(vmod, v[1] -1)
+                    local tognames = v[2]
+                    local t = menu.toggle(bodym, tognames, {''}, '', function (on)
+                        VEHICLE.TOGGLE_VEHICLE_MOD(vmod, v[1] - 1, on)
+                      end, current)         
+                    table.insert(vehmenus, t)
+                  util.yield()
+                end
+
+                end)
+                 end
+
+
         end)
-     end, nil, nil, COMMANDPERM_FRIENDLY)
+           
+
+    local color = {}
+    local mainc = {
+        AClang.trans('Metallic Black'),
+        AClang.trans('Metallic Graphite Black'),
+        AClang.trans('Metallic Black Steal'),
+        AClang.trans('Metallic Dark Silver'),	
+        AClang.trans('Metallic Silver'),
+        AClang.trans('Metallic Blue Silver'),
+        AClang.trans('Metallic Steel Gray'),
+        AClang.trans('Metallic Shadow Silver'),
+        AClang.trans('Metallic Stone Silver'),
+        AClang.trans('Metallic Midnight Silver'),
+        AClang.trans('Metallic Gun Metal'),
+        AClang.trans('Metallic Anthracite Grey'),
+        AClang.trans('Matte Black'),
+        AClang.trans('Matte Gray'),
+        AClang.trans('Matte Light Grey'),	
+        AClang.trans('Util Black'),
+        AClang.trans('Util Black Poly'),
+        AClang.trans('Util Dark silver'),	
+        AClang.trans('Util Silver'),
+        AClang.trans('Util Gun Metal'),	
+        AClang.trans('Util Shadow Silver'),
+        AClang.trans('Worn Black'),
+        AClang.trans('Worn Graphite'),
+        AClang.trans('Worn Silver Grey'),	
+        AClang.trans('Worn Silver'),
+        AClang.trans('Worn Blue Silver'), 	
+        AClang.trans('Worn Shadow Silver'),	
+        AClang.trans('Metallic Red'),
+        AClang.trans('Metallic Torino Red'),
+        AClang.trans('Metallic Formula Red'),
+        AClang.trans('Metallic Blaze Red'), 	
+        AClang.trans('Metallic Graceful Red'),	
+        AClang.trans('Metallic Garnet Red'),
+        AClang.trans('Metallic Desert Red'),
+        AClang.trans('Metallic Cabernet Red'),
+        AClang.trans('Metallic Candy Red'),
+        AClang.trans('Metallic Sunrise Orange'),	
+        AClang.trans('Metallic Classic Gold'),
+        AClang.trans('Metallic Orange'),	
+        AClang.trans('Matte Red'), 	
+        AClang.trans('Matte Dark Red'),	
+        AClang.trans('Matte Orange'),
+        AClang.trans('Matte Yellow'),	
+        AClang.trans('Util Red'),
+        AClang.trans('Util Bright Red'),	
+        AClang.trans('Util Garnet Red'),	
+        AClang.trans('Worn Red'),
+        AClang.trans('Worn Golden Red'),
+        AClang.trans('Worn Dark Red'),
+        AClang.trans('Metallic Dark Green'),	
+        AClang.trans('Metallic Racing Green'),
+        AClang.trans('Metallic Sea Green'),	
+        AClang.trans('Metallic Olive Green'),	
+        AClang.trans('Metallic Green'),
+        AClang.trans('Metallic Gasoline Blue Green'),
+        AClang.trans('Matte Lime Green'),
+        AClang.trans('Util Dark Green'), 	
+        AClang.trans('Util Green'),
+        AClang.trans('Worn Dark Green'),	
+        AClang.trans('Worn Green'),
+        AClang.trans('Worn Sea Wash'),
+        AClang.trans('Metallic Midnight Blue'),	
+        AClang.trans('Metallic Dark Blue'),	
+        AClang.trans('Metallic Saxony Blue'),	
+        AClang.trans('Metallic Blue'),
+        AClang.trans('Metallic Mariner Blue'), 	
+        AClang.trans('Metallic Harbor Blue'), 	
+        AClang.trans('Metallic Diamond Blue'),	
+        AClang.trans('Metallic Surf Blue'),
+        AClang.trans('Metallic Nautical Blue'),	
+        AClang.trans('Metallic Bright Blue'),
+        AClang.trans('Metallic Purple Blue'),	
+        AClang.trans('Metallic Spinnaker Blue'), 	
+        AClang.trans('Metallic Ultra Blue'),	
+        AClang.trans('Metallic Bright Blue'),	
+        AClang.trans('Util Dark Blue'),
+        AClang.trans('Util Midnight Blue'), 	
+        AClang.trans('Util Blue'),
+        AClang.trans('Util Sea Foam Blue'),
+        AClang.trans('Util Lightning blue'),
+        AClang.trans('Util Maui Blue Poly'),
+        AClang.trans('Util Bright Blue'),
+        AClang.trans('Matte Dark Blue'),
+        AClang.trans('Matte Blue'),
+        AClang.trans('Matte Midnight Blue'),	
+        AClang.trans('Worn Dark blue'),
+        AClang.trans('Worn Blue'),
+        AClang.trans('Worn Light blue'),
+        AClang.trans('Metallic Taxi Yellow'),
+        AClang.trans('Metallic Race Yellow'),
+        AClang.trans('Metallic Bronze'),
+        AClang.trans('Metallic Yellow Bird'),
+        AClang.trans('Metallic Lime'),
+        AClang.trans('Metallic Champagne'),
+        AClang.trans('Metallic Pueblo Beige'),	
+        AClang.trans('Metallic Dark Ivory'),
+        AClang.trans('Metallic Choco Brown'),
+        AClang.trans('Metallic Golden Brown'),
+        AClang.trans('Metallic Light Brown'),
+        AClang.trans('Metallic Straw Beige'),	
+        AClang.trans('Metallic Moss Brown'),
+        AClang.trans('Metallic Biston Brown'),
+        AClang.trans('Metallic Beechwood'),
+        AClang.trans('Metallic Dark Beechwood'), 	
+        AClang.trans('Metallic Choco Orange'),	
+        AClang.trans('Metallic Beach Sand'),
+        AClang.trans('Metallic Sun Bleeched Sand'),	
+        AClang.trans('Metallic Cream'),
+        AClang.trans('Util Brown'),	
+        AClang.trans('Util Medium Brown'),	
+        AClang.trans('Util Light Brown'),	
+        AClang.trans('Metallic White'),	
+        AClang.trans('Metallic Frost White'),
+        AClang.trans('Worn Honey Beige'),
+        AClang.trans('Worn Brown'),	
+        AClang.trans('Worn Dark Brown'),
+        AClang.trans('Worn straw beige'),	
+        AClang.trans('Brushed Steel'),
+        AClang.trans('Brushed Black steel'), 	
+        AClang.trans('Brushed Aluminium'),
+        AClang.trans('Chrome'),
+        AClang.trans('Worn Off White'), 
+        AClang.trans('Util Off White'), 
+        AClang.trans('Worn Orange'), 
+        AClang.trans('Worn Light Orange'), 
+        AClang.trans('Metallic Securicor Green'),  	
+        AClang.trans('Worn Taxi Yellow'), 
+        AClang.trans('police car blue'),  	
+        AClang.trans('Matte Green'), 	
+        AClang.trans('Matte Brown'), 	
+        AClang.trans('Worn Orange'), 
+        AClang.trans('Matte White'), 	
+        AClang.trans('Worn White'),
+        AClang.trans('Worn Olive Army Green'), 	
+        AClang.trans('Pure White'),	
+        AClang.trans('Hot Pink'), 	
+        AClang.trans('Salmon pink'),
+        AClang.trans('Metallic Vermillion Pink'),
+        AClang.trans('Orange'),
+        AClang.trans('Green'),	
+        AClang.trans('Blue'),
+        AClang.trans('Mettalic Black Blue'), 	
+        AClang.trans('Metallic Black Purple'),	
+        AClang.trans('Metallic Black Red'),
+        AClang.trans('Hunter Green'),
+        AClang.trans('Metallic Purple'),
+        AClang.trans('Metaillic V Dark Blue'),	
+        AClang.trans('MODSHOP BLACK1'), 
+        AClang.trans('Matte Purple'),
+        AClang.trans('Matte Dark Purple'), 	
+        AClang.trans('Metallic Lava Red'),	
+        AClang.trans('Matte Forest Green'),	
+        AClang.trans('Matte Olive Drab'),	
+        AClang.trans('Matte Desert Brown'),
+        AClang.trans('Matte Desert Tan'), 	
+        AClang.trans('Matte Foilage Green'),
+        AClang.trans('DEFAULT ALLOY COLOR'),
+        AClang.trans('Epsilon Blue'),
+        AClang.trans('Pure Gold'),
+        AClang.trans('Brushed Gold')
+    }
+
+    AClang.list_select(colm, 'Primary Color', {''}, 'Changes the Primary Color on the Vehicle', mainc, 1, 
+    function (t)
+        color.prim = t - 1
+        GetPlayVeh(pid, function ()
+            Changecolor(pid, color)
+        end)
+    end)
+
+    AClang.list_select(colm, 'Secondary Color', {''}, 'Changes the Secondary Color on the Vehicle', mainc, 1, 
+    function (t)
+        color.sec = t - 1
+        GetPlayVeh(pid, function ()
+            Changecolor(pid, color)
+        end)
+    end)
+
+    AClang.list_select(colm, 'Pearlescent Color', {''}, 'Changes the Pearlescent Color on the Vehicle', mainc, 1, 
+    function (t)
+        color.per = t - 1
+        GetPlayVeh(pid, function ()
+            Changewhepercolor(pid, color)
+        end)
+    end)
+   
+    AClang.list_select(colm, 'Wheel Color', {''}, 'Changes the Wheel Color on the Vehicle', mainc, 1, 
+    function (t)
+        color.whe = t - 1
+        GetPlayVeh(pid, function ()
+            Changewhepercolor(pid, color)
+        end)
+    end)
+
+    AClang.list_select(colm, 'Interior Color', {''}, 'Changes the Interior Color on the Vehicle', mainc, 1, 
+    function (t)
+        color.int = t - 1
+        GetPlayVeh(pid, function ()
+            Changeintcolor(pid, color.int)
+        end)
+    end)
+
+    AClang.list_select(colm, 'Dashboard Color', {''}, 'Changes the Dashboard Color on the Vehicle', mainc, 1, 
+    function (t)
+        color.das = t - 1
+        GetPlayVeh(pid, function ()
+            Changedashcolor(pid, color.das)
+        end)
+    end)
+
+    local til = {
+        AClang.trans('NONE'),
+        AClang.trans('BLACK'),
+        AClang.trans('DARKSMOKE'),
+        AClang.trans('LIGHTSMOKE'),
+        AClang.trans('STOCK'),
+        AClang.trans('LIMO'),
+        AClang.trans('GREEN')
+    }
+    AClang.list_select(lscm, 'Window Tints', {''}, 'Changes the Tint on the Vehicle', til, 1, 
+    function (t)
+        local tint = t - 1
+        GetPlayVeh(pid, function ()
+            Changetint(pid, tint)
+        end)
+        
+    end)
 
 
-    AClang.text_input(vehmenu, 'Change their license plate', {'lplate'}, 'Change the license plate to a custom text', function (cusplate)
-        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if set.alert then
-        AClang.toast('Getting control of vehicle')
-        end
-        GetPlayVeh(pid, pedm, function ()
-           Platechange(pedm, cusplate, spec, pid)
+    local lighc = {
+        AClang.trans('White'),
+        AClang.trans('Blue'),
+        AClang.trans('Electric Blue'),
+        AClang.trans('Mint Green'),
+        AClang.trans('Lime Green'),
+        AClang.trans('Yellow'),
+        AClang.trans('Golden Shower'),
+        AClang.trans('Orange'),
+        AClang.trans('Red'),
+        AClang.trans('Pony Pink'),
+        AClang.trans('Hot Pink'),
+        AClang.trans('Purple'),
+        AClang.trans('Blacklight')
+
+    }
+    
+    AClang.list_select(lighm, 'Headlights', {''}, 'Changes the Headlights to different colors', lighc, 1, 
+
+    function(c)
+        local hcolor = c - 1
+
+        GetPlayVeh(pid, function ()
+            Changehead(pid, hcolor)
+        end)
+    end)
+
+
+    AClang.list_select(lighm, 'Neons', {''}, 'Changes the Neons to different colors', mainc, 1, 
+
+    function(c)
+        local ncolor = c - 1
+        GetPlayVeh(pid, function ()
+            Changeneon(pid, ncolor)
+        end)
+    end)
+    
+local nrgb = {color= {r= 0, g = 255, b = 0, a = 1}}
+
+    AClang.action(lighm, 'Change RGB Neons', {}, 'Change the Color for the Neons to RGB of your choice', function ()
+
+        GetPlayVeh(pid, function ()
+            local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+            local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+            local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+            GetControl(vmod, spec, pid)
+            RGBNeonKit(pedm)
+            local red = nrgb.color.r * 255
+            local green = nrgb.color.g * 255
+            local blue = nrgb.color.b * 255
+            VEHICLE.SET_VEHICLE_NEON_COLOUR(vmod, red, green, blue)
             if not spec then
                 Specoff(pid)
             end
@@ -968,48 +1503,672 @@ end)
     end)
 
 
+    AClang.colour(lighm, 'RGB Neon Color', {'rgbsc'}, 'Choose the Color for the Neons be changed to ', nrgb.color, false, function(ncolor)
+        nrgb.color = ncolor
+    end)
+
+
+    local bbw = {
+        AClang.trans('Chrome OG Hunnets'),
+        AClang.trans('Gold OG Hunnets'),
+        AClang.trans('Chrome Wires'),
+        AClang.trans('Gold Wires'),
+        AClang.trans('Chrome Spoked Out'),
+        AClang.trans('Gold Spoked Out'),
+        AClang.trans('Chrome Knock-Offs'),
+        AClang.trans('Gold Knock-Offs'),
+        AClang.trans('Chrome Bigger Worm'),
+        AClang.trans('Gold Bigger Worm'),
+        AClang.trans('Chrome Vintage Wire'),
+        AClang.trans('Gold Vintage Wire'),
+        AClang.trans('Chrome Classic Wire'),
+        AClang.trans('Gold Classic Wire'),
+        AClang.trans('GroundRide'),
+        AClang.trans('Chrome Smoothie'),
+        AClang.trans('Gold Smoothie'),
+        AClang.trans('Chrome Classic Rod'),
+        AClang.trans('Gold Classic Rod'),
+        AClang.trans('Chrome Dollar'),
+        AClang.trans('Gold Dollar'),
+        AClang.trans('Chrome Mighty Star'),
+        AClang.trans('Gold Mighty Star'),
+        AClang.trans('Chrome Decadent Dish'),
+        AClang.trans('Gold Decadent Dish'),
+        AClang.trans('Gold Razor Style'),
+        AClang.trans('Chrome Celtic Knot'),
+        AClang.trans('Gold Celtic Knot'),
+        AClang.trans('Chrome Warrior Dish'),
+        AClang.trans('Gold Warrior Dish'),
+        AClang.trans('Gold Big Dog Spokes'),
+    }
+
+
+
+
+    AClang.list_select(wmenu, 'Bennys Bespoke', {''}, 'Changes the wheels to Bennys Bespoke wheels', bbw, 1, 
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 9, wheel)
+        end)
+        
+    end)
+
+    local bow = {
+        AClang.trans('OG Hunnets'),
+        AClang.trans('OG Hunnets (Chrome Lip)'),
+        AClang.trans('Knock-Offs'),
+        AClang.trans('Knock-Offs (Chrome Lip)'),
+        AClang.trans('Spoked Out'),
+        AClang.trans('Spoked Out (Chrome Lip)'),
+        AClang.trans('Vintage Wire'),
+        AClang.trans('Vintage Wire (Chrome Lip)'),
+        AClang.trans('Smoothie'),
+        AClang.trans('Smoothie (Chrome Lip)'),
+        AClang.trans('Smoothie (Solid Color)'),
+        AClang.trans('Rod Me Up'),
+        AClang.trans('Rod Me Up (Chrome Lip)'),
+        AClang.trans('Rod Me Up (Solid Color)'),
+        AClang.trans('Clean'),
+        AClang.trans('Lotta Chrome'),
+        AClang.trans('Spindles'),
+        AClang.trans('Viking'),
+        AClang.trans('Triple Spoke'),
+        AClang.trans('Pharohe'),
+        AClang.trans('Tiger Style'),
+        AClang.trans('Three Wheelin'),
+        AClang.trans('Big Bar'),
+        AClang.trans('Biohazard'),
+        AClang.trans('Waves'),
+        AClang.trans('Lick Lick'),
+        AClang.trans('Spiralizer'),
+        AClang.trans('Hypnotics'),
+        AClang.trans('Psycho-Delic'),
+        AClang.trans('Half Cut'),
+        AClang.trans('Super Electric'),
+    }
+    AClang.list_select(wmenu, 'Bennys Originals', {''}, 'Changes the wheels to Bennys Originals wheels', bow, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 8, wheel)
+        end)
+        
+    end)
+
+    local bw = {
+        AClang.trans('Speedway'),
+        AClang.trans('Street Special'),
+        AClang.trans('Racer'),
+        AClang.trans('Track Star'),
+        AClang.trans('Overlord'),
+        AClang.trans('Trident'),
+        AClang.trans('Triple Threat'),
+        AClang.trans('Stilleto'),
+        AClang.trans('Wires'),
+        AClang.trans('Bobber'),
+        AClang.trans('Solidus'),
+        AClang.trans('Ice Shield'),
+        AClang.trans('Loops'),
+        AClang.trans('Chrome Speedway'),
+        AClang.trans('Chrome Street Special'),
+        AClang.trans('Chrome Racer'),
+        AClang.trans('Chrome Track Star'),
+        AClang.trans('Chrome Overlord'),
+        AClang.trans('Chrome Trident'),
+        AClang.trans('Chrome Triple Threat'),
+        AClang.trans('Chrome Stilleto'),
+        AClang.trans('Chrome Wires'),
+        AClang.trans('Chrome Bobber'),
+        AClang.trans('Chrome Solidus'),
+        AClang.trans('Chrome Ice Shield'),
+        AClang.trans('Chrome Loops'),
+        AClang.trans('Romper Racing'),
+        AClang.trans('Warp Drive'),
+        AClang.trans('Snowflake'),
+        AClang.trans('Holy Spoke'),
+        AClang.trans('Old Skool Triple'),
+        AClang.trans('Futura'),
+        AClang.trans('Quarter Mile King'),
+        AClang.trans('Cartwheel'),
+        AClang.trans('Double Five'),
+        AClang.trans('Shuriken'),
+        AClang.trans('Simple Six'),
+        AClang.trans('Celtic'),
+        AClang.trans('Razer'),
+        AClang.trans('Twisted'),
+        AClang.trans('Morning Star'),
+        AClang.trans('Jagged Spokes'),
+        AClang.trans('Eidolon'),
+        AClang.trans('Enigma'),
+        AClang.trans('Big Spokes'),
+        AClang.trans('Webs'),
+        AClang.trans('Hotplate'),
+        AClang.trans('Bobsta'),
+        AClang.trans('Grouch'),
+    }
+    AClang.list_select(wmenu, 'Bike', {''}, 'Changes the wheels to Bike(motorcycle) wheels', bw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 6, wheel)
+        end)
+        
+    end)
+
+    local hew = {
+        AClang.trans('Shadow'),
+        AClang.trans('Hyper'),
+        AClang.trans('Blade'),
+        AClang.trans('Diamond'),
+        AClang.trans('Supa Gee'),
+        AClang.trans('Chromatic Z '),
+        AClang.trans('Mercie Ch.Lip'),
+        AClang.trans('Obey RS'),
+        AClang.trans('GT Chrome'),
+        AClang.trans('Cheetah R'),
+        AClang.trans('Solar'),
+        AClang.trans('Split Ten'),
+        AClang.trans('Dash VIP'),
+        AClang.trans('LozSpeed Ten'),
+        AClang.trans('Carbon Inferno'),
+        AClang.trans('Carbon Shadow'),
+        AClang.trans('Carbonic Z'),
+        AClang.trans('Carbon Solar'),
+        AClang.trans('Cheetah Carbon R'),
+        AClang.trans('Carbon S Racer'),
+        AClang.trans('Chrome Shadow'),
+        AClang.trans('Chrome Hyper'),
+        AClang.trans('Chrome Blade'),
+        AClang.trans('Chrome Diamond'),
+        AClang.trans('Chrome Supa Gee'),
+        AClang.trans('Chrome Chromatic Z '),
+        AClang.trans('Chrome Mercie Ch.Lip'),
+        AClang.trans('Chrome Obey RS'),
+        AClang.trans('Chrome GT Chrome'),
+        AClang.trans('Chrome Cheetah R'),
+        AClang.trans('Chrome Solar'),
+        AClang.trans('Chrome Split Ten'),
+        AClang.trans('Chrome Dash VIP'),
+        AClang.trans('Chrome LozSpeed Ten'),
+        AClang.trans('Chrome Carbon Inferno'),
+        AClang.trans('Chrome Carbon Shadow'),
+        AClang.trans('Chrome Carbonic Z'),
+        AClang.trans('Chrome Carbon Solar'),
+        AClang.trans('Chrome Cheetah Carbon R'),
+        AClang.trans('Chrome Carbon S Racer'),
+    }
+    AClang.list_select(wmenu, 'High End', {''}, 'Changes the wheels to High End wheels', hew, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid,  function ()
+            Changewheel(pid, 7, wheel)
+
+        end)
+        
+    end)
+
+    local lw = {
+        AClang.trans('Flare'),
+        AClang.trans('Wired'),
+        AClang.trans('Triple Golds'),
+        AClang.trans('Big Worm'),
+        AClang.trans('Seven Fives'),
+        AClang.trans('Split Six'),
+        AClang.trans('Fresh Mesh'),
+        AClang.trans('Lead Sled'),
+        AClang.trans('Turbine'),
+        AClang.trans('Super Fin'),
+        AClang.trans('Classic Rod'),
+        AClang.trans('Dollar'),
+        AClang.trans('Dukes'),
+        AClang.trans('Low Five'),
+        AClang.trans('Gooch'),
+        AClang.trans('Chrome Flare'),
+        AClang.trans('Chrome Wired'),
+        AClang.trans('Chrome Triple Golds'),
+        AClang.trans('Chrome Big Worm'),
+        AClang.trans('Chrome Seven Fives'),
+        AClang.trans('Chrome Split Six'),
+        AClang.trans('Chrome Fresh Mesh'),
+        AClang.trans('Chrome Lead Sled'),
+        AClang.trans('Chrome Turbine'),
+        AClang.trans('Chrome Super Fin'),
+        AClang.trans('Chrome Classic Rod'),
+        AClang.trans('Chrome Dollar'),
+        AClang.trans('Chrome Dukes'),
+        AClang.trans('Chrome Low Five'),
+        AClang.trans('Chrome Gooch'),
+    }
+    AClang.list_select(wmenu, 'Lowrider', {''}, 'Changes the wheels to Lowrider wheels', lw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 2, wheel)
+        end)
+        
+    end)
+    local mw = {
+        AClang.trans('Classic Five'),
+        AClang.trans('Dukes'),
+        AClang.trans('Muscle Freak'),
+        AClang.trans('Kracka'),
+        AClang.trans('Azreal'),
+        AClang.trans('Mecha'),
+        AClang.trans('Black Top'),
+        AClang.trans('Drag SPL'),
+        AClang.trans('Revolver'),
+        AClang.trans('Classic Rod '),
+        AClang.trans('Fairlie'),
+        AClang.trans('Spooner'),
+        AClang.trans('Five Star'),
+        AClang.trans('Old School'),
+        AClang.trans('El Jefe'),
+        AClang.trans('Dodman'),
+        AClang.trans('Six Gun'),
+        AClang.trans('Mercenary'),
+        AClang.trans('Chrome Classic Five'),
+        AClang.trans('Chrome Dukes'),
+        AClang.trans('Chrome Muscle Freak'),
+        AClang.trans('Chrome Kracka'),
+        AClang.trans('Chrome Azreal'),
+        AClang.trans('Chrome Mecha'),
+        AClang.trans('Chrome Black Top'),
+        AClang.trans('Chrome Drag SPL'),
+        AClang.trans('Chrome Revolver'),
+        AClang.trans('Chrome Classic Rod '),
+        AClang.trans('Chrome Fairlie'),
+        AClang.trans('Chrome Spooner'),
+        AClang.trans('Chrome Five Star'),
+        AClang.trans('Chrome Old School'),
+        AClang.trans('Chrome El Jefe'),
+        AClang.trans('Chrome Dodman'),
+        AClang.trans('Chrome Six Gun'),
+        AClang.trans('Chrome Mercenary'),
+
+    }
+    AClang.list_select(wmenu, 'Muscle', {''}, 'Changes the wheels to Muscle wheels', mw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 1, wheel)
+
+        end)
+        
+    end)
+
+    local orw = {
+        AClang.trans('Raider'),
+        AClang.trans('Mudslinger'),
+        AClang.trans('Nevis'),
+        AClang.trans('Cairngorm'),
+        AClang.trans('Amazon'),
+        AClang.trans('Challenger'),
+        AClang.trans('Dune Basher'),
+        AClang.trans('Five Star'),
+        AClang.trans('Rock Crawler'),
+        AClang.trans('Mill Spec Steelie'),
+        AClang.trans('Chrome Raider'),
+        AClang.trans('Chrome Mudslinger'),
+        AClang.trans('Chrome Nevis'),
+        AClang.trans('Chrome Cairngorm'),
+        AClang.trans('Chrome Amazon'),
+        AClang.trans('Chrome Challenger'),
+        AClang.trans('Chrome Dune Basher'),
+        AClang.trans('Chrome Five Star'),
+        AClang.trans('Chrome Rock Crawler'),
+        AClang.trans('Chrome Mill Spec Steelie'),
+        AClang.trans('Retro Steelie'),
+        AClang.trans('Heavy Duty Steelie'),
+        AClang.trans('Concave Steelie'),
+        AClang.trans('Police Issue Steelie'),
+        AClang.trans('Lightweight Steelie'),
+        AClang.trans('Dukes'),
+        AClang.trans('Avalanche'),
+        AClang.trans('Mountain Man'),
+        AClang.trans('Rigde Climber'),
+        AClang.trans('Concave 5'),
+        AClang.trans('Flat Six'),
+        AClang.trans('All Terrain Monster'),
+        AClang.trans('Drag SPL'),
+        AClang.trans('Concave Rally Master'),
+        AClang.trans('Rugged Snowflake'),
+    }
+    AClang.list_select(wmenu, 'Offroad', {''}, 'Changes the wheels to Offroad wheels', orw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 4, wheel)
+
+        end)
+        
+    end)
+
+    local rw = {
+        AClang.trans('Classic 5'),
+        AClang.trans('Classic 5 (Striped)'),
+        AClang.trans('Retro Star'),
+        AClang.trans('Retro Star (Striped)'),
+        AClang.trans('Triplex'),
+        AClang.trans('Triplex (Striped)'),
+        AClang.trans('70s Spec'),
+        AClang.trans('70s Spec (Striped)'),
+        AClang.trans('Super 5R'),
+        AClang.trans('Super 5R (Striped)'),
+        AClang.trans('Speedster'),
+        AClang.trans('Speedster (Striped)'),
+        AClang.trans('GP-90'),
+        AClang.trans('GP-90 (Striped)'),
+        AClang.trans('Superspoke'),
+        AClang.trans('Superspoke (Striped)'),
+        AClang.trans('Gridline'),
+        AClang.trans('Gridline (Striped)'),
+        AClang.trans('Snowflake'),
+        AClang.trans('Snowflake (Striped)'),
+    }
+    AClang.list_select(wmenu, 'Racing(Formula 1 Wheels)', {''}, 'Changes the wheels to Racing(Formula 1 Wheels) wheels', rw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid,  function ()
+            Changewheel(pid, 10, wheel)
+
+        end)
+        
+    end)
+
+    local spw = {
+        AClang.trans('Inferno'),
+        AClang.trans('Deep Five'),
+        AClang.trans('Lozspeed Mk.V'),
+        AClang.trans('Diamond Cut'),
+        AClang.trans('Chrono'),
+        AClang.trans('Feroci RR'),
+        AClang.trans('FiftyNine'),
+        AClang.trans('Mercie'),
+        AClang.trans('Synthetic Z'),
+        AClang.trans('Organic Type 0'),
+        AClang.trans('Endo v.1'),
+        AClang.trans('GT One'),
+        AClang.trans('Duper 7'),
+        AClang.trans('Uzer'),
+        AClang.trans('GroundRide'),
+        AClang.trans('S Racer'),
+        AClang.trans('Venum'),
+        AClang.trans('Cosmo'),
+        AClang.trans('Dash VIP'),
+        AClang.trans('Ice Kid'),
+        AClang.trans('Ruff Weld'),
+        AClang.trans('Wangan Master'),
+        AClang.trans('Super Five'),
+        AClang.trans('Endo v.2'),
+        AClang.trans('Split Six'),
+        AClang.trans('Chrome Inferno'),
+        AClang.trans('Chrome Deep Five'),
+        AClang.trans('Chrome Lozspeed Mk.V'),
+        AClang.trans('Chrome Diamond Cut'),
+        AClang.trans('Chrome Chrono'),
+        AClang.trans('Chrome Feroci RR'),
+        AClang.trans('Chrome FiftyNine'),
+        AClang.trans('Chrome Mercie'),
+        AClang.trans('Chrome Synthetic Z'),
+        AClang.trans('Chrome Organic Type 0'),
+        AClang.trans('Chrome Endo v.1'),
+        AClang.trans('Chrome GT One'),
+        AClang.trans('Chrome Duper 7'),
+        AClang.trans('Chrome Uzer'),
+        AClang.trans('Chrome GroundRide'),
+        AClang.trans('Chrome S Racer'),
+        AClang.trans('Chrome Venum'),
+        AClang.trans('Chrome Cosmo'),
+        AClang.trans('Chrome Dash VIP'),
+        AClang.trans('Chrome Ice Kid'),
+        AClang.trans('Chrome Ruff Weld'),
+        AClang.trans('Chrome Wangan Master'),
+        AClang.trans('Chrome Super Five'),
+        AClang.trans('Chrome Endo v.2'),
+        AClang.trans('Chrome Split Six'),
+    }
+    AClang.list_select(wmenu, 'Sport', {''}, 'Changes the wheels to Sport wheels', spw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid,  function ()
+            Changewheel(pid, 0, wheel)
+
+        end)
+        
+    end)
+    
+    local stw = {
+        AClang.trans('Retro Steelie'),
+        AClang.trans('Poverty Spec Steelie'),
+        AClang.trans('Concave Steelie'),
+        AClang.trans('Nebula'),
+        AClang.trans('Hotring Steelie'),
+        AClang.trans('Cup Champion'),
+        AClang.trans('Stanced EG Custom'),
+        AClang.trans('Kracka Custom'),
+        AClang.trans('Dukes Custom'),
+        AClang.trans('Endo v.3 Custom'),
+        AClang.trans('V8 Killer'),
+        AClang.trans('Fujiwara Custom'),
+        AClang.trans('Cosmo MKII'),
+        AClang.trans('Aero Star'),
+        AClang.trans('Hype Five'),
+        AClang.trans('Ruff Weld Mega Deep '),
+        AClang.trans('Mercie Concave'),
+        AClang.trans('Sugoi Concave'),
+        AClang.trans('Synthetic Z Concave'),
+        AClang.trans('Endo v.4 Dished'),
+        AClang.trans('Hyperfresh'),
+        AClang.trans('Truffade Concave'),
+        AClang.trans('Organic Type II'),
+        AClang.trans('Big Mamba'),
+        AClang.trans('Deep Flake'),
+        AClang.trans('Cosmo MKIII'),
+        AClang.trans('Concave Racer'),
+        AClang.trans('Deep Flake Reverse'),
+        AClang.trans('Wild Wagon'),
+        AClang.trans('Concave Mega Mesh'),
+    }
+    AClang.list_select(wmenu, 'Street', {''}, 'Changes the wheels to Street wheels', stw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 11, wheel)
+
+        end)
+        
+    end)
+
+    local suw = {
+        AClang.trans('VIP'),
+        AClang.trans('Benefactor'),
+        AClang.trans('Cosmo'),
+        AClang.trans('Bippu'),
+        AClang.trans('Royal Six '),
+        AClang.trans('Fagorme'),
+        AClang.trans('Deluxe'),
+        AClang.trans('Iced Out'),
+        AClang.trans('Cognoscenti'),
+        AClang.trans('LozSpeed Ten'),
+        AClang.trans('Supernova'),
+        AClang.trans('Obey RS'),
+        AClang.trans('LozSpeed Baller'),
+        AClang.trans('Extravaganzo'),
+        AClang.trans('Split Six'),
+        AClang.trans('Empowered'),
+        AClang.trans('Sunrise'),
+        AClang.trans('Dash VIP'),
+        AClang.trans('Cutter'),
+        AClang.trans('Chrome VIP'),
+        AClang.trans('Chrome Benefactor'),
+        AClang.trans('Chrome Cosmo'),
+        AClang.trans('Chrome Bippu'),
+        AClang.trans('Chrome Royal Six '),
+        AClang.trans('Chrome Fagorme'),
+        AClang.trans('Chrome Deluxe'),
+        AClang.trans('Chrome Iced Out'),
+        AClang.trans('Chrome Cognoscenti'),
+        AClang.trans('Chrome LozSpeed Ten'),
+        AClang.trans('Chrome Supernova'),
+        AClang.trans('Chrome Obey RS'),
+        AClang.trans('Chrome LozSpeed Baller'),
+        AClang.trans('Chrome Extravaganzo'),
+        AClang.trans('Chrome Split Six'),
+        AClang.trans('Chrome Empowered'),
+        AClang.trans('Chrome Sunrise'),
+        AClang.trans('Chrome Dash VIP'),
+        AClang.trans('Chrome Cutter'),
+    }
+    AClang.list_select(wmenu, 'SUV', {''}, 'Changes the wheels to SUV wheels', suw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid,  function ()
+            Changewheel(pid, 3, wheel)
+        end)
+      
+        
+    end)
+
+
+    local trw = {
+        AClang.trans('Rally Throwback'),
+        AClang.trans('Gravel Trap'),
+        AClang.trans('Stove Top'),
+        AClang.trans('Stove Top Mesh'),
+        AClang.trans('Retro 3 Piece'),
+        AClang.trans('Rally Monoblock'),
+        AClang.trans('Forged 5'),
+        AClang.trans('Split Star'),
+        AClang.trans('Speed Boy'),
+        AClang.trans('90s Running'),
+        AClang.trans('Tropos'),
+        AClang.trans('Exos'),
+        AClang.trans('High Five'),
+        AClang.trans('Super Luxe'),
+        AClang.trans('Pure Business'),
+        AClang.trans('Pepper Pot'),
+        AClang.trans('Blacktop Blender'),
+        AClang.trans('Throwback'),
+        AClang.trans('Expressway'),
+        AClang.trans('Hidden Six'),
+        AClang.trans('Dinka SPL'),
+        AClang.trans('Retro Turbofan'),
+        AClang.trans('Conical Turbofan'),
+        AClang.trans('Ice Storm'),
+        AClang.trans('Super Turbine'),
+        AClang.trans('Modern Mesh'),
+        AClang.trans('Forged Star'),
+        AClang.trans('Snowflake'),
+        AClang.trans('Giga Mesh'),
+        AClang.trans('Mesh Meister'),
+    }
+    AClang.list_select(wmenu, 'Track', {''}, 'Changes the wheels to Track wheels', trw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid,  function ()
+            Changewheel(pid, 12, wheel)
+        end)
+
+    end)
+
+    local tuw = {
+        AClang.trans('Cosmo'),
+        AClang.trans('Super Mesh'),
+        AClang.trans('Outsider'),
+        AClang.trans('Rollas'),
+        AClang.trans('Driftmeister'),
+        AClang.trans('Slicer'),
+        AClang.trans('El Quatro'),
+        AClang.trans('Dubbed'),
+        AClang.trans('Five Star'),
+        AClang.trans('Slideways'),
+        AClang.trans('Apex'),
+        AClang.trans('Stanced EG'),
+        AClang.trans('Countersteer'),
+        AClang.trans('Endo v.1'),
+        AClang.trans('Endo v.2 Dish'),
+        AClang.trans('Gruppe Z'),
+        AClang.trans('Choku-Dori'),
+        AClang.trans( 'Chicane'),
+        AClang.trans('Saisoku'),
+        AClang.trans('Dished Eight'),
+        AClang.trans('Fujiwara'),
+        AClang.trans('Zokusha'),
+        AClang.trans('Battle VIII'),
+        AClang.trans('Rally Master'),
+        AClang.trans('Chrome Cosmo'),
+        AClang.trans('Chrome Super Mesh'),
+        AClang.trans('Chrome Outsider'),
+        AClang.trans('Chrome Rollas'),
+        AClang.trans('Chrome Driftmeister'),
+        AClang.trans('Chrome Slicer'),
+        AClang.trans('Chrome El Quatro'),
+        AClang.trans('Chrome Dubbed'),
+        AClang.trans('Chrome Five Star'),
+        AClang.trans('Chrome Slideways'),
+        AClang.trans('Chrome Apex'),
+        AClang.trans('Chrome Stanced EG'),
+        AClang.trans('Chrome Countersteer'),
+        AClang.trans('Chrome Endo v.1'),
+        AClang.trans('Chrome Endo v.2 Dish'),
+        AClang.trans('Chrome Gruppe Z'),
+        AClang.trans('Chrome Choku-Dori'),
+        AClang.trans('Chrome Chicane'),
+        AClang.trans('Chrome Saisoku'),
+        AClang.trans('Chrome Dished Eight'),
+        AClang.trans('Chrome Fujiwara'),
+        AClang.trans('Chrome Zokusha'),
+        AClang.trans('Chrome Battle VIII'),
+        AClang.trans('Chrome Rally Master'),
+    }
+    AClang.list_select(wmenu, 'Tuner', {''}, 'Changes the wheels to Tuner wheels', tuw, 1,
+    function(w)
+        local wheel = w - 1
+        GetPlayVeh(pid, function ()
+            Changewheel(pid, 5, wheel)
+        end)
+    end)
+
+
+
+
+    AClang.action(vehmenu, 'Max out their Vehicle', {'maxv'}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
+        GetPlayVeh(pid,  function ()
+            Maxoutcar(pid)
+        end)
+     end, nil, nil, COMMANDPERM_FRIENDLY)
+
+
+    AClang.text_input(vehmenu, 'Change their license plate', {'lplate'}, 'Change the license plate to a custom text', function (cusplate)
+        GetPlayVeh(pid,  function ()
+           Platechange(cusplate, pid)
+        end)
+    end)
+
+
     AClang.action(vehmenu, 'Repair Vehicle', {'repv'}, 'Repair their vehicle', function ()
-        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if set.alert then
-        AClang.toast('Getting control of vehicle')
-        end
-        GetPlayVeh(pid, pedm, function ()
-            Fixveh(pedm, spec, pid)
-            if not spec then
-                Specoff(pid)
-            end
+        GetPlayVeh(pid,  function ()
+            Fixveh(pid)
         end)
      end, nil, nil, COMMANDPERM_FRIENDLY)
 
      
      AClang.click_slider(vehmenu, 'Accelerate Vehicle', {'accel'}, 'Accelerate Vehicle Forward by your set amount (actual speed is roughly double the number in MPH)', 10, 150, 40, 10, function (s)
        local  speed = s
-        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if set.alert then
-        AClang.toast('Getting control of vehicle')
-        end
-        GetPlayVeh(pid, pedm, function ()
-           Accelveh(pedm, speed, spec, pid)
+        GetPlayVeh(pid, function ()
+           Accelveh( speed, pid)
            util.yield(1000)
-           if not spec then
-                Specoff(pid)
-            end
         end)
     end)
-
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
     AClang.toggle_loop(vehmenu, 'Slow Vehicle Down', {'slowv'}, 'Does not freeze them just slows down the vehicles velocity', function ()
-        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if set.alert then
-        AClang.toast('Getting control of vehicle')
-        end
-        GetPlayVeh(pid, pedm, function ()
-            Stopveh(pedm, spec, pid)
-
+        Specon(pid)
+        GetPlayVeh(pid, function ()
+            Stopveh(pid)
         end)
-    end, function (spec)
+        return spec
+    end, function ()
         
         if not spec then
             Specoff(pid)
@@ -1026,6 +2185,9 @@ end)
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
     AClang.text_input(cvmenu, 'Enter Custom Vehicle Hash', {'cussmash'}, 'Enter Vehicle Hash to change Vehicle given to player', function(cusveh)
+        if not players.exists(pid) then
+            util.stop_thread()
+        end
         if STREAMING.IS_MODEL_A_VEHICLE(util.joaat(cusveh)) then
            cus.veh = util.joaat(cusveh)
         else
@@ -1036,16 +2198,8 @@ end)
     end, 'toreador')
 
     AClang.action(vehmenu, 'Randomize Paint', {'rpaint'}, 'Randomize the Paint of their vehicle', function ()
-        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if set.alert then
-        AClang.toast('Getting control of vehicle')
-        end
-        GetPlayVeh(pid, pedm, function ()
-            Rpaint(pedm, spec, pid)
-            if not spec then
-                Specoff(pid)
-            end
+        GetPlayVeh(pid, function ()
+            Rpaint(pid)
         end)
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
@@ -1074,7 +2228,7 @@ end)
     end)
 
  local mir = {weap = 'WEAPON_SNOWBALL', speed = 1000}
-  local mirloop =  AClang.toggle_loop(mrplaym, AClang.str_trans('Make it Rain ').. AClang.str_trans(': Snowballs'), {'rain'}, 'Make it Rain your choice of weapon in all directions', function ()
+  local mirloop =  AClang.toggle_loop(mrplaym, 'Make it Rain', {'rain'}, 'Make it Rain your choice of weapon in all directions', function ()
         local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
         local weap = util.joaat(mir.weap)
@@ -1098,9 +2252,8 @@ end)
         end
     end)
     
-    AClang.list_action(mrplaym, 'Weapon Choices', {''}, 'Changes the weapon that rains down on them', Weaplist, function(weapsel, text)
+    AClang.list_select(mrplaym, 'Weapon Choices', {''}, 'Changes the weapon that rains down on them', Weaplist, 1, function(weapsel)
         mir.weap = Weap[weapsel]
-        menu.set_menu_name(mirloop, AClang.str_trans('Make it Rain ') ..': '.. text)
     end)
 
    local weaspeed = AClang.slider(mrplaym, 'Weapon Speed', {''}, 'Adjust the speed of the Weapons', 100, 6000, 1000, 100, function (s)
@@ -1198,15 +2351,13 @@ end)
 
  -------------------------------------
     local exset = {exsel = 0, scale = 1000, isaud = true, invis = false, shake = 0, damage = false, delay = 1}
-   local exloop = AClang.toggle_loop(eplaym, AClang.str_trans('Explode Player Loop ').. ': Grenade', {'EXPL'}, 'Explode Player in a continous loop', function ()
+   local exloop = AClang.toggle_loop(eplaym, 'Explode Player Loop', {'EXPL'}, 'Explode Player in a continous loop', function ()
         local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
 
-
-        FIRE.ADD_EXPLOSION(tar1.x, tar1.y, tar1.z - 1, exset.exsel, exset.scale, exset.isaud, exset.invis, exset.shake, exset.damage)
-        FIRE.ADD_EXPLOSION(tar1.x, tar1.y, tar1.z - 0.5, exset.exsel, exset.scale, exset.isaud, exset.invis, exset.shake, exset.damage)
-        FIRE.ADD_EXPLOSION(tar1.x, tar1.y, tar1.z, exset.exsel, exset.scale, exset.isaud, exset.invis, exset.shake, exset.damage)
-        FIRE.ADD_EXPLOSION(tar1.x, tar1.y, tar1.z + 0.5, exset.exsel, exset.scale, exset.isaud, exset.invis, exset.shake, exset.damage)
+        for i = -1.5, 1.5, 0.5 do
+            FIRE.ADD_EXPLOSION(tar1.x, tar1.y, tar1.z + i, exset.exsel, exset.scale, exset.isaud, exset.invis, exset.shake, exset.damage)
+        end
         util.yield(exset.delay)
 
         if not players.exists(pid) then
@@ -1217,95 +2368,94 @@ end)
         end
     end)
 
-
-    AClang.list_action(eplaym, 'Change Explosion Type', {''}, 'Changes Explosion used for exploding the player', {
-        {'Grenade'}, --modified list from jerryscript
-        {'Grenade Launcher'},
-        {'Sticky Bomb'},
-        {'Molotov'},
-        {'Rocket'},
-        {'Tank Shell'},
-        {'Hi Octane'},
-        {'Car'},
-        {'Plane'},
-        {'Gasoline Pump'},
-        {'Motorcycle'},
-        {'Steam'},
-        {'Flame'},
-        {'Water Jet'},
-        {'Gas Canister Flame'},
-        {'Boat'},
-        {'Ship Destroy'},
-        {'Truck'},
-        {'Bullet'},
-        {'Smoke Grenade Launcher (adjust delay to start)'},
-        {'Smoke Grenade (adjust delay to start)'},
-        {'BZ Gas'},
-        {'Flare'},
-        {'Gas Canister'},
-        {'Fire Extinguisher'},
-        {'Programmable AR'},
-        {'Train'},
-        {'Barrel'},
-        {'Propane'},
-        {'Blimp'},
-        {'Yet Another Flame'},
-        {'Tanker'},
-        {'Plane Rocket'},
-        {'Vehicle Bullet'},
-        {'Gas Tank'},
-        {'Bird Crap'},
-        {'Rail Gun'},
-        {'Blimp 2'},
-        {'Firework'},
-        {'Snowball'},
-        {'Proximity Mine'},
-        {'Valkyrie Cannon'},
-        {'Air Defence (can not be seen outside of water)'},
-        {'Pipe Bomb'},
-        {'Vehicle Mine'},
-        {'Explosive Ammo'},
-        {'APC Shell'},
-        {'Bomb Cluster'},
-        {'Bomb Gas (can not be seen)'},
-        {'Bomb Incendiary'},
-        {'Bomb Standard'},
-        {'Torpedo'},
-        {'Torpedo Underwater (Use this if they are in the water)'},
-        {'Bombushka Cannon'},
-        {'Bomb Cluster Secondary'},
-        {'Hunter Barrage'},
-        {'Hunter Cannon'},
-        {'Rogue Cannon'},
-        {'Mine Underwater'},
-        {'Orbital Cannon (can not be seen outside of water)'},
-        {'Bomb Standard Wide'},
-        {'Explosive Ammo Shotgun'},
-        {'Oppressor MK2 Cannon'},
-        {'Mortar Kinetic'},
-        {'Vehicle Mine Kinetic'},
-        {'Vehicle Mine EMP'},
-        {'Vehicle Mine Spike'},
-        {'Vehicle Mine Slick'},
-        {'Vehicle Mine Tar'},
-        {'Script drone'},
-        {'Up-n-Atomizer'},
-        {'Buried Mine'},
-        {'Script Missile'},
-        {'RC Tank Rocket'},
-        {'Bomb Water (can not be seen outside of water)'},
-        {'Bomb Water Secondary (can not be seen outside of water)'},
-        {'Stun Grenade Alt'},
-        {'Stun Grenade Alt 2'},
-        {'Flash Grenade'},
-        {'Stun Grenade'},
-        {'Stun Grenade Alt 3'},
-        {'Script Missile Large'},
-        {'Submarine Big'},
-        {'EMP Launcher EMP'},
-    },
-    function(index, text)
-        menu.set_menu_name(exloop, AClang.str_trans('Explode Player Loop ') ..': '.. text)
+    local exlist = {
+        AClang.trans('Grenade'), --modified list from jerryscript
+        AClang.trans('Grenade Launcher'),
+        AClang.trans('Sticky Bomb'),
+        AClang.trans('Molotov'),
+        AClang.trans('Rocket'),
+        AClang.trans('Tank Shell'),
+        AClang.trans('Hi Octane'),
+        AClang.trans('Car'),
+        AClang.trans('Plane'),
+        AClang.trans('Gasoline Pump'),
+        AClang.trans('Motorcycle'),
+        AClang.trans('Steam'),
+        AClang.trans('Flame'),
+        AClang.trans('Water Jet'),
+        AClang.trans('Gas Canister Flame'),
+        AClang.trans('Boat'),
+        AClang.trans('Ship Destroy'),
+        AClang.trans('Truck'),
+        AClang.trans('Bullet'),
+        AClang.trans('Smoke Grenade Launcher (adjust delay to start)'),
+        AClang.trans('Smoke Grenade (adjust delay to start)'),
+        AClang.trans('BZ Gas'),
+        AClang.trans('Flare'),
+        AClang.trans('Gas Canister'),
+        AClang.trans('Fire Extinguisher'),
+        AClang.trans('Programmable AR'),
+        AClang.trans('Train'),
+        AClang.trans('Barrel'),
+        AClang.trans('Propane'),
+        AClang.trans('Blimp'),
+        AClang.trans('Yet Another Flame'),
+        AClang.trans('Tanker'),
+        AClang.trans('Plane Rocket'),
+        AClang.trans('Vehicle Bullet'),
+        AClang.trans('Gas Tank'),
+        AClang.trans('Bird Crap'),
+        AClang.trans('Rail Gun'),
+        AClang.trans('Blimp 2'),
+        AClang.trans('Firework'),
+        AClang.trans('Snowball'),
+        AClang.trans('Proximity Mine'),
+        AClang.trans('Valkyrie Cannon'),
+        AClang.trans('Air Defence (can not be seen outside of water)'),
+        AClang.trans('Pipe Bomb'),
+        AClang.trans('Vehicle Mine'),
+        AClang.trans('Explosive Ammo'),
+        AClang.trans('APC Shell'),
+        AClang.trans('Bomb Cluster'),
+        AClang.trans('Bomb Gas (can not be seen)'),
+        AClang.trans('Bomb Incendiary'),
+        AClang.trans('Bomb Standard'),
+        AClang.trans('Torpedo'),
+        AClang.trans('Torpedo Underwater (Use this if they are in the water)'),
+        AClang.trans('Bombushka Cannon'),
+        AClang.trans('Bomb Cluster Secondary'),
+        AClang.trans('Hunter Barrage'),
+        AClang.trans('Hunter Cannon'),
+        AClang.trans('Rogue Cannon'),
+        AClang.trans('Mine Underwater'),
+        AClang.trans('Orbital Cannon (can not be seen outside of water)'),
+        AClang.trans('Bomb Standard Wide'),
+        AClang.trans('Explosive Ammo Shotgun'),
+        AClang.trans('Oppressor MK2 Cannon'),
+        AClang.trans('Mortar Kinetic'),
+        AClang.trans('Vehicle Mine Kinetic'),
+        AClang.trans('Vehicle Mine EMP'),
+        AClang.trans('Vehicle Mine Spike'),
+        AClang.trans('Vehicle Mine Slick'),
+        AClang.trans('Vehicle Mine Tar'),
+        AClang.trans('Script drone'),
+        AClang.trans('Up-n-Atomizer'),
+        AClang.trans('Buried Mine'),
+        AClang.trans('Script Missile'),
+        AClang.trans('RC Tank Rocket'),
+        AClang.trans('Bomb Water (can not be seen outside of water)'),
+        AClang.trans('Bomb Water Secondary (can not be seen outside of water)'),
+        AClang.trans('Stun Grenade Alt'),
+        AClang.trans('Stun Grenade Alt 2'),
+        AClang.trans('Flash Grenade'),
+        AClang.trans('Stun Grenade'),
+        AClang.trans('Stun Grenade Alt 3'),
+        AClang.trans('Script Missile Large'),
+        AClang.trans('Submarine Big'),
+        AClang.trans('EMP Launcher EMP'),
+    }
+    AClang.list_select(eplaym, 'Change Explosion Type', {''}, 'Changes Explosion used for exploding the player', exlist, 1,
+    function(index)
         exset.exsel = index - 1
     end)
 
@@ -1450,6 +2600,9 @@ end)
 
 
      AClang.text_input(cclist, 'Enter Custom Vehicle Hash', {'cussmash'}, 'Enter Vehicle Hash to change Vehicular Assault Vehicle', function(cussma)
+        if not players.exists(pid) then
+            util.stop_thread()
+        end
          if STREAMING.IS_MODEL_A_VEHICLE(util.joaat(cussma)) then
             vehaset.vehasel = util.joaat(cussma)
          else
@@ -1517,7 +2670,7 @@ end, 'toreador')
 
 
   local cage_table = {}
-  local pedset = {mdl = 'player_two'}
+  local pedset = {mdl = 'u_m_m_jesus_01'}
  local pedca =  AClang.toggle_loop(pcagem, 'Ped Cage', {'PCAGE'}, 'Traps Player in a Cage of Peds', function ()
     local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
     local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
@@ -1552,6 +2705,8 @@ end, 'toreador')
         Teabagtime(p1, p2, p3, p4, p5, p6, p7, p8)
     elseif pedhash == util.joaat('player_two') then
         Trevortime(peds)
+    elseif pedhash == util.joaat('u_m_m_jesus_01') then
+        Jesuslovesyou(peds)  
     elseif pedhash ~= util.joaat('IG_LesterCrest') or util.joaat('player_two') then
     if AUDIO.DOES_CONTEXT_EXIST_FOR_THIS_PED(p1, 'GENERIC_FUCK_YOU') ==true
     then Fuckyou(peds)
@@ -1572,6 +2727,7 @@ end, 'toreador')
         Streamanim('rcmpaparazzo_2')
         Streamanim('mp_player_int_upperfinger')
         Streamanim('misscarsteal2peeing')
+        Streamanim('mp_player_int_upperpeace_sign')
         local ped_anim = {p2, p3, p4, p5, p6, p7, p8}
         for _, Pedanim in ipairs(ped_anim) do
             if pedhash == util.joaat('player_two') then
@@ -1580,11 +2736,14 @@ end, 'toreador')
                 Streamptfx('core')
                --credits to saltyscript for gfx part
                GRAPHICS.START_NETWORKED_PARTICLE_FX_LOOPED_ON_ENTITY_BONE("ent_amb_peeing", Pedanim, 0, 0, 0, -90, 0, 0, tre, 2, false, false, false)
+            elseif pedhash == util.joaat('u_m_m_jesus_01') then
+                Runanim(p1, 'mp_player_int_upperpeace_sign', 'mp_player_int_peace_sign')
+                Runanim(Pedanim, 'mp_player_int_upperpeace_sign', 'mp_player_int_peace_sign')
             else
                 Runanim(Pedanim, 'mp_player_int_upperfinger', 'mp_player_int_finger_02_fp')
+                Runanim(p1, 'rcmpaparazzo_2', 'shag_loop_a')
             end
 
-            Runanim(p1, 'rcmpaparazzo_2', 'shag_loop_a')
     end
         local ped_tab = {p1, p2, p3, p4, p5, p6, p7, p8}
         for _, spawned_ped in ipairs(ped_tab) do
@@ -1723,6 +2882,10 @@ end)
 
  ------------------NPC List Actions------------
 
+ AClang.list_action(PedClist, 'Special Ped Cages', {''}, 'Changes Peds to One of the Custom Pedcages', SPClist, function(pedsel)
+    pedset.mdl = SPC[pedsel]
+end)
+
  ----------------------------------Ambient Females-------------------------------
 
     AClang.list_action(PedClist, 'Ambient Female NPCs', {''}, 'Changes Peds to Ambient Females', AfClist, function(pedsel)
@@ -1830,45 +2993,45 @@ end)
  ----------------------------------------PTFX-------------------------------------------------------------------
 Fxcorelist = {
 
-    "Concrete Smash",
-    "Grenade",
-    "Flashbang",
-    "Gobstoppers",
-    "Blood(Turn them into Carrie)",
-    "Metal Fragment",
-    "Water",
-    "Oil(will start glitching out)",
-    "Paparazzi Flash",
-    "Gasoline Pump Explosion",
-    "Molotov",
-    "Cig Exhale(Chain Smoker)",
-    "Wood",
-    "Electrical Fire",
-    "Water Splash",
-    "Polystyrene",
-    "Gasoline",
-    "Flame(Human Torch)",
-    "Casino Chips",
-    "Flying Cigarettes",
-    "Rain Oranges",
-    "Vehicle Respray Smoke(Very Laggy)",
-    "Sparking Wires",
-    "Sub Large Explosion",
-    "Dust(Turn them into Pig-Pen)",
-    "Show them they are TRASH",
-    "Extinguisher(Very Laggy)",
-    "Splash Pee",
-    "Bubbles Everywhere",
-    "Water Mist(Very Laggy)",
-    "Coins",
-    "Foundry Steam",
-    "Mail",
-    "XS Ray",
-    "Extinguisher Water(starts glitching)",
-    "Smoke Grenade",
-    "Telegraph Pole",
-    "Launched Emp",
-    "Electrical Box",
+    AClang.trans("Concrete Smash"),
+    AClang.trans("Grenade"),
+    AClang.trans("Flashbang"),
+    AClang.trans("Gobstoppers"),
+    AClang.trans("Blood(Turn them into Carrie)"),
+    AClang.trans("Metal Fragment"),
+    AClang.trans("Water"),
+    AClang.trans("Oil(will start glitching out)"),
+    AClang.trans("Paparazzi Flash"),
+    AClang.trans("Gasoline Pump Explosion"),
+    AClang.trans("Molotov"),
+    AClang.trans("Cig Exhale(Chain Smoker)"),
+    AClang.trans("Wood"),
+    AClang.trans("Electrical Fire"),
+    AClang.trans("Water Splash"),
+    AClang.trans("Polystyrene"),
+    AClang.trans("Gasoline"),
+    AClang.trans("Flame(Human Torch)"),
+    AClang.trans("Casino Chips"),
+    AClang.trans("Flying Cigarettes"),
+    AClang.trans("Rain Oranges"),
+    AClang.trans("Vehicle Respray Smoke(Very Laggy)"),
+    AClang.trans("Sparking Wires"),
+    AClang.trans("Sub Large Explosion"),
+    AClang.trans("Dust(Turn them into Pig-Pen)"),
+    AClang.trans("Show them they are TRASH"),
+    AClang.trans("Extinguisher(Very Laggy)"),
+    AClang.trans("Splash Pee"),
+    AClang.trans("Bubbles Everywhere"),
+    AClang.trans("Water Mist(Very Laggy)"),
+    AClang.trans("Coins"),
+    AClang.trans("Foundry Steam"),
+    AClang.trans("Mail"),
+    AClang.trans("XS Ray"),
+    AClang.trans("Extinguisher Water(starts glitching)"),
+    AClang.trans("Smoke Grenade"),
+    AClang.trans("Telegraph Pole"),
+    AClang.trans("Launched Emp"),
+    AClang.trans("Electrical Box"),
 }
 
  Fxha = {
@@ -1919,11 +3082,11 @@ Fxcorelist = {
  ------------------------------Big Object List------------------------------------------------------------
 
  Bigobjlist =  {
-    'Meteor',
-    'Ufo',
-    'Cargo Plane',
-    'Ferris Wheel',
-    'Tug Boat',
+    AClang.trans('Meteor'),
+    AClang.trans('Ufo'),
+    AClang.trans('Cargo Plane'),
+    AClang.trans('Ferris Wheel'),
+    AClang.trans('Tug Boat'),
 
  }
 
@@ -1939,15 +3102,15 @@ Fxcorelist = {
  ----------------------------------------------------------------------------------
  -------------------------------Weapons----------------------------------------------------
  Weaplist = {
-    'Firework Launcher',
-    'Grenade Launcher',
-    'Heavy Sniper Mk II',
-    'Molotovs',
-    'Rail Gun',
-    'Rockets',
-    'Snowball',
-    'Unholy Hellbringer',
-    'Up-n-Atomizer',
+    AClang.trans('Firework Launcher'),
+    AClang.trans('Grenade Launcher'),
+    AClang.trans('Heavy Sniper Mk II'),
+    AClang.trans('Molotovs'),
+    AClang.trans('Rail Gun'),
+    AClang.trans('Rockets'),
+    AClang.trans('Snowball'),
+    AClang.trans('Unholy Hellbringer'),
+    AClang.trans('Up-n-Atomizer'),
  }
 
  Weap = {
@@ -1966,18 +3129,18 @@ Fxcorelist = {
   ---------------------------------Vehicles------------------------------------
 
   Vehlist = {
-    'Clown Van',
-    'Phantom Wedge',
-    'Space Docker',
-    'Ramp Car',
-    'Insurgent Custom',
-    'Faggio',
-    'Chernobog',
-    'RC Bandito',
-    'MOC Cab',
-    'Benefactor BR8',
-    'Lawn Mower',
-    'Future Shock Bruiser',
+    AClang.trans('Clown Van'),
+    AClang.trans('Phantom Wedge'),
+    AClang.trans('Space Docker'),
+    AClang.trans('Ramp Car'),
+    AClang.trans('Insurgent Custom'),
+    AClang.trans('Faggio'),
+    AClang.trans('Chernobog'),
+    AClang.trans('RC Bandito'),
+    AClang.trans('MOC Cab'),
+    AClang.trans('Benefactor BR8'),
+    AClang.trans('Lawn Mower'),
+    AClang.trans('Future Shock Bruiser'),
 
 }
 
@@ -2129,6 +3292,20 @@ Extob = {
 }
 
 --------------------------NPCS-----------
+SPClist = {
+    'Lester',
+    'Trevor',
+    'Jesus'
+}
+
+
+SPC = {
+    'ig_lestercrest',
+    'player_two',
+    'u_m_m_jesus_01'
+}
+
+
 
 ----------------------------------Ambient Females-------------------------------
 
@@ -3988,7 +5165,7 @@ Dlcp = {
 
 players.dispatch_on_join()
 
-local localVer = 1.7 -- all credits for the updater go to Prisuhm#7717 Thank You
+
 
  -------------------
  AClang.action(setroot, 'Version Number', {}, tostring(localVer), function ()
@@ -4027,9 +5204,9 @@ local localVer = 1.7 -- all credits for the updater go to Prisuhm#7717 Thank You
  AClang.action(Troot, 'akatozi and BloodyStall_', {}, 'For the French translations', function ()
  end)
   -------------------------------------------------------------------------------------------------------
-
+ local response = false
 async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/AcjokerScriptVersion", function(output)
-    currentVer = tonumber(output)
+    local currentVer = tonumber(output)
     response = true
     if localVer ~= currentVer then
         AClang.toast("New AcjokerScript version is available, update the lua to get the newest version.")
@@ -4095,4 +5272,9 @@ repeat
 until response
 
 
+util.keep_running()
+
+util.on_stop(function ()
+    Load = false
+end)
 
