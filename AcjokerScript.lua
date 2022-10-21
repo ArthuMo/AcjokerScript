@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 1.9 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.0 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -347,6 +347,9 @@ function Getveh(vic)
 end
 
 function GetControl(vic, spec, pid)
+    if pid ~= playerid then
+        return
+    end    
     if not players.exists(pid) then
         util.stop_thread()
     end
@@ -465,6 +468,9 @@ function Rpaint(pid)
 end
 
 function GetPlayVeh(pid, opt)
+    if pid ~= playerid then
+        return
+    end
     local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
     if not players.exists(pid) then
         util.stop_thread()
@@ -517,9 +523,7 @@ function Changewheel(pid, wtype, wheel)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     if VEHICLE.IS_THIS_MODEL_A_BIKE(vhash) then
         VEHICLE.SET_VEHICLE_WHEEL_TYPE(vmod, wtype)
         VEHICLE.SET_VEHICLE_MOD(vmod, 23, wheel)
@@ -538,9 +542,7 @@ function Changehead(pid, color)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     VEHICLE.TOGGLE_VEHICLE_MOD(vmod, 22, true)
     VEHICLE.SET_VEHICLE_XENON_LIGHT_COLOR_INDEX(vmod, color)
 end
@@ -552,9 +554,7 @@ function Changeneon(pid, color)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     RGBNeonKit(pedm)
     VEHICLE.SET_VEHICLE_NEON_INDEX_COLOUR(vmod, color)
 
@@ -567,9 +567,7 @@ function Changetint(pid, tint)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     VEHICLE.SET_VEHICLE_FIXED(vmod)
     VEHICLE.SET_VEHICLE_WINDOW_TINT(vmod, tint)
 end
@@ -582,9 +580,7 @@ function Changecolor(pid, color)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     VEHICLE.SET_VEHICLE_FIXED(vmod)
     VEHICLE.SET_VEHICLE_COLOURS(vmod, color.prim, color.sec)
 end
@@ -597,9 +593,7 @@ function Changewhepercolor(pid, color)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     VEHICLE.SET_VEHICLE_FIXED(vmod)
     VEHICLE.SET_VEHICLE_EXTRA_COLOURS(vmod, color.per, color.whe)
 end
@@ -611,9 +605,7 @@ function Changeintcolor(pid, color)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     VEHICLE.SET_VEHICLE_FIXED(vmod)
     VEHICLE.SET_VEHICLE_EXTRA_COLOUR_5(vmod, color)
 end
@@ -625,9 +617,7 @@ function Changedashcolor(pid, color)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid ~= playerid then
         GetControl(vmod, spec, pid)
-    end
     VEHICLE.SET_VEHICLE_FIXED(vmod)
     VEHICLE.SET_VEHICLE_EXTRA_COLOUR_6(vmod, color)
 end
@@ -640,9 +630,7 @@ function Changemod(pid, modtype, mod)
     end
     if PED.IS_PED_IN_ANY_VEHICLE(pedm) ==true then
         local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
-        if pid ~= playerid then
             GetControl(vmod, spec, pid)
-        end
         VEHICLE.GET_NUM_MOD_KITS(vmod)
         VEHICLE.GET_VEHICLE_MOD_KIT(vmod)
         VEHICLE.SET_VEHICLE_MOD_KIT(vmod, 0)
@@ -696,6 +684,8 @@ function CombineTables(table1, table2, table3, table4, table5, table6, table7, t
 	end
 
 end
+
+
 -------------------------------------------------------------------------------------------------------
 
 
@@ -882,9 +872,26 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
 
     local forw = {amount = 0.5} --credits to lance#8011
     AClang.action(TeleRoot, 'TP Foward', {'tpforw'}, 'Teleport Forward your set amount', function ()
+        if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
+            return
+        end
         local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
-        SEC(playerped, fv.x , fv.y, fv.z, false, false, false, false)
+            SEC(playerped, fv.x , fv.y, fv.z, false, false, false, false)
     end)
+
+     AClang.toggle_loop(TeleRoot, 'TP Foward Toggle', {''}, 'Teleport Forward toggle for your gamepad RB and DPAD Down', function ()
+        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
+        if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
+            return
+        end
+        if PAD.IS_CONTROL_PRESSED(0, 187) or PAD.IS_CONTROL_PRESSED(0, 47) or PAD.IS_CONTROL_PRESSED(0, 19) and PAD.IS_CONTROL_PRESSED(0, 44) then
+            SEC(playerped, fv.x , fv.y, fv.z, false, false, false, false)
+        else util.yield()
+        end
+        util.yield(250)
+    end)
+
+
 
     AClang.slider(TeleRoot, 'TP Forward Amount', {''}, 'Adjust the amount you teleport forward by', 1, 100, 1, 1, function (a)
         forw.amount = a*0.1
@@ -970,9 +977,7 @@ end)
 AClang.list_select(pcolm, 'Wheel Color', {''}, 'Changes the Wheel Color on the Vehicle', Mainc, 1, 
 function (t)
     pcolor.whe = t - 1
-    GetPlayVeh(playerid, function ()
         Changewhepercolor(playerid, pcolor)
-    end)
 end)
 
 AClang.list_select(pcolm, 'Interior Color', {''}, 'Changes the Interior Color on the Vehicle', Mainc, 1, 
@@ -1010,10 +1015,10 @@ end)
 
 
 
+
 local pnrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
 
-AClang.colour(plighm, 'RGB Neon Color', {'rgbsc'}, 'Choose the Color for the Neons be changed to ', pnrgb.color, false, function(ncolor)
-    pnrgb.color = ncolor
+AClang.action(plighm, 'Change RGB Neons', {}, 'Change the Color for the Neons to RGB of your choice', function ()
     local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     RGBNeonKit(pedm)
@@ -1021,6 +1026,10 @@ AClang.colour(plighm, 'RGB Neon Color', {'rgbsc'}, 'Choose the Color for the Neo
     local green = pnrgb.color.g * 255
     local blue = pnrgb.color.b * 255
     VEHICLE.SET_VEHICLE_NEON_COLOUR(vmod, red, green, blue)
+end)
+
+AClang.colour(plighm, 'RGB Neon Color', {'rgbsc'}, 'Choose the Color for the Neons be changed to ', pnrgb.color, false, function(ncolor)
+    pnrgb.color = ncolor
 end)
 
 AClang.list_select(pwmenu, 'Bennys Bespoke', {''}, 'Changes the wheels to Bennys Bespoke wheels', Bbw, 1, 
@@ -2159,6 +2168,9 @@ AClang.slider(jplaym, 'Juggle Rate', {'jugglerate'}, 'Adjust rate at which vehic
 end, 'toreador')
 
 
+
+
+
   local cage_table = {}
   local pedset = {mdl = 'u_m_m_jesus_01'}
  local pedca =  AClang.toggle_loop(pcagem, 'Ped Cage', {'PCAGE'}, 'Traps Player in a Cage of Peds', function ()
@@ -2630,7 +2642,10 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
     if localVer ~= currentVer then
         AClang.toast("New AcjokerScript version is available, update the lua to get the newest version.")
         AClang.action(menu.my_root(), AClang.str_trans("Update Lua"), {}, "", function()
-
+            while response do
+                util.toast('Downloading AcjokerScript Files')
+                util.yield()
+            end
             local lang = {
                 'ACPortuguese.lua',
                 'ACFrench.lua',
@@ -2652,10 +2667,10 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
                     f:write(a)
                     f:close()
                 end)
-                util.yield(100)
+                util.yield(500)
                 async_http.dispatch() 
             end
-            util.yield(100)
+            util.yield(1000)
 
             
 
@@ -2669,7 +2684,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         f:close()
     end)
     async_http.dispatch()
-    util.yield(100)
+    util.yield(1000)
 
     async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/ACJSTables.lua',function(c)
         local err = select(2,load(c))
@@ -2681,7 +2696,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         f:close()
     end)
     async_http.dispatch()  
-    util.yield(100)
+    util.yield(1000)
 
     async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/AClangLib.lua',function(d)
         local err = select(2,load(d))
