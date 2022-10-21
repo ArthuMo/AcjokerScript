@@ -2645,7 +2645,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
             while response do
                 util.toast('Downloading AcjokerScript Files')
                 util.yield()
-            end
+     
             local lang = {
                 'ACPortuguese.lua',
                 'ACFrench.lua',
@@ -2711,6 +2711,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
     end)
     async_http.dispatch()  
     util.yield(100)
+end
         end)
     end
 end, function() response = true end)
