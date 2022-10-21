@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 2.1 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.2 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -2655,6 +2655,10 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
     if localVer ~= currentVer then
         AClang.toast("New AcjokerScript version is available, update the lua to get the newest version.")
         AClang.action(menu.my_root(), AClang.str_trans("Update Lua"), {}, "", function()
+            while response do
+                util.toast('Downloading AcjokerScript Files')
+                util.yield()
+
             local lang = {
                 'ACPortuguese.lua',
                 'ACFrench.lua',
@@ -2720,6 +2724,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
     end)
     async_http.dispatch()  
     util.yield(100)
+end
         end)
     end
 end, function() response = true end)
