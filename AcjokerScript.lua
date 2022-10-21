@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 2.2 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.3 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -896,13 +896,11 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
         if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
             return
         end
-        if PAD.IS_CONTROL_PRESSED(0, 187) or PAD.IS_CONTROL_PRESSED(0, 47) or PAD.IS_CONTROL_PRESSED(0, 19) and PAD.IS_CONTROL_PRESSED(0, 44) then
-            menu.trigger_commands('levitate'..' on')
-        else 
-            menu.trigger_commands('levitate'..' off')
-            util.yield()
+        if  PAD.IS_CONTROL_PRESSED(0, 44) then
+         if PAD.IS_CONTROL_PRESSED(0, 187) or PAD.IS_CONTROL_PRESSED(0, 47) or PAD.IS_CONTROL_PRESSED(0, 19) then
+            menu.trigger_commands('levitate')
+         end
         end
-        
         util.yield(250)
     end)
 
