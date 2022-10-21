@@ -2655,10 +2655,6 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
     if localVer ~= currentVer then
         AClang.toast("New AcjokerScript version is available, update the lua to get the newest version.")
         AClang.action(menu.my_root(), AClang.str_trans("Update Lua"), {}, "", function()
-            while response do
-                util.toast('Downloading AcjokerScript Files')
-                util.yield()
-            end
             local lang = {
                 'ACPortuguese.lua',
                 'ACFrench.lua',
@@ -2683,7 +2679,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
                 util.yield(500)
                 async_http.dispatch() 
             end
-            util.yield(1000)
+            util.yield(500)
 
             
 
@@ -2697,7 +2693,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         f:close()
     end)
     async_http.dispatch()
-    util.yield(1000)
+    util.yield(500)
 
     async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/ACJSTables.lua',function(c)
         local err = select(2,load(c))
@@ -2709,7 +2705,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         f:close()
     end)
     async_http.dispatch()  
-    util.yield(1000)
+    util.yield(500)
 
     async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/AClangLib.lua',function(d)
         local err = select(2,load(d))
