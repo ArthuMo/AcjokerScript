@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 2.0 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.1 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -891,7 +891,20 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
         util.yield(250)
     end)
 
-
+    AClang.toggle_loop(TeleRoot, 'Levitate Toggle', {''}, 'Leveitate toggle for your gamepad RB and DPAD Down', function ()
+        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
+        if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
+            return
+        end
+        if PAD.IS_CONTROL_PRESSED(0, 187) or PAD.IS_CONTROL_PRESSED(0, 47) or PAD.IS_CONTROL_PRESSED(0, 19) and PAD.IS_CONTROL_PRESSED(0, 44) then
+            menu.trigger_commands('levitate'..' on')
+        else 
+            menu.trigger_commands('levitate'..' off')
+            util.yield()
+        end
+        
+        util.yield(250)
+    end)
 
     AClang.slider(TeleRoot, 'TP Forward Amount', {''}, 'Adjust the amount you teleport forward by', 1, 100, 1, 1, function (a)
         forw.amount = a*0.1
@@ -2645,7 +2658,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
             while response do
                 util.toast('Downloading AcjokerScript Files')
                 util.yield()
-     
+            end
             local lang = {
                 'ACPortuguese.lua',
                 'ACFrench.lua',
@@ -2711,7 +2724,6 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
     end)
     async_http.dispatch()  
     util.yield(100)
-end
         end)
     end
 end, function() response = true end)
