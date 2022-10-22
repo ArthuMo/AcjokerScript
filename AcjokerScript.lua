@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 2.3 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.4 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -347,7 +347,7 @@ function Getveh(vic)
 end
 
 function GetControl(vic, spec, pid)
-    if pid ~= playerid then
+    if pid == playerid then
         return
     end    
     if not players.exists(pid) then
@@ -468,9 +468,7 @@ function Rpaint(pid)
 end
 
 function GetPlayVeh(pid, opt)
-    if pid ~= playerid then
-        return
-    end
+
     local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
     if not players.exists(pid) then
         util.stop_thread()
@@ -757,6 +755,7 @@ AClang.action(TeleRoot, 'TP to PC', {'tpdesk'}, 'Teleport to PC at the Desk', fu
     end)
 
 
+
 AClang.action(TeleRoot, 'TP to MC Product', {'tpMCproduct'}, 'Teleport to MC Club Product Pickup/Sale', function ()
     local pPickup = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(501))
     local hPickup = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(64))
@@ -907,6 +906,8 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
     AClang.slider(TeleRoot, 'TP Forward Amount', {''}, 'Adjust the amount you teleport forward by', 1, 100, 1, 1, function (a)
         forw.amount = a*0.1
     end)
+
+    
 
  ------------------------------------------
  ------------------------------------------
@@ -1443,17 +1444,20 @@ end)
             if not players.exists(pid) then
                 util.stop_thread()
             end
+            GetPlayVeh(pid, function ()
             local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
             local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
             if PED.IS_PED_IN_ANY_VEHICLE(pedm, false) then    
-                GetPlayVeh(pid, function ()
+               
                 for _, v in pairs(Vehopts) do
                     local current = VEHICLE.GET_VEHICLE_MOD(vmod, v[1] -1)
                     local maxmods = Getmodcou(pid, v[1] - 1)
                     if maxmods > 0  then
                         local modnames = v[2]
                         local s = menu.slider(bodym, modnames , {''}, '',  -1, maxmods  , current, 1, function (mod)
+                            GetPlayVeh(pid, function ()
                             Changemod(pid, v[1] -1, mod)
+                            end)
                         end)
               
                      
@@ -1472,9 +1476,9 @@ end)
                   util.yield()
                 end
 
-                end)
+                
                  end
-
+                end)
 
         end)
            

@@ -302,3 +302,8 @@ t(f('Changes the wheels to Track wheels'), 'Ändert die Felgen zu Mesh Meister F
 t(f('Changes the wheels to Tuner wheels'), 'Ändert die Felgen zu Tuner Felgen')
 t(f('Special Ped Cages'), 'Special PED Käfige')
 t(f('Changes Peds to One of the Custom Pedcages'), 'Wechselt PEDs zu einem der Custom PED Käfige')
+t(f('Random Ped Cage'), 'zufalls-PED Käfig')
+t(f('Traps Player in a Cage of Random Peds'), 'sperrt Spieler in einem Käfig aus zufälligen PEDs ein')
+t(f('Free from Random Ped Cage'), 'aus zufalls PED Käfig befreien')
+t(f('Free Player from Random Ped Cage'), 'befreit den Spieler vom zufalls-PED Käfig')
+t(f('ACJSTables.lua failed to download. Please try again later. If this continues to happen then manually update via github.'), 'ACJSTables.lua konnte nicht herunter geladen werden. Versuche es später nochmal. Wenn es weiterhin nicht funktioniert, aktualisiere manuell über Github.')
