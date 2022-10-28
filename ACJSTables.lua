@@ -2,6 +2,16 @@
 LANG_SETTINGS = {}
 local AClang = require ('lib/AClangLib')
 
+Windows = {
+    'Front Left Window',
+    'Front Right Window',
+    'Rear Left Window',
+    'Rear Right Window',
+    'Front Windscreen',
+    'Rear Windscreen',
+    'Mid Left',
+    'Mid Right'
+}
 
 Exlist = {
     AClang.trans('Grenade'), --modified list from jerryscript
@@ -499,7 +509,7 @@ Exlist = {
 }
  
  Lw = {
-    AClang.trans('Flare'),
+    AClang.trans('Flares'),
     AClang.trans('Wired'),
     AClang.trans('Triple Golds'),
     AClang.trans('Big Worm'),
@@ -1354,7 +1364,7 @@ AMClist = {
 'South Central 4',
 'Latino 2',
 'Tennis',
-'Yourist',
+'Tourist',
 'Tramp',
 'Tramp Beach',
 'Tranvest',
@@ -1662,7 +1672,7 @@ Csplist = {
     'Car guy 1',
     'Car guy 2',
     'Chef',
-    'Chef2',
+    'Chef 2',
     'Chinese Goon',
     'Cletus',
     'Cop',
@@ -1798,7 +1808,7 @@ CSP = {
     'csb_bride',
     'csb_burgerdrug',
     'csb_bryony',
-    'csb_car3guy,1',
+    'csb_car3guy1',
     'csb_car3guy2',
     'csb_chef',
     'csb_chef2',
@@ -1875,7 +1885,7 @@ GMlist = {
 'Grove Street 2',
 'Grove Street 3',
 'Korean Goon 1',
-'Korean Goon ',
+'Korean Goon 2',
 'Korean Lieutenant',
 'Lost 1',
 'Lost 2',
@@ -2054,7 +2064,7 @@ MSFlist = {
 'Stripper 1',
 'Stripper 2',
 'Stripper 3',
-'Sweat Shop 2',
+'Sweat Shop',
 }
 
 MSF = {
@@ -2104,7 +2114,7 @@ MCMlist = {
 'Gaffer',
 'Gardener',
 'General Transport Worker',
-'Hair dresser',
+'Hair Dresser',
 'Highend Security 1',
 'Highend security 2',
 'Janitor',
@@ -2305,7 +2315,7 @@ SMClist = {
 'Car Guy 2',
 'Casey',
 'Chef',
-'Chef2',
+'Chef 2',
 'Cheng SR',
 'Chris Formage',
 'Clay',
@@ -2339,8 +2349,8 @@ SMClist = {
 'Kerry Mcintosh',
 'Lamar Davis',
 'Lazlow',
-'Lestercrest',
-'Lestercrest 2',
+'Lester Crest',
+'Lester Crest 2',
 'Rickie Lukens',
 'Lifeinvader Employee',
 'Magenta',
@@ -2481,7 +2491,7 @@ SMC = {
 'ig_natalia',
 'ig_nervousron',
 'ig_nigel',
-'ig_old_man1a',
+'ig_old_man1',
 'ig_old_man2',
 'ig_omega',
 'ig_oneil',
@@ -2574,7 +2584,7 @@ Ssmlist = {
     'FIB Architect',
     'Film Director',
     'Glen Stank',
-    'Griff_01',
+    'Griff',
     'Jesus',
     'Jewelery Security',
     'Jewel Thief',

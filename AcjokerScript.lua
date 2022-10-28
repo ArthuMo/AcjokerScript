@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 2.4 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.5 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -682,18 +682,107 @@ function CombineTables(table1, table2, table3, table4, table5, table6, table7, t
 	end
 
 end
+    --memory stuff skidded from heist control
+    local Int_PTR = memory.alloc_int()
 
+    local function getMPX()
+        return 'MP'.. util.get_char_slot() ..'_'
+    end
 
+    local function STAT_GET_INT(Stat)
+        STATS.STAT_GET_INT(util.joaat(getMPX() .. Stat), Int_PTR, -1)
+        return memory.read_int(Int_PTR)
+    end
+    
 -------------------------------------------------------------------------------------------------------
 
 
 -------------------------------- Teleports---------------------------------------------------
 TeleRoot = AClang.list(onlineroot, 'Teleports', {}, '')
-AClang.action(TeleRoot, 'TP into Avenger', {'tpaven'}, 'Teleport into Avengers holding area/facility', function ()
+-- credits to Jerry this is a modified version of his property TP
+local ownedprops = {
+    {AClang.trans('Agency'), 826},
+    {AClang.trans('Arcade'), 740},
+    {AClang.trans('Auto shop'), 779},
+    {AClang.trans('Bunker'), 557},
+    {AClang.trans('Cargo Warehouses'), 473},
+    {AClang.trans('CEO Office'),   475 },
+    {AClang.trans('Facility'), 590},
+    {AClang.trans('Hangar'), 569},
+    {AClang.trans('MC Clubhouse'), 492,
+    mcprops = {AClang.trans('MC Businesses'), loc = {
+        {AClang.trans('Cocaine Lockup'), 497 },
+        {AClang.trans('Counterfeit Cash'), 500 },
+        {AClang.trans('Document Forgery'), 498 },
+        {AClang.trans('Methamphetamine Lab'), 499 },
+        {AClang.trans('Weed Farm'), 496 },
+    }}},
+    {AClang.trans('Night Club'), 614},
+    {AClang.trans('Vehicle Warehouse'), 524}
+}
+
+local function getblip(id)
+    local blip = HUD.GET_FIRST_BLIP_INFO_ID(id)
+    while blip ~= 0 do
+        local blipColour = HUD.GET_BLIP_COLOUR(blip)
+        if HUD.DOES_BLIP_EXIST(blip) and blipColour != 55 and blipColour != 3 then return blip end
+        blip = HUD.GET_NEXT_BLIP_INFO_ID(id)
+    end
+end
+
+local function tpToBlip(blip)
+    local pos = HUD.GET_BLIP_COORDS(blip)
+    SEC(playerped, pos.x, pos.y, pos.z, false, false, false, false)
+end
+
+local properties = {}
+local function regenerateTpLocations(root)
+    for k, _ in pairs(properties) do
+        menu.delete(properties[k])
+        properties[k] = nil
+    end
+    for i = 1, #ownedprops do
+        local propblip = getblip(ownedprops[i][2])
+        if propblip == nil then break end
+
+        properties[ownedprops[i][1]] = menu.action(root, ownedprops[i][1], {}, '', function()
+            if not HUD.DOES_BLIP_EXIST(propblip) then
+                AClang.toast('Could not find property.')
+                return
+            end
+            tpToBlip(propblip)
+        end)
+        if ownedprops[i].mcprops then
+            local mcprops = ownedprops[i].mcprops
+            local listName = mcprops[1]
+            properties[listName] = menu.list(root, listName, {}, '')
+            for j = 1, #mcprops.loc do
+                local mcproploc = getblip(mcprops.loc[j][2])
+                if propblip == nil then break end
+
+                menu.action(properties[listName], mcprops.loc[j][1], {}, '', function() 
+                    if not HUD.DOES_BLIP_EXIST(propblip) then
+                        AClang.toast('Could not find property.')
+                        return
+                    end
+                    tpToBlip(mcproploc)
+                end)
+            end
+        end
+    end
+end
+
+Proptp = AClang.list(TeleRoot, 'Property Teleports', {'tpprop'}, 'Lets you teleport to the properties you own.', function()
+    regenerateTpLocations(Proptp)
+end)
+
+local vteles = AClang.list(TeleRoot, 'Vehicle Teleports', {}, '')
+
+AClang.action(vteles, 'TP into Avenger', {'tpaven'}, 'Teleport into Avengers holding area/facility', function ()
     SEC(playerped, 514.31335, 4750.5264, -68.99592, false, false, false, false)
     end)
 
-AClang.action(TeleRoot, 'TP into Kosatka', {'tpkosatka'}, 'MUST HAVE CALLED IN Teleport to Kosatka Cayo Perico Heist board', function ()
+AClang.action(vteles, 'TP into Kosatka', {'tpkosatka'}, 'MUST HAVE CALLED IN Teleport to Kosatka Cayo Perico Heist board', function ()
     local kos = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(760))
     HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(760))
     if kos.x ==0 and kos.y ==0 and kos.z ==0 then
@@ -704,14 +793,14 @@ AClang.action(TeleRoot, 'TP into Kosatka', {'tpkosatka'}, 'MUST HAVE CALLED IN T
     end
     end)
 
-AClang.action(TeleRoot, 'TP into MOC', {'tpMOC'}, 'Teleport into MOC command center/bunker', function ()
+AClang.action(vteles, 'TP into MOC', {'tpMOC'}, 'Teleport into MOC command center/bunker', function ()
     SEC(playerped, 1103.3782, -3011.6018, -38.999435, false, false, false, false)
     end)
 
-AClang.action(TeleRoot, 'TP into Terrorbyte', {'tpterro'}, 'Teleport to Terrorbyte Business control', function ()
+AClang.action(vteles, 'TP into Terrorbyte', {'tpterro'}, 'Teleport to Terrorbyte Business control', function ()
     local ter = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(632))
     HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(632))
-    if ter.x ==0 and ter.y ==0 and ter.z ==0 then
+    if ter.x == 0 and ter.y == 0 and ter.z == 0 then
         if set.alert then
             AClang.toast('Terrorbyte not found')
         end
@@ -719,7 +808,9 @@ AClang.action(TeleRoot, 'TP into Terrorbyte', {'tpterro'}, 'Teleport to Terrorby
     end
     end)
 
-AClang.action(TeleRoot, 'TP to Special Cargo', {'tpscargo'}, 'Teleport to Special Cargo pickup', function ()
+    local cargoteles = AClang.list(TeleRoot, 'CEO Cargo Teleports', {}, '')
+
+AClang.action(cargoteles, 'TP to Special Cargo', {'tpscargo'}, 'Teleport to Special Cargo pickup', function ()
     local cPickup = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(478))
     HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(478))
         if cPickup.x == 0 and cPickup.y == 0 and cPickup.z == 0 then
@@ -731,7 +822,7 @@ AClang.action(TeleRoot, 'TP to Special Cargo', {'tpscargo'}, 'Teleport to Specia
         end
     end)
 
-AClang.action(TeleRoot, 'TP to Vehicle Cargo', {'tpvcargo'}, 'Teleport to Vehicle Cargo pickup', function ()
+AClang.action(cargoteles, 'TP to Vehicle Cargo', {'tpvcargo'}, 'Teleport to Vehicle Cargo pickup', function ()
     local vPickup = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(523))
     HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(523))
         if vPickup.x == 0 and vPickup.y == 0 and vPickup.z == 0 then
@@ -742,19 +833,56 @@ AClang.action(TeleRoot, 'TP to Vehicle Cargo', {'tpvcargo'}, 'Teleport to Vehicl
             SEC(playerped, vPickup.x, vPickup.y, vPickup.z, false, false, false, false)
         end
     end)
-AClang.action(TeleRoot, 'TP to PC', {'tpdesk'}, 'Teleport to PC at the Desk', function ()
+
+    local intteles = AClang.list(TeleRoot, 'Interior Teleports', {}, '')
+
+AClang.action(intteles, 'TP to PC', {'tpdesk'}, 'Teleport to PC at the Desk', function ()
     local pcD = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(521))
     HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(521))
-        if pcD.x == 0 and pcD.y == 0 and pcD.z == 0 then
+        if pcD.x ~= 0 and pcD.y ~= 0 and pcD.z ~= 0 then
+            SEC(playerped, pcD.x- 1.0, pcD.y + 1.0 , pcD.z, false, false, false, false)
+        else
             if set.alert then
                 AClang.toast('No PC Found')  
             end
-        else
-                SEC(playerped, pcD.x- 1.0, pcD.y + 1.0 , pcD.z, false, false, false, false)
         end
     end)
 
 
+    AClang.action(intteles, 'TP to Nightclub Person', {'tpNCPerson'}, 'Teleport to the Nightclub Person', function ()
+        local nigh1 = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(143))
+        local nigh2 = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(480))
+        HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(143))
+        HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(480))
+            if nigh1.x ~= 0 and nigh1.y ~= 0 and nigh1.z ~= 0 then
+                SEC(playerped, nigh1.x, nigh1.y, nigh1.z, false, false, false, false)
+            elseif nigh2.x ~= 0 and nigh2.y ~= 0 and nigh2.z ~= 0 then
+                SEC(playerped, nigh2.x, nigh2.y, nigh2.z, false, false, false, false)
+            else 
+                if set.alert then
+                AClang.toast('No Person Found')
+                end
+            end
+
+        end)
+
+    AClang.action(intteles, 'TP to Safe', {'tpsafe'}, 'Teleport to Safe inside Agency, Arcade, or Nightclub', function ()
+        local saf1 = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(108))
+        local saf2 = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(207))
+        HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(108))
+        HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(207))
+            if saf1.x ~= 0 and saf1.y ~= 0 and saf1.z ~= 0 then
+                SEC(playerped, saf1.x - 1.0, saf1.y + 1.0 , saf1.z, false, false, false, false)
+            elseif saf2.x ~= 0 and saf2.y ~= 0 and saf2.z ~= 0 then
+                SEC(playerped, saf2.x, saf2.y + 1.0 , saf2.z, false, false, false, false)
+            else
+                if set.alert then
+                    AClang.toast('No Safe Found')  
+                end
+            end
+        end)
+
+        
 
 AClang.action(TeleRoot, 'TP to MC Product', {'tpMCproduct'}, 'Teleport to MC Club Product Pickup/Sale', function ()
     local pPickup = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(501))
@@ -869,8 +997,10 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
         end
     end)
 
+    local forwteles = AClang.list(TeleRoot, 'TP Forward Teleports', {}, '')
+
     local forw = {amount = 0.5} --credits to lance#8011
-    AClang.action(TeleRoot, 'TP Foward', {'tpforw'}, 'Teleport Forward your set amount', function ()
+    AClang.action(forwteles, 'TP Foward', {'tpforw'}, 'Teleport Forward your set amount', function ()
         if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
             return
         end
@@ -878,7 +1008,7 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
             SEC(playerped, fv.x , fv.y, fv.z, false, false, false, false)
     end)
 
-     AClang.toggle_loop(TeleRoot, 'TP Foward Toggle', {''}, 'Teleport Forward toggle for your gamepad RB and DPAD Down', function ()
+     AClang.toggle_loop(forwteles, 'TP Foward Toggle', {''}, 'Teleport Forward toggle for your gamepad RB and DPAD Down', function ()
         local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
         if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
             return
@@ -889,6 +1019,11 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
         end
         util.yield(250)
     end)
+
+    AClang.slider(forwteles, 'TP Forward Amount', {'tpslider'}, 'Adjust the amount you teleport forward by', 1, 10000, 1, 1, function (a)
+        forw.amount = a*0.1
+    end)
+
 
     AClang.toggle_loop(TeleRoot, 'Levitate Toggle', {''}, 'Leveitate toggle for your gamepad RB and DPAD Down', function ()
         local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
@@ -903,9 +1038,7 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
         util.yield(250)
     end)
 
-    AClang.slider(TeleRoot, 'TP Forward Amount', {''}, 'Adjust the amount you teleport forward by', 1, 100, 1, 1, function (a)
-        forw.amount = a*0.1
-    end)
+
 
     
 
@@ -1081,7 +1214,7 @@ function(w)
     
 end)
 
-AClang.list_select(pwmenu, 'Muscle', {''}, 'Changes the wheels to Muscle wheels', Mw, 1,
+AClang.list_select(pwmenu, 'Muscles', {''}, 'Changes the wheels to Muscle wheels', Mw, 1,
 function(w)
     local wheel = w - 1
         Changewheel(playerid, 1, wheel)
@@ -1124,7 +1257,7 @@ function(w)
     
 end)
 
-AClang.list_select(pwmenu, 'Track', {''}, 'Changes the wheels to Track wheels', Trw, 1,
+AClang.list_select(pwmenu, 'Tracks', {''}, 'Changes the wheels to Track wheels', Trw, 1,
 function(w)
     local wheel = w - 1
         Changewheel(playerid, 12, wheel)
@@ -1315,6 +1448,22 @@ if PED.IS_PED_GETTING_INTO_A_VEHICLE(playerped) ==false and PED.IS_PED_IN_VEHICL
             end
 end)
 
+AClang.toggle(vehroot, 'Reduce Burnout', {'Rburnout'}, 'Makes it to where the vehicle does not burnout as easily', function (tog)
+    PHYSICS.SET_IN_ARENA_MODE(tog)
+end)
+
+local horn = {speed = 40}
+AClang.toggle_loop(vehroot, 'Horn Boost', {'horn'}, 'Boost the car when the horn is pressed you can hold it down to go continously', function ()
+        local vmod = entities.get_user_vehicle_as_handle()
+        if PLAYER.IS_PLAYER_PRESSING_HORN(playerid) then
+            VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, horn.speed)
+        end
+end)
+
+AClang.slider(vehroot, 'Change Speed for Horn Boost', {''}, 'Change Speed for Horn Boost (actual speed is roughly double the number in MPH)', 10, 150, 40, 10, function (s)
+    horn.speed = s
+ end)
+
 
 --------------------------------------------------------------
 
@@ -1365,6 +1514,26 @@ end)
 AClang.action(onlineroot, 'Stop Sounds', {'ssound'}, 'Stop all sounds incase they are going off constantly', function ()
     Stopsound()
 end)
+
+AClang.toggle_loop(onlineroot, 'Nightclub Popularity', {'ncmax'}, 'Keeps the Nightclub Popularity at max', function ()
+    if util.is_session_started() then
+        local ncpop = math.floor(STAT_GET_INT('CLUB_POPULARITY') / 10)
+        if ncpop < 100 then
+            menu.trigger_commands('clubpopularity 100')
+            util.yield(250)
+        end
+    end
+
+end)
+
+
+AClang.toggle_loop(onlineroot, 'Increase Kosatka Missile Range', {'krange'}, 'You can use it anywhere in the map now', function ()
+    if util.is_session_started() then
+    memory.write_float(memory.script_global(262145 + 30176), 200000.0)
+    end
+end)
+
+
 
 -------------------------------Player Options-----------------------------------------------
 
@@ -1874,6 +2043,9 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
         menu.trigger_commands("JuggleC".. players.get_name(pid)..' off')
     end)
 
+
+
+
 local bigolist = {} 
 local bigobjset  = {obj= util.joaat('prop_asteroid_01'), ptfx = false, exp = false, speed = 1000}
 AClang.toggle_loop(metmenu, 'Big Object Shower', {'Oshower'}, 'Make Objects rain down from the sky', function ()
@@ -1943,7 +2115,6 @@ AClang.list_action(ptfxmenu, 'Ptfx List', {''}, 'Choose a PTFX from the list', F
     ptfx.sel = Fxha[fxsel]
     ptfx.lib = 'core'
 end)
-
 
 
 
