@@ -8,9 +8,8 @@
    -------------------------------------------------------------------------
    
 --github
-os.rename(filesystem.store_dir() .. 'AcjokerScript', filesystem.resources_dir().. 'AcjokerScript')
-os.rename(filesystem.scripts_dir()..'\\lib\\AClangLib.lua',  filesystem.resources_dir().. 'AcjokerScript\\AClangLib.lua')
-local localVer = 2.6 -- all credits for the updater go to Prisuhm#7717 Thank You
+
+local localVer = 2.4 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -1021,7 +1020,7 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
         util.yield(250)
     end)
 
-    AClang.slider(forwteles, 'TP Forward Amount', {'tpslider'}, 'Adjust the amount you teleport forward by', 1, 10000, 1, 1, function (a)
+    AClang.slider(forwteles, 'TP Forward Amount', {''}, 'Adjust the amount you teleport forward by', 1, 100, 1, 1, function (a)
         forw.amount = a*0.1
     end)
 

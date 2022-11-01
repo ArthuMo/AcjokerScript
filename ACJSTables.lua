@@ -1,6 +1,6 @@
 --------------------------------------------Tables-----------------------------------------------------------
 LANG_SETTINGS = {}
-local AClang = require ('resources/AcjokerScript/AClangLib')
+local AClang = require ('lib/AClangLib')
 
 Windows = {
     AClang.trans('Front Left Window'),
