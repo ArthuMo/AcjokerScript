@@ -8,8 +8,9 @@
    -------------------------------------------------------------------------
    
 --github
-
-local localVer = 2.5 -- all credits for the updater go to Prisuhm#7717 Thank You
+os.rename(filesystem.store_dir() .. 'AcjokerScript', filesystem.resources_dir().. 'AcjokerScript')
+os.rename(filesystem.scripts_dir()..'\\lib\\AClangLib.lua',  filesystem.resources_dir().. 'AcjokerScript\\AClangLib.lua')
+local localVer = 2.6 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
