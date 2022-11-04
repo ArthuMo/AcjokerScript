@@ -2,14 +2,14 @@
    --credits to Jerry123 for major help with multiple portions of the script and his LangLib for translations
    --credits to Sapphire for the help in programming they are the real MVP for helping everyone
    --credits to Vsus and ghozt for pointing me in the right direction
-   --credits to Nowiry for their script it was a heavy influence on the Charger weapon
+   --credits to Nowiry for their script it was a heavy influence on the Charger and Lazer Space Docker weapons
    --credits to aaronlink127#0127 for the ScaleformLib script and help with executing it
    --Script made by acjoker8818
    -------------------------------------------------------------------------
    
 --github
 
-local localVer = 2.5 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.6 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('lib/AClangLib')
@@ -96,6 +96,22 @@ function SF() --Scaleform Full credits to aaron
     sf.CLEAR_ALL()
     sf.TOGGLE_MOUSE_BUTTONS(false)
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 86, true), AClang.str_trans('Push Away or Blow up'))
+    sf.DRAW_INSTRUCTIONAL_BUTTONS()
+    sf:draw_fullscreen()
+end
+
+function SFlsd() --Scaleform Full credits to aaron
+    local scaleform = require('ScaleformLib')
+    local sf = scaleform('instructional_buttons')
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
+---@diagnostic disable-next-line: param-type-mismatch
+    memory.write_int(memory.script_global(1645739+1121), 1)
+    sf.CLEAR_ALL()
+    sf.TOGGLE_MOUSE_BUTTONS(false)
+    sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 86, true), AClang.str_trans('Lazers'))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
@@ -264,6 +280,7 @@ function Vmod(vmod, plate)
 end
 
 function Vspawn(mod, pCoor, pedSi, plate)
+    
     Streament(mod)
    local vmod = VEHICLE.CREATE_VEHICLE(mod, pCoor.x, pCoor.y, pCoor.z, 0, true, true, false)
     PED.SET_PED_INTO_VEHICLE(pedSi, vmod, -1)
@@ -694,6 +711,40 @@ end
         return memory.read_int(Int_PTR)
     end
     
+
+    function Rolladown(pid)
+        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        GetControl(pedm, spec, pid)
+        VEHICLE.ROLL_DOWN_WINDOWS(vmod)
+    end
+
+    function Rollaup(pid)
+        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        GetControl(pedm, spec, pid)
+        for i = 0, 7 do
+            VEHICLE.ROLL_UP_WINDOW(vmod, i)
+        end
+    end
+    
+    function Rolldindivid(pid, win)
+        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        GetControl(pedm, spec, pid)
+        VEHICLE.ROLL_DOWN_WINDOW(vmod, win)
+    end
+
+    function Rolluindivid(pid, win)
+        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        GetControl(pedm, spec, pid)
+        VEHICLE.ROLL_UP_WINDOW(vmod, win)
+    end
 -------------------------------------------------------------------------------------------------------
 
 
@@ -1270,10 +1321,36 @@ function(w)
         Changewheel(playerid, 5, wheel)
 end)
 
+local pwinmenu = AClang.list(vehroot, 'Windows', {}, '')
+
+AClang.action(pwinmenu, 'Roll Up All Windows', {'upwin'}, 'Rolls up all windows at once', function ()
+        Rollaup(playerid)
+end)
+
+AClang.action(pwinmenu, 'Roll Down All Windows', {'downwin'}, 'Rolls up all windows at once', function ()
+        Rolladown(playerid)
+end)
 
 
+local winmen = AClang.list(pwinmenu, 'Roll Up and Down Windows', {''}, 'Roll Up and Down Individual Windows')
+        
+for index, name in ipairs(Windows) do
+    menu.toggle(winmen, 'Roll up or down '..name, {''}, 'Roll up or down '..name, function (on)
+        local win = index - 1
+        local curcar = entities.get_user_vehicle_as_handle()
+        local winup= on
+        if winup ~= nil then
+            if winup then
+                VEHICLE.ROLL_DOWN_WINDOW(curcar, win)
+            else
+                VEHICLE.ROLL_UP_WINDOW(curcar, win)
+            end
+        end
 
+    end)
+    end
 
+    
 
 
 
@@ -1336,6 +1413,155 @@ local rgb = {cus = 100}
     AClang.slider(rgbvm, 'Synced RGB Speed', {''}, 'Adjust the speed of the synced RGB', 1, 1000, 100, 10, function (c)
         srgb.cus = c
     end)
+ ---------------------------------Space Docker------------------------------------------------
+    local sdroot = AClang.list(vehroot, 'Lazer Space Docker', {}, 'Space Docker with lazers') --credits to Nowiry for the functions to make this work
+    local lsd ={weap = 'WEAPON_RAYCARBINE', hash = util.joaat('dune2')}
+    local function SDcreate(pCoor, pedSi)
+        Lsdcar = VEHICLE.CREATE_VEHICLE(lsd.hash, pCoor.x, pCoor.y, pCoor.z, 0, true, true, false)
+        PED.SET_PED_INTO_VEHICLE(pedSi, Lsdcar, -1)
+        Vmod(Lsdcar, 'Lazers')
+       local CV = CAM.GET_GAMEPLAY_CAM_RELATIVE_HEADING()
+       ENTITY.SET_ENTITY_HEADING(Lsdcar, CV)
+     
+       local lsdweap = {
+        AClang.trans('Unholy Hellbringer'),
+        AClang.trans('Up-n-Atomizer'),
+    }
+    local lsdh = {
+        'weapon_raycarbine',
+        'weapon_raypistol',
+    }
+
+    Lsd_w = AClang.list_select(sdroot, 'LSD Weapon', {'lsdweap'},'Changes weapon for Lazer Space Docker', lsdweap, 1, function(vweap)
+        lsd.weap = lsdh[vweap]
+        end)
+     
+       util.create_tick_handler(function ()
+            if PED.IS_PED_IN_VEHICLE(playerped, Lsdcar, false) ==true then
+            VEHICLE.SET_VEHICLE_DIRT_LEVEL(Lsdcar, 0)
+            ENTITY.SET_ENTITY_INVINCIBLE(Lsdcar, true)
+            VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(Lsdcar, false)
+            SFlsd()
+            end
+        end)
+
+
+    end
+
+
+    local get_vehicle_cam_relative_heading = function(vehicle)
+        local camDir = CAM.GET_GAMEPLAY_CAM_ROT(0):toDir()
+        local fwdVector = ENTITY.GET_ENTITY_FORWARD_VECTOR(vehicle)
+        camDir.z, fwdVector.z = 0.0, 0.0
+        local angle = math.acos(fwdVector:dot(camDir) / (#camDir * #fwdVector))
+        return math.deg(angle)
+    end
+    local shoot_from_vehicle = function (vehicle, damage, weaponHash, ownerPed, isAudible, isVisible, speed, target, position)
+        local min, max = v3.new(), v3.new()
+        local offset
+        MISC.GET_MODEL_DIMENSIONS(ENTITY.GET_ENTITY_MODEL(vehicle), min, max)
+        if position == 0 then
+            offset = v3.new(min.x + 0.3, max.y + 0.25, 0.5)
+        elseif position == 1 then
+            offset = v3.new(min.x + 0.3, min.y + 4, 0.5)
+        elseif position == 2 then
+            offset = v3.new(max.x - 0.3, max.y + 0.25, 0.5)
+        elseif position == 3 then
+            offset = v3.new(max.x - 0.3, min.y + 4, 0.5)
+        else
+            error("got unexpected position")offset = v3.new(min.x + 0.25, max.y, 0.5)
+        end
+        local a = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(vehicle, offset.x, offset.y - 3.15, offset.z + 1.05)
+        local direction = ENTITY.GET_ENTITY_ROTATION(vehicle, 2):toDir()
+        if get_vehicle_cam_relative_heading(vehicle) > 95.0 then
+            direction:mul(-1)
+        end
+        local b = v3.new(direction)
+        b:mul(300.0); b:add(a)
+    
+        MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY_NEW(
+            a.x, a.y, a.z,
+            b.x, b.y, b.z - 15,
+            damage,
+            true,
+            weaponHash,
+            ownerPed,
+            isAudible,
+            not isVisible,
+            speed,
+            vehicle,
+            false, false, target, false, 0, 0, 0
+        )
+    end
+
+
+    SDspawn = AClang.toggle_loop(sdroot, 'Spawn Lazer Space Docker', {'lsdspawn'}, 'Space Docker that can shoot lazers', function ()
+
+        Streament(lsd.hash)
+        local pedSi = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
+        local pCoor = ENTITY.GET_ENTITY_COORDS(playerped)
+        local pH = ENTITY.GET_ENTITY_HEADING(pCoor)
+    
+            if players.is_in_interior(playerid) ==true then
+                if set.alert then
+                    AClang.toast('Lazer Space Docker will not Spawn in interior')
+                end
+                menu.set_value(SDspawn, false)
+                return
+            end
+            
+        if PED.IS_PED_IN_VEHICLE(playerped, Lsdcar, true) ==false and PED.IS_PED_IN_ANY_VEHICLE(playerped) ==true then
+            local curcar = entities.get_user_vehicle_as_handle()
+            ENTITY.SET_ENTITY_AS_MISSION_ENTITY(curcar)
+            entities.delete_by_handle(curcar)
+            if set.alert then
+                AClang.toast('Fuck that car')
+            end
+            for i = 1, 1 do
+                SDcreate(pCoor, pedSi)
+            end
+
+    
+            elseif PED.IS_PED_IN_VEHICLE(playerped, Lsdcar, true) ==true then
+                local weap = util.joaat(lsd.weap)
+                WEAPON.REQUEST_WEAPON_ASSET(weap)
+            
+                if not ENTITY.DOES_ENTITY_EXIST(Lsdcar) or not PAD.IS_CONTROL_PRESSED(0, 86)
+                then
+                    return
+                elseif get_vehicle_cam_relative_heading(Lsdcar) < 95.0 then
+                    shoot_from_vehicle(Lsdcar, 200, weap, players.user_ped(), true, true, 2000.0, 0, 0)
+                    shoot_from_vehicle(Lsdcar, 200, weap, players.user_ped(), true, true, 2000.0, 0, 2)
+                else
+                    shoot_from_vehicle(Lsdcar, 200, weap, players.user_ped(), true, true, 2000.0, 0, 1)
+                    shoot_from_vehicle(Lsdcar, 200, weap, players.user_ped(), true, true, 2000.0, 0, 3)
+                end
+
+
+            elseif PED.IS_PED_IN_ANY_VEHICLE(playerped) ==false and not ENTITY.DOES_ENTITY_EXIST(Lsdcar) then
+                SDcreate(pCoor, pedSi)
+                     if set.alert then
+                        AClang.toast('Lazer Space Docker Spawned')
+                     end
+            end
+    
+    if PED.IS_PED_GETTING_INTO_A_VEHICLE(playerped) ==false and PED.IS_PED_IN_VEHICLE(playerped, Lsdcar , false) ==false
+                then
+                    if set.alert then
+                        AClang.toast('Player has left the Lazer Space Docker and it has been deleted')
+                    end
+            ---@diagnostic disable-next-line: param-type-mismatch
+                  menu.set_value(SDspawn, false)
+                  STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(lsd.hash)
+                  ENTITY.SET_ENTITY_AS_MISSION_ENTITY(Lsdcar)
+                  entities.delete_by_handle(Lsdcar)
+                  menu.delete(Lsd_w)
+                  util.stop_thread()
+                end
+        
+    end)
+
+    ----------------------------------------------
 ---------------------------------- FF9 Charger ----------------------------------
 local charroot = AClang.list(vehroot, 'Charger', {}, 'Duke O Death with Electro Magnet capabilities')
 local charger = {charg = util.joaat('dukes2'), emp = util.joaat('hei_prop_heist_emp')}
@@ -1452,6 +1678,18 @@ AClang.toggle(vehroot, 'Reduce Burnout', {'Rburnout'}, 'Makes it to where the ve
     PHYSICS.SET_IN_ARENA_MODE(tog)
 end)
 
+AClang.toggle_loop(vehroot, 'Stick to Walls', {'sticktg'}, 'Makes it to where the vehicle sticks to walls(using horn boost on the lowest setting helps get up on the walls)', function ()
+    local curcar = entities.get_user_vehicle_as_handle()
+    if PED.IS_PED_IN_ANY_VEHICLE(playerped) then
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(curcar, 1, 0, 0, - 0.5, 0, true, true, true, true)
+        VEHICLE.MODIFY_VEHICLE_TOP_SPEED(curcar, 40)
+    else
+        util.yield()
+    end
+
+end)
+
+
 local horn = {speed = 40}
 AClang.toggle_loop(vehroot, 'Horn Boost', {'horn'}, 'Boost the car when the horn is pressed you can hold it down to go continously', function ()
         local vmod = entities.get_user_vehicle_as_handle()
@@ -1533,6 +1771,24 @@ AClang.toggle_loop(onlineroot, 'Increase Kosatka Missile Range', {'krange'}, 'Yo
     end
 end)
 
+local menus = {}
+--Vehicle Aliases added by Hexarobi
+    AClang.toggle(onlineroot, 'Vehicle Aliases', {'Valiases'}, 'Activate the list of vehicle name aliases used for spawning, you can use this to turn it off if mulitple people have it running', function (on)
+        menus.vehicle_alias = on
+    end)
+    menus.vehicle_aliases = menu.list(onlineroot, 'Vehicle Aliases List', {}, 'A list of vehicle name aliases used for spawning')
+    for alias, vehicle in pairs(VEHICLE_ALIASES) do
+        menu.action(menus.vehicle_aliases, alias, {alias}, "Spawn "..vehicle, function(click_type, pid)
+                local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
+                local veh = util.joaat(vehicle)
+                if menus.vehicle_alias then
+                    Vspawn(veh, tar1, targets, tostring(players.get_name(pid)))
+                    else
+                end
+        end, nil, nil, COMMANDPERM_SPAWN)
+    end
+
 
 
 -------------------------------Player Options-----------------------------------------------
@@ -1541,7 +1797,7 @@ players.on_join(function(pid)
 
     AClang.divider(menu.player_root(pid), 'AcjokerScript')
     local frienm = AClang.list(menu.player_root(pid), 'Friendly', {}, '')
-    local vehmenu = AClang.list(frienm, 'Vehicles', {}, 'If you are too far away from them it will spectate them to complete task')
+    local pvehmenu = AClang.list(frienm, 'Vehicles', {}, 'If you are too far away from them it will spectate them to complete task')
     local plamenu = AClang.list(frienm, 'Player Menu', {}, '')
 
     local firw = {speed = 1000}
@@ -1588,9 +1844,42 @@ end)
         menu.trigger_commands("arm".. players.get_name(pid))
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
+    local winmenu = AClang.list(pvehmenu, 'Windows Menu', {}, 'Works better/faster if you are near them')
+
+    AClang.action(winmenu, 'Roll Up All Windows', {'rolluwin'}, 'Rolls up all windows at once', function ()
+        GetPlayVeh(pid, function ()
+            Rollaup(pid)
+        end)
+    end, nil, nil, COMMANDPERM_FRIENDLY)
+
+    AClang.action(winmenu, 'Roll Down All Windows', {'rolldwin'}, 'Rolls up all windows at once', function ()
+        GetPlayVeh(pid, function ()
+            Rolladown(pid)
+        end)
+    end, nil, nil, COMMANDPERM_FRIENDLY)
+
+    AClang.list_action(winmenu, 'Roll Up Individual Windows', {''}, 'Roll Up Individual Windows', Windows,
+    function(index)
+        local win = index - 1
+        GetPlayVeh(pid, function ()
+            Rolluindivid(pid, win)
+        end)
+    end)
+
+    AClang.list_action(winmenu, 'Roll Down Individual Windows', {''}, 'Roll Down Individual Windows', Windows,
+    function(index)
+        local win = index - 1
+        GetPlayVeh(pid, function ()
+            Rolldindivid(pid, win)
+        end)
+    end)
 
 
-    local lscm = AClang.list(vehmenu, 'Los Santos Customs', {}, 'Works better/faster if you are near them')
+    
+
+
+
+    local lscm = AClang.list(pvehmenu, 'Los Santos Customs', {}, 'Works better/faster if you are near them')
 
   local bodym = AClang.list(lscm, 'Body Modifications', {}, 'Only shows what is available to be changed. If they get in a new vehicle back out of Body Modifications to refresh options')
 
@@ -1901,28 +2190,28 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
 
 
 
-    AClang.action(vehmenu, 'Max out their Vehicle', {'maxv'}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
+    AClang.action(pvehmenu, 'Max out their Vehicle', {'maxv'}, 'Max out their Vehicle with an increased top speed (will put random wheels on the Vehicle each time you press it)', function ()
         GetPlayVeh(pid,  function ()
             Maxoutcar(pid)
         end)
      end, nil, nil, COMMANDPERM_FRIENDLY)
 
 
-    AClang.text_input(vehmenu, 'Change their license plate', {'lplate'}, 'Change the license plate to a custom text', function (cusplate)
+    AClang.text_input(pvehmenu, 'Change their license plate', {'lplate'}, 'Change the license plate to a custom text', function (cusplate)
         GetPlayVeh(pid,  function ()
            Platechange(cusplate, pid)
         end)
     end)
 
 
-    AClang.action(vehmenu, 'Repair Vehicle', {'repv'}, 'Repair their vehicle', function ()
+    AClang.action(pvehmenu, 'Repair Vehicle', {'repv'}, 'Repair their vehicle', function ()
         GetPlayVeh(pid,  function ()
             Fixveh(pid)
         end)
      end, nil, nil, COMMANDPERM_FRIENDLY)
 
      
-     AClang.click_slider(vehmenu, 'Accelerate Vehicle', {'accel'}, 'Accelerate Vehicle Forward by your set amount (actual speed is roughly double the number in MPH)', 10, 150, 40, 10, function (s)
+     AClang.click_slider(pvehmenu, 'Accelerate Vehicle', {'accel'}, 'Accelerate Vehicle Forward by your set amount (actual speed is roughly double the number in MPH)', 10, 150, 40, 10, function (s)
        local  speed = s
         GetPlayVeh(pid, function ()
            Accelveh( speed, pid)
@@ -1930,7 +2219,7 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
         end)
     end)
     local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-    AClang.toggle_loop(vehmenu, 'Slow Vehicle Down', {'slowv'}, 'Does not freeze them just slows down the vehicles velocity', function ()
+    AClang.toggle_loop(pvehmenu, 'Slow Vehicle Down', {'slowv'}, 'Does not freeze them just slows down the vehicles velocity', function ()
         Specon(pid)
         GetPlayVeh(pid, function ()
             Stopveh(pid)
@@ -1943,9 +2232,9 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
         end
     end)
 
-    local cvmenu = AClang.list(vehmenu, 'Give Them a Vehicle', {}, '')
+    local cvmenu = AClang.list(pvehmenu, 'Give Them a Vehicle', {}, '')
 
-    local cus = {veh = util.joaat('toreador')}
+    local cus = {veh = 'toreador'}
     AClang.action(cvmenu, 'Spawn Vehicle', {'spv'}, 'Spawn them a custom vehicle the default is toreador', function ()
         local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
@@ -1965,13 +2254,13 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
         end
     end, 'toreador')
 
-    AClang.action(vehmenu, 'Randomize Paint', {'rpaint'}, 'Randomize the Paint of their vehicle', function ()
+    AClang.action(pvehmenu, 'Randomize Paint', {'rpaint'}, 'Randomize the Paint of their vehicle', function ()
         GetPlayVeh(pid, function ()
             Rpaint(pid)
         end)
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
-    AClang.action(vehmenu, 'Spectate Player', {''}, AClang.str_trans('Turn on/off spectating of player'), function ()
+    AClang.action(pvehmenu, 'Spectate Player', {''}, AClang.str_trans('Turn on/off spectating of player'), function ()
         menu.trigger_commands("spectate".. players.get_name(pid))
     end)
 
@@ -2849,7 +3138,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
                     if err then
                         AClang.toast("Languages failed to download. Please try again later. If this continues to happen then manually update via github.")
                     return end
-                    local f = io.open(filesystem.store_dir() .. 'AcjokerScript\\Languages\\'.. file, "wb")
+                    local f = io.open(filesystem.resources_dir() .. 'AcjokerScript\\Languages\\'.. file, "wb")
                     f:write(a)
                     f:close()
                 end)
@@ -2877,7 +3166,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         if err then
             AClang.toast("ACJSTables.lua failed to download. Please try again later. If this continues to happen then manually update via github.")
         return end
-        local f = io.open(filesystem.store_dir() .. 'AcjokerScript\\ACJSTables.lua', "wb")
+        local f = io.open(filesystem.resources_dir() .. 'AcjokerScript\\ACJSTables.lua', "wb")
         f:write(c)
         f:close()
     end)
@@ -2889,7 +3178,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         if err then
             AClang.toast("AClanglib.lua failed to download. Please try again later. If this continues to happen then manually update via github.")
         return end
-        local f = io.open(filesystem.scripts_dir()..'\\lib\\AClangLib.lua', "wb")
+        local f = io.open(filesystem.resources_dir()..'AcjokerScript\\AClangLib.lua', "wb")
         f:write(d)
         f:close()
         AClang.toast("Successfully updated AcjokerScript :)")
@@ -2908,3 +3197,5 @@ until response
 
 
 util.keep_running()
+
+
