@@ -364,3 +364,7 @@ t(f('Activate the list of vehicle name aliases used for spawning, you can use th
 t(f('Windows Menu'), 'Fenster-Menü')
 t(f('Roll Up Individual Windows'), 'Einzelne Fenster hochrollen')
 t(f('Roll Down Individual Windows'), 'Einzelne Fenster runterrollen')
+t(f('TP Player to Waypoint'), 'TP spieler zum Wegpunkt')
+t(f('Delete Players Vehicle'), 'Fahrzeug des Spielers löschen')
+t(f('Teleports Player to the waypoint the player sets on their map(stand users must be in a vehicle) can be used by others and will reset your waypoint if one is set'), 'Teleportiert den Spieler zu dem Wegpunkt, den der Spieler auf seiner Karte gesetzt hat (STAND Nutzer müssen in einem Fahrzeug sein), kann von anderen benutzt werden und setzt den eigenen Wegpunkt zurück, wenn der des Spielers festgelegt wurde.')
+t(f('Delete the Players Vehicle and every vehicle around them you must be spectacting'), 'Löscht das Fahrzeug des Spielers und jedes andere Fahrzeug um ihn herum. Spieler muss zugeschaut werden')

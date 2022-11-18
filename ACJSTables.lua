@@ -1,6 +1,7 @@
 --------------------------------------------Tables-----------------------------------------------------------
 LANG_SETTINGS = {}
-local AClang = require ('lib/AClangLib')
+local AClang = require ('resources/AcjokerScript/AClangLib')
+
 
 VEHICLE_ALIASES = {
     moc = "trailerlarge",
@@ -66,6 +67,7 @@ VEHICLE_ALIASES = {
     DukeODeath = "dukes2",
     DriftYosemite = "yosemite2",
     limo = "patriot2",
+    batmobile = "vigilante",
 
 
 }

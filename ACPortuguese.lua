@@ -685,3 +685,7 @@ t(f('Activate the list of vehicle name aliases used for spawning, you can use th
 t(f('Windows Menu'), 'Menu de Janelas')
 t(f('Roll Up Individual Windows'), 'Subir Vidros Individuais')
 t(f('Roll Down Individual Windows'), 'Abaixar Vidros Individuais')
+t(f('TP Player to Waypoint'), 'TP Jogador para Waypoint')
+t(f('Teleports Player to the waypoint the player sets on their map(stand users must be in a vehicle) can be used by others and will reset your waypoint if one is set'), 'Teleporta o Jogador para o Waypoint setado no mapa (Usuários de Stand tem que estar em um veículo) pode ser usado por outras pessoas e irá redefinir seu waypoint se um estiver setado')
+t(f('Delete Players Vehicle'), 'Excluir veículo dos Jogadores')
+t(f('Delete the Players Vehicle and every vehicle around them you must be spectacting'), 'O veículo do Jogador é excluído e qualquer veículo ao redor também, você tem que estar espectando')

@@ -9,11 +9,11 @@
    
 --github
 
-local localVer = 2.6 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 2.7 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
-local AClang = require ('lib/AClangLib')
-require ('store/AcjokerScript/ACJSTables')
+local AClang = require ('resources/AcjokerScript/AClangLib')
+require ('resources/AcjokerScript/ACJSTables')
 LANG_SETTINGS = {}
 SEC = ENTITY.SET_ENTITY_COORDS
 local playerid = players.user()
@@ -26,7 +26,7 @@ AClang.action(menu.my_root(), 'Restart Script', {}, 'Restarts the script to chec
 end)
 
 AClang.action(menu.my_root(), 'Player Options', {}, 'Redirects you to the Player list in Stand for the Trolling and Friendly options', function ()
-    menu.trigger_commands("players")
+    menu.ref_by_path("Players"):trigger()
 end)
 
 local onlineroot = AClang.list(menu.my_root(), 'Online', {}, '')
@@ -364,12 +364,12 @@ function Getveh(vic)
 end
 
 function GetControl(vic, spec, pid)
-    if pid == playerid then
-        return
-    end    
     if not players.exists(pid) then
         util.stop_thread()
     end
+    if pid == playerid then
+        return
+    end    
     local tick = 0
     NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
     while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) do
@@ -378,7 +378,7 @@ function GetControl(vic, spec, pid)
         NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
         util.yield()
         tick =  tick + 1
-        if tick > 10 then
+        if tick > 20 then
             if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vic) then
                 if set.alert then
                     AClang.toast('Could not gain control')
@@ -699,7 +699,8 @@ function CombineTables(table1, table2, table3, table4, table5, table6, table7, t
 	end
 
 end
-    --memory stuff skidded from heist control
+
+--memory stuff skidded from heist control
     local Int_PTR = memory.alloc_int()
 
     local function getMPX()
@@ -745,6 +746,8 @@ end
         GetControl(pedm, spec, pid)
         VEHICLE.ROLL_UP_WINDOW(vmod, win)
     end
+
+
 -------------------------------------------------------------------------------------------------------
 
 
@@ -1702,6 +1705,112 @@ AClang.slider(vehroot, 'Change Speed for Horn Boost', {''}, 'Change Speed for Ho
     horn.speed = s
  end)
 
+ local menus = {}
+--Vehicle Aliases added by Hexarobi
+    AClang.toggle(vehroot, 'Vehicle Aliases', {'Valiases'}, 'Activate the list of vehicle name aliases used for spawning, you can use this to turn it off if mulitple people have it running', function (on)
+        menus.vehicle_alias = on
+    end)
+    menus.vehicle_aliases = menu.list(vehroot, 'Vehicle Aliases List', {}, 'A list of vehicle name aliases used for spawning')
+    local current_preview = nil
+    local next_preview
+    local image_preview
+    local function rotation_to_direction(rotation)
+        local adjusted_rotation =
+        {
+            x = (math.pi / 180) * rotation.x,
+            y = (math.pi / 180) * rotation.y,
+            z = (math.pi / 180) * rotation.z
+        }
+        local direction =
+        {
+            x = -math.sin(adjusted_rotation.z) * math.abs(math.cos(adjusted_rotation.x)),
+            y =  math.cos(adjusted_rotation.z) * math.abs(math.cos(adjusted_rotation.x)),
+            z =  math.sin(adjusted_rotation.x)
+        }
+        return direction
+    end
+    local function get_offset_from_camera(distance)
+        local cam_rot = CAM.GET_FINAL_RENDERED_CAM_ROT(0)
+        local cam_pos = CAM.GET_FINAL_RENDERED_CAM_COORD()
+        local direction = rotation_to_direction(cam_rot)
+        local destination =
+        {
+            x = cam_pos.x + direction.x * distance,
+            y = cam_pos.y + direction.y * distance,
+            z = cam_pos.z + direction.z * distance
+        }
+        return destination
+    end
+
+    local function update_preview_tick()
+        if current_preview ~= nil then
+            current_preview.position = get_offset_from_camera(current_preview.camera_distance)
+            current_preview.rotation.z = current_preview.rotation.z + 2
+            ENTITY.SET_ENTITY_COORDS_NO_OFFSET(
+                    current_preview.handle,
+                    current_preview.position.x,
+                    current_preview.position.y,
+                    current_preview.position.z,
+                    true, false, false
+            )
+            ENTITY.SET_ENTITY_ROTATION(
+                    current_preview.handle,
+                    current_preview.rotation.x,
+                    current_preview.rotation.y,
+                    current_preview.rotation.z,
+                    2, true
+            )
+            ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(current_preview.handle, false, true)
+            ENTITY.SET_ENTITY_ALPHA(current_preview.handle, 206, false)
+            ENTITY.FREEZE_ENTITY_POSITION(current_preview.handle, true)
+        end
+    end
+
+    
+    for alias, vehicle in pairs(VEHICLE_ALIASES) do
+        local alias_menu_item = menu.action(menus.vehicle_aliases, alias, {alias}, "Spawn "..vehicle, function(click_type, pid)
+                local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+                local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
+                menus.veh = util.joaat(vehicle)
+
+                if menus.vehicle_alias then
+                    Vspawn(menus.veh, tar1, targets, tostring(players.get_name(pid)))
+                    else
+                        if set.alert then
+                            AClang.toast('Vehicle Aliases not set')
+                        end
+                         
+                end
+        end, nil, nil, COMMANDPERM_SPAWN)
+
+        menu.on_focus(alias_menu_item, function ()
+          --local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
+          --local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
+            local hash = util.joaat(vehicle)
+            Streament(hash)
+            local handle = entities.create_vehicle(hash, {x=0, y=0, z=0}, 0)
+            if handle then
+                ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(handle , false, true)
+                ENTITY.SET_ENTITY_ALPHA(handle , 206, false)
+                ENTITY.FREEZE_ENTITY_POSITION(handle, true)
+                current_preview = {
+                    handle = handle,
+                    position={x=0,y=0,z=0},
+                    rotation={x=0,y=0,z=0},
+                    camera_distance=5
+                }
+            end
+        end)
+        menu.on_blur(alias_menu_item, function()
+          entities.delete_by_handle(current_preview.handle)
+          current_preview = nil
+        end)
+      end
+      util.create_tick_handler(function ()
+        if current_preview ~= nil then
+          update_preview_tick()
+        end
+      end)
 
 --------------------------------------------------------------
 
@@ -1771,24 +1880,6 @@ AClang.toggle_loop(onlineroot, 'Increase Kosatka Missile Range', {'krange'}, 'Yo
     end
 end)
 
-local menus = {}
---Vehicle Aliases added by Hexarobi
-    AClang.toggle(onlineroot, 'Vehicle Aliases', {'Valiases'}, 'Activate the list of vehicle name aliases used for spawning, you can use this to turn it off if mulitple people have it running', function (on)
-        menus.vehicle_alias = on
-    end)
-    menus.vehicle_aliases = menu.list(onlineroot, 'Vehicle Aliases List', {}, 'A list of vehicle name aliases used for spawning')
-    for alias, vehicle in pairs(VEHICLE_ALIASES) do
-        menu.action(menus.vehicle_aliases, alias, {alias}, "Spawn "..vehicle, function(click_type, pid)
-                local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-                local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
-                local veh = util.joaat(vehicle)
-                if menus.vehicle_alias then
-                    Vspawn(veh, tar1, targets, tostring(players.get_name(pid)))
-                    else
-                end
-        end, nil, nil, COMMANDPERM_SPAWN)
-    end
-
 
 
 -------------------------------Player Options-----------------------------------------------
@@ -1843,6 +1934,28 @@ end)
         menu.trigger_commands("autoheal".. players.get_name(pid))
         menu.trigger_commands("arm".. players.get_name(pid))
     end, nil, nil, COMMANDPERM_FRIENDLY)
+
+    AClang.action(plamenu, 'TP Player to Waypoint', {'tele'}, 'Teleports Player to the waypoint the player sets on their map(stand users must be in a vehicle) can be used by others and will reset your waypoint if one is set', function ()
+       local x, y, z, b = players.get_waypoint(pid)
+       if HUD.IS_WAYPOINT_ACTIVE() then
+        local curway = HUD.GET_BLIP_INFO_ID_COORD(HUD.GET_FIRST_BLIP_INFO_ID(8))
+        HUD.SET_WAYPOINT_OFF()
+        HUD.SET_NEW_WAYPOINT(x, y)
+        menu.trigger_commands("WPTP".. players.get_name(pid))
+        util.yield(1500)
+        HUD.SET_NEW_WAYPOINT(curway.x, curway.y)
+        else
+            HUD.SET_NEW_WAYPOINT(x, y)
+            menu.trigger_commands("WPTP".. players.get_name(pid))
+            HUD.SET_WAYPOINT_OFF()
+       end
+
+    end, nil, nil, COMMANDPERM_FRIENDLY)
+
+
+
+
+
 
     local winmenu = AClang.list(pvehmenu, 'Windows Menu', {}, 'Works better/faster if you are near them')
 
@@ -2234,7 +2347,7 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
 
     local cvmenu = AClang.list(pvehmenu, 'Give Them a Vehicle', {}, '')
 
-    local cus = {veh = 'toreador'}
+    local cus = {veh = util.joaat('toreador')}
     AClang.action(cvmenu, 'Spawn Vehicle', {'spv'}, 'Spawn them a custom vehicle the default is toreador', function ()
         local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
@@ -2333,6 +2446,36 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
     end)
 
 
+    AClang.toggle_loop(trollm , 'Delete Players Vehicle', {'delv'}, 'Delete the Players Vehicle and every vehicle around them you must be spectacting', function ()
+        local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        Specon(pid)
+        local surcars = {}
+        local hndl = entities.get_all_vehicles_as_handles()
+        for index, value in ipairs(hndl) do
+            for i = 1, 5 do
+               table.insert(surcars, value)
+               DelEnt(surcars)
+            end
+        end
+
+        if PED.IS_PED_IN_ANY_VEHICLE(targets, true) then
+            while PED.IS_PED_IN_ANY_VEHICLE(targets, true) do
+                Delcar(targets, spec, pid)
+                util.yield(100)
+            end
+            if not players.exists(pid) then
+                util.stop_thread()
+            end
+        else
+            util.yield(100)
+        end
+    end, function ()
+                Specoff(pid)
+    end)
+
+
+
+
 
 
 local bigolist = {} 
@@ -2404,6 +2547,7 @@ AClang.list_action(ptfxmenu, 'Ptfx List', {''}, 'Choose a PTFX from the list', F
     ptfx.sel = Fxha[fxsel]
     ptfx.lib = 'core'
 end)
+
 
 
 
@@ -3145,7 +3289,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
                 util.yield(500)
                 async_http.dispatch() 
             end
-            util.yield(500)
+            util.yield(1000)
 
             
 
@@ -3159,7 +3303,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         f:close()
     end)
     async_http.dispatch()
-    util.yield(500)
+    util.yield(1000)
 
     async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/ACJSTables.lua',function(c)
         local err = select(2,load(c))
@@ -3171,7 +3315,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         f:close()
     end)
     async_http.dispatch()  
-    util.yield(500)
+    util.yield(1000)
 
     async_http.init('raw.githubusercontent.com','/acjoker8818/AcjokerScript/main/AClangLib.lua',function(d)
         local err = select(2,load(d))
@@ -3185,7 +3329,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
         util.restart_script()
     end)
     async_http.dispatch()  
-    util.yield(100)
+    util.yield(1000)
 end
         end)
     end
