@@ -60,7 +60,6 @@ t(f('Teleport to Exotic Export Dock'), 'Teleportacja do doku eksportowego egzoty
 t(f('Spawn FF9 EMP Charger'), 'Spawn FF9 Ładowarka EMP')
 t(f('Spawn Charger from FF9 with Electro Magnet capabilities'), 'Spawn Charger z FF9 z możliwościami Electro Magnet')
 t(f('AcjokerScript'), 'AcjokerScript')
-t(f('Cages'), 'Klatki')
 t(f('Vehicular Assault'), 'Napad na pojazd')
 t(f('Will Smash or Run the Player over every time they try and stand up'), 'Rozbija lub przejeżdża gracza za każdym razem, gdy ten próbuje wstać.')
 t(f('Invisible Vehicles'), 'Niewidzialne pojazdy')

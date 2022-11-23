@@ -60,7 +60,6 @@ t(f('Teleport to Exotic Export Dock'), 'Teleportas į egzotinių prekių eksport
 t(f('Spawn FF9 EMP Charger'), 'Spawn FF9 EMP įkroviklis')
 t(f('Spawn Charger from FF9 with Electro Magnet capabilities'), 'Spawn įkroviklis iš FF9 su elektromagneto savybėmis')
 t(f('AcjokerScript'), 'AcjokerScript')
-t(f('Cages'), 'Narvai')
 t(f('Vehicular Assault'), 'Transporto priemonės užpuolimas')
 t(f('Will Smash or Run the Player over every time they try and stand up'), 'Kiekvieną kartą, kai žaidėjas bando atsistoti, jį sudaužo arba pervažiuoja.')
 t(f('Invisible Vehicles'), 'Nematomos transporto priemonės')
