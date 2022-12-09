@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 2.8 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 0.1 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')
@@ -96,6 +96,8 @@ function SF() --Scaleform Full credits to aaron
     sf.CLEAR_ALL()
     sf.TOGGLE_MOUSE_BUTTONS(false)
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 86, true), AClang.str_trans('Push Away or Blow up'))
+    sf.addButton(PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 76, true))
+    sf.SET_DATA_SLOT(2,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 88, true) , AClang.str_trans("Yeet"))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
@@ -361,6 +363,7 @@ function Getveh(vic)
         
         end
     end
+    return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
 end
 
 function GetControl(vic, spec, pid)
@@ -391,7 +394,7 @@ function GetControl(vic, spec, pid)
         
         end
     end
-
+    return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(vic)
 
 end
 
@@ -747,6 +750,65 @@ end
         VEHICLE.ROLL_UP_WINDOW(vmod, win)
     end
 
+
+
+    
+    local next_preview
+    local image_preview
+    local function rotation_to_direction(rotation)
+        local adjusted_rotation =
+        {
+            x = (math.pi / 180) * rotation.x,
+            y = (math.pi / 180) * rotation.y,
+            z = (math.pi / 180) * rotation.z
+        }
+        local direction =
+        {
+            x = -math.sin(adjusted_rotation.z) * math.abs(math.cos(adjusted_rotation.x)),
+            y =  math.cos(adjusted_rotation.z) * math.abs(math.cos(adjusted_rotation.x)),
+            z =  math.sin(adjusted_rotation.x)
+        }
+        return direction
+    end
+    local function get_offset_from_camera(distance)
+        local cam_rot = CAM.GET_FINAL_RENDERED_CAM_ROT(0)
+        local cam_pos = CAM.GET_FINAL_RENDERED_CAM_COORD()
+        local direction = rotation_to_direction(cam_rot)
+        local destination =
+        {
+            x = cam_pos.x + direction.x * distance,
+            y = cam_pos.y + direction.y * distance,
+            z = cam_pos.z + direction.z * distance
+        }
+        return destination
+    end
+
+    function Update_preview_tick(current_preview)
+        if current_preview ~= nil then
+            current_preview.position = get_offset_from_camera(current_preview.camera_distance)
+            current_preview.rotation.z = current_preview.rotation.z + 2
+            ENTITY.SET_ENTITY_COORDS_NO_OFFSET(
+                    current_preview.handle,
+                    current_preview.position.x,
+                    current_preview.position.y,
+                    current_preview.position.z,
+                    true, false, false
+            )
+            ENTITY.SET_ENTITY_ROTATION(
+                    current_preview.handle,
+                    current_preview.rotation.x,
+                    current_preview.rotation.y,
+                    current_preview.rotation.z,
+                    2, true
+            )
+            ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(current_preview.handle,  true, true)
+            ENTITY.SET_ENTITY_ALPHA(current_preview.handle, 206, false)
+            ENTITY.FREEZE_ENTITY_POSITION(current_preview.handle, true)
+            ENTITY.SET_ENTITY_INVINCIBLE(current_preview.handle, true)
+        end
+    end
+
+    
 
 -------------------------------------------------------------------------------------------------------
 
@@ -1565,6 +1627,9 @@ local rgb = {cus = 100}
     end)
 
     ----------------------------------------------
+
+
+
 ---------------------------------- FF9 Charger ----------------------------------
 local charroot = AClang.list(vehroot, 'Charger', {}, 'Duke O Death with Electro Magnet capabilities')
 local charger = {charg = util.joaat('dukes2'), emp = util.joaat('hei_prop_heist_emp')}
@@ -1603,6 +1668,41 @@ local function Ccreate(pCoor, pedSi)
         end
     util.yield()
 end
+
+local closeveh = {}
+function Yeet()
+    local car = entities.get_all_vehicles_as_handles()
+    local cvc = ENTITY.GET_ENTITY_COORDS(car)
+    local chc = ENTITY.GET_ENTITY_COORDS(FFchar)
+    local disbet = SYSTEM.VDIST2(chc.x, chc.y, chc.z, cvc.x, cvc.y, cvc.z)
+    if #closeveh >= 5 then return end
+    if  PAD.IS_CONTROL_PRESSED(0, 72) and PAD.IS_CONTROL_PRESSED(0, 76) then
+        for _, pveh in ipairs(entities.get_all_vehicles_as_handles()) do
+        if ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(pveh, FFchar, 17) then
+            if disbet >= 5 then
+                table.insert(closeveh, pveh)
+            end
+            if #closeveh >= 50 then break end
+        end
+        for _, cv in ipairs(closeveh) do
+            if cv ~= car then
+                ENTITY.FREEZE_ENTITY_POSITION(FFchar, true)
+                Getveh(cv)
+                ENTITY.APPLY_FORCE_TO_ENTITY(cv, 1, math.random(1, 100), math.random(1, 100), math.random(1, 100), 0.0, 0.0, 0.0, 0, false, false, true, false, false)
+                closeveh = {}
+            end
+
+        end
+        end
+        if set.alert then
+            AClang.toast('Yeet') 
+        end
+
+    else closeveh = {}
+    end
+    ENTITY.FREEZE_ENTITY_POSITION(FFchar, false)
+end
+
     Mag_int = menu.list_action(charroot, AClang.str_trans('Magnet Intensity'), {'Magint'}, AClang.str_trans('Changes Magnet to Push Away or Blow up'), maglist, function(magint)
         magval.nodam = magtf[magint]
         end)
@@ -1649,6 +1749,7 @@ end
 
         elseif PED.IS_PED_IN_VEHICLE(playerped, FFchar, true) ==true then
             Magout()
+            Yeet()
         elseif PED.IS_PED_IN_ANY_VEHICLE(playerped) ==false then
                 Ccreate(pCoor, pedSi)
                  if set.alert then
@@ -1676,6 +1777,7 @@ if PED.IS_PED_GETTING_INTO_A_VEHICLE(playerped) ==false and PED.IS_PED_IN_VEHICL
 
             end
 end)
+
 
 AClang.toggle(vehroot, 'Reduce Burnout', {'Rburnout'}, 'Makes it to where the vehicle does not burnout as easily', function (tog)
     PHYSICS.SET_IN_ARENA_MODE(tog)
@@ -1705,66 +1807,28 @@ AClang.slider(vehroot, 'Change Speed for Horn Boost', {''}, 'Change Speed for Ho
     horn.speed = s
  end)
 
+AClang.toggle_loop(vehroot, 'Unlimited Submarine Crush Depth', {'subdepth'}, 'Increases Submarine Crush Depth limit to Unlimited', function ()
+    local subs = {'submersible','submersible2','avisa','kosatka', 'toreador'}
+    local cursub = ENTITY.GET_ENTITY_MODEL(entities.get_user_vehicle_as_handle())
+    for _, s in ipairs(subs) do
+        if cursub == util.joaat(s) then
+            VEHICLE.SET_SUBMARINE_CRUSH_DEPTHS(entities.get_user_vehicle_as_handle(), false, 2000, 2000, 2000)
+        end
+    end
+end)
+
+
+
+
  local menus = {}
+
+ local current_preview = nil
 --Vehicle Aliases added by Hexarobi
     AClang.toggle(vehroot, 'Vehicle Aliases', {'Valiases'}, 'Activate the list of vehicle name aliases used for spawning, you can use this to turn it off if mulitple people have it running', function (on)
         menus.vehicle_alias = on
     end)
     menus.vehicle_aliases = menu.list(vehroot, 'Vehicle Aliases List', {}, 'A list of vehicle name aliases used for spawning')
-    local current_preview = nil
-    local next_preview
-    local image_preview
-    local function rotation_to_direction(rotation)
-        local adjusted_rotation =
-        {
-            x = (math.pi / 180) * rotation.x,
-            y = (math.pi / 180) * rotation.y,
-            z = (math.pi / 180) * rotation.z
-        }
-        local direction =
-        {
-            x = -math.sin(adjusted_rotation.z) * math.abs(math.cos(adjusted_rotation.x)),
-            y =  math.cos(adjusted_rotation.z) * math.abs(math.cos(adjusted_rotation.x)),
-            z =  math.sin(adjusted_rotation.x)
-        }
-        return direction
-    end
-    local function get_offset_from_camera(distance)
-        local cam_rot = CAM.GET_FINAL_RENDERED_CAM_ROT(0)
-        local cam_pos = CAM.GET_FINAL_RENDERED_CAM_COORD()
-        local direction = rotation_to_direction(cam_rot)
-        local destination =
-        {
-            x = cam_pos.x + direction.x * distance,
-            y = cam_pos.y + direction.y * distance,
-            z = cam_pos.z + direction.z * distance
-        }
-        return destination
-    end
 
-    local function update_preview_tick()
-        if current_preview ~= nil then
-            current_preview.position = get_offset_from_camera(current_preview.camera_distance)
-            current_preview.rotation.z = current_preview.rotation.z + 2
-            ENTITY.SET_ENTITY_COORDS_NO_OFFSET(
-                    current_preview.handle,
-                    current_preview.position.x,
-                    current_preview.position.y,
-                    current_preview.position.z,
-                    true, false, false
-            )
-            ENTITY.SET_ENTITY_ROTATION(
-                    current_preview.handle,
-                    current_preview.rotation.x,
-                    current_preview.rotation.y,
-                    current_preview.rotation.z,
-                    2, true
-            )
-            ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(current_preview.handle, false, true)
-            ENTITY.SET_ENTITY_ALPHA(current_preview.handle, 206, false)
-            ENTITY.FREEZE_ENTITY_POSITION(current_preview.handle, true)
-        end
-    end
 
     
     for alias, vehicle in pairs(VEHICLE_ALIASES) do
@@ -1790,7 +1854,8 @@ AClang.slider(vehroot, 'Change Speed for Horn Boost', {''}, 'Change Speed for Ho
             Streament(hash)
             local handle = entities.create_vehicle(hash, {x=0, y=0, z=0}, 0)
             if handle then
-                ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(handle , false, true)
+                ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(handle , true, true)
+                ENTITY.SET_ENTITY_INVINCIBLE(handle, true)
                 ENTITY.SET_ENTITY_ALPHA(handle , 206, false)
                 ENTITY.FREEZE_ENTITY_POSITION(handle, true)
                 current_preview = {
@@ -1808,9 +1873,13 @@ AClang.slider(vehroot, 'Change Speed for Horn Boost', {''}, 'Change Speed for Ho
       end
       util.create_tick_handler(function ()
         if current_preview ~= nil then
-          update_preview_tick()
+          Update_preview_tick(current_preview)
         end
       end)
+
+
+
+
 
 --------------------------------------------------------------
 
@@ -1880,7 +1949,239 @@ AClang.toggle_loop(onlineroot, 'Increase Kosatka Missile Range', {'krange'}, 'Yo
     end
 end)
 
+AClang.toggle_loop(onlineroot, 'Ultra Jump', {}, 'Keep going higher the longer you press jump (can also be used to fly)', function ()
+        if PAD.IS_CONTROL_PRESSED(0, 22) then
+            PED.SET_PED_CAN_RAGDOLL(playerped, false)
+            ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(playerped, 1, 0.5, 0.5, 0.5, 0, 0, 0, 0, true, true, true, true)
+        end
+end)
 
+
+
+local function objams(obj_hash, obj, camcoords)
+    local CV = CAM.GET_GAMEPLAY_CAM_RELATIVE_HEADING()
+    if STREAMING.IS_MODEL_A_VEHICLE(obj_hash) then
+        obj.prev = VEHICLE.CREATE_VEHICLE(obj_hash, camcoords.x, camcoords.y, camcoords.z, CV, true, true, false)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, playerped, false)
+      elseif STREAMING.IS_MODEL_A_PED(obj_hash) then
+        obj.prev = entities.create_ped(1, obj_hash, camcoords, CV)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, playerped, false)
+      elseif STREAMING.IS_MODEL_VALID(obj_hash) then
+        obj.prev = OBJECT.CREATE_OBJECT(obj_hash, camcoords.x, camcoords.y, camcoords.z, true, true, true)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, playerped, false)
+    end
+
+    if obj.prev then
+
+        ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(obj.prev ,  true, true)
+        ENTITY.SET_ENTITY_ALPHA(obj.prev , 206, false)
+        ENTITY.FREEZE_ENTITY_POSITION(obj.prev, true)
+        ENTITY.SET_ENTITY_INVINCIBLE(obj.prev, true)
+        SEC(obj.prev, camcoords.x, camcoords.y, camcoords.z, false, true, true, false)
+        end
+end
+local objtab = {}
+local veh
+local ped
+local obj_shot
+local function vshot(hash, camcoords, CV, rot)
+    if not ENTITY.DOES_ENTITY_EXIST(veh) then
+        veh = entities.create_vehicle(hash, camcoords, CV)
+        ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 0, true)
+        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1000)
+        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, true)
+        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_NON_SCRIPT_PLAYERS(veh, true)
+        table.insert(objtab, veh)
+    else
+            local veh_sec = entities.create_vehicle(hash, camcoords, CV)
+            ENTITY.SET_ENTITY_ROTATION(veh_sec, rot.x, rot.y, rot.z, 0, true)
+            VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh_sec, 1000)
+            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, true)
+            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_NON_SCRIPT_PLAYERS(veh, true)
+            table.insert(objtab, veh_sec)
+    end
+
+end
+local function pshot(hash, camcoords, CV, rot)
+    if not ENTITY.DOES_ENTITY_EXIST(ped) then
+        ped = entities.create_ped(1, hash, camcoords, CV)
+        ENTITY.SET_ENTITY_INVINCIBLE(ped, true)
+        util.yield(30)
+        ENTITY.SET_ENTITY_ROTATION(ped, rot.x, rot.y, rot.z, 0, true)
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(ped, 1, 0, 5000, 0, 0, true, true, true, true)
+        table.insert(objtab, ped)
+    else
+        local sped = entities.create_ped(1, hash, camcoords, CV)
+        ENTITY.SET_ENTITY_INVINCIBLE(sped, true)
+        util.yield(30)
+        ENTITY.SET_ENTITY_ROTATION(sped, rot.x, rot.y, rot.z, 0, true)
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(sped, 1, 0, 5000, 0, 0, true, true, true, true)
+        table.insert(objtab, sped)
+    end
+end
+local function oshot(hash, camcoords, rot)
+    if not ENTITY.DOES_ENTITY_EXIST(obj_shot) then
+        local objs = OBJECT.CREATE_OBJECT(hash, camcoords.x, camcoords.y, camcoords.z, true, true, true)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(objs, playerped, false)
+        util.yield(20)
+        ENTITY.SET_ENTITY_ROTATION(objs, rot.x, rot.y, rot.z, 0, true)
+        
+        ENTITY.APPLY_FORCE_TO_ENTITY(objs, 2, camcoords.x ,  15000, camcoords.z , 0, 0, 0, 0,  true, false, true, false, true)
+        table.insert(objtab, objs)
+        else
+            local sobjs = OBJECT.CREATE_OBJECT(hash, camcoords.x, camcoords.y, camcoords.z, true, true, true)
+            ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(sobjs, playerped, false)
+            util.yield(20)
+            ENTITY.SET_ENTITY_ROTATION(sobjs, rot.x, rot.y, rot.z, 0, true)
+            ENTITY.APPLY_FORCE_TO_ENTITY(sobjs, 2, camcoords.x ,  15000, camcoords.z , 0, 0, 0, 0,  true, false, true, false, true)
+            table.insert(objtab, sobjs)
+    end
+
+end
+
+local function objshots(hash, obj, camcoords)
+    local CV = CAM.GET_GAMEPLAY_CAM_RELATIVE_HEADING()
+    local rot = CAM.GET_GAMEPLAY_CAM_ROT(0)
+    if STREAMING.IS_MODEL_A_VEHICLE(hash) then
+        vshot(hash, camcoords, CV, rot)
+        
+        for i, car in ipairs(objtab) do
+            if obj.expl then
+                if ENTITY.HAS_ENTITY_COLLIDED_WITH_ANYTHING(car) then
+                    local expcoor = ENTITY.GET_ENTITY_COORDS(car)
+                    FIRE.ADD_EXPLOSION(expcoor.x, expcoor.y, expcoor.z, 81, 5000, true, false, 0.0, false)
+                    entities.delete_by_handle(car)
+                end
+
+
+            end
+            if i >= 150 then
+                for index, vehs in ipairs(objtab) do
+                    entities.delete_by_handle(vehs)
+                    objtab ={}
+                end
+            end
+            local carc = ENTITY.GET_ENTITY_COORDS(car)
+            local tar2 = ENTITY.GET_ENTITY_COORDS(playerped)
+            local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, carc.x, carc.y, carc.z)
+            if disbet > 15000 then
+                entities.delete_by_handle(car)
+            end
+        end
+
+    elseif STREAMING.IS_MODEL_A_PED(hash) then
+       pshot(hash, camcoords, CV, rot)
+
+    
+        for i, psho in ipairs(objtab) do
+        if obj.expl then
+            if ENTITY.HAS_ENTITY_COLLIDED_WITH_ANYTHING(psho) then
+                local expcoor = ENTITY.GET_ENTITY_COORDS(psho)
+                FIRE.ADD_EXPLOSION(expcoor.x, expcoor.y, expcoor.z, 81, 5000, true, false, 0.0, false)
+                entities.delete_by_handle(psho)
+            end
+                
+                    local pedc = ENTITY.GET_ENTITY_COORDS(ped)
+                    local tar2 = ENTITY.GET_ENTITY_COORDS(playerped)
+                    local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, pedc.x, pedc.y, pedc.z)
+                    if disbet > 15000 then
+                        entities.delete_by_handle(ped)
+                    end
+        end
+        if i >= 40 then
+            for index, p_shot in ipairs(objtab) do
+                entities.delete_by_handle(p_shot)
+                objtab ={}
+            end
+        end
+    end
+    elseif STREAMING.IS_MODEL_VALID(hash) then
+       oshot(hash, camcoords, rot)
+
+
+
+       for i, objs in ipairs(objtab) do
+       if obj.expl then
+        if ENTITY.HAS_ENTITY_COLLIDED_WITH_ANYTHING(objs) then
+            local expcoor = ENTITY.GET_ENTITY_COORDS(objs)
+            FIRE.ADD_EXPLOSION(expcoor.x, expcoor.y, expcoor.z, 81, 5000, true, false, 0.0, false)
+            entities.delete_by_handle(objs)
+        end
+
+                local objc = ENTITY.GET_ENTITY_COORDS(objs)
+                local tar2 = ENTITY.GET_ENTITY_COORDS(playerped)
+                local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, objc.x, objc.y, objc.z)
+
+                if disbet > 15000 then
+                    entities.delete_by_handle(objs)
+                end
+            end
+            if i >= 40 then
+                for index, p_shot in ipairs(objtab) do
+                    entities.delete_by_handle(p_shot)
+                    objtab ={}
+                end
+            end
+        end
+    end
+   
+end
+local obj_hash = 'vigilante'
+local objgun = AClang.list(onlineroot, 'Custom Object Gun', {}, '')
+local obj = {expl = false}
+OBJgun = AClang.toggle_loop(objgun, 'Custom Object Gun', {'objgun'}, 'Fires the object you have selected', function ()
+   local hash = util.joaat(obj_hash)
+    Streament(hash)
+    if PLAYER.IS_PLAYER_FREE_AIMING(playerid) then
+        local rot = CAM.GET_GAMEPLAY_CAM_ROT(0)
+        local camcoords = get_offset_from_camera(10)
+        if not ENTITY.DOES_ENTITY_EXIST(obj.prev) then
+            objams(hash, obj, camcoords)
+        else
+            SEC(obj.prev, camcoords.x, camcoords.y, camcoords.z, false, true, true, false)
+        end
+        ENTITY.SET_ENTITY_ROTATION(obj.prev, rot.x, rot.y, rot.z, 0, true)
+        
+    elseif ENTITY.DOES_ENTITY_EXIST(obj.prev) and not PLAYER.IS_PLAYER_FREE_AIMING(playerid) then
+        entities.delete_by_handle(obj.prev)
+    end
+    if PED.IS_PED_SHOOTING(playerped) then
+        local camcoords = get_offset_from_camera(15)
+        objshots(hash, obj, camcoords)
+        entities.delete_by_handle(obj.prev)
+        util.yield(20)
+    end
+    
+end)
+
+AClang.list_select(objgun, 'Object to Shoot', {''}, 'Change the object that you shoot', Objn, 1, function (sel)
+    obj_hash = Objl[sel]
+end)
+
+
+
+
+
+  AClang.toggle(objgun, 'Make Objects Explosive', {}, 'Makes the objects you shoot explosive when hitting something', function (on)
+    obj.expl =  on
+  end)
+
+
+  AClang.text_input(objgun, 'Custom Object', {'cusobj'}, 'Enter the model name of an object to change the object you shoot example "prop_keg_01"', function(cusobj)
+
+    if STREAMING.IS_MODEL_A_VEHICLE(util.joaat(cusobj)) then
+        obj_hash = cusobj
+      elseif STREAMING.IS_MODEL_A_PED(util.joaat(cusobj)) then
+        obj_hash = cusobj
+      elseif STREAMING.IS_MODEL_VALID(util.joaat(cusobj)) then
+        obj_hash = cusobj
+    else
+       if set.alert then
+           AClang.toast('Improper Object Name (check the spelling)')
+       end
+    end
+end, 'toreador')
+  
 
 -------------------------------Player Options-----------------------------------------------
 
@@ -1897,23 +2198,14 @@ players.on_join(function(pid)
           local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
           local weap = util.joaat('weapon_firework')
           WEAPON.REQUEST_WEAPON_ASSET(weap)
-          FIRE.ADD_EXPLOSION(tar1.x, tar1.y, tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x + math.random(-50, 50), tar1.y, tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x, tar1.y + math.random(-50, 50), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x + math.random(-50, 50), tar1.y + math.random(-50, 50), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x - math.random(-50, 50), tar1.y, tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x, tar1.y - math.random(-50, 50), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x - math.random(-50, 50), tar1.y - math.random(-50, 50), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x - math.random(-50, 50), tar1.y + math.random(-50, 50), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          FIRE.ADD_EXPLOSION(tar1.x + math.random(-50, 50), tar1.y - math.random(-50, 50), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x, tar1.y, tar1.z + math.random(10, 15), 200, 0, weap, 0, false, true, firw.speed)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x + math.random(-50, 50), tar1.y, tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x , tar1.y + math.random(-50, 50), tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x + math.random(-50, 50), tar1.y, tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x + math.random(-50, 50), tar1.y + math.random(-50, 50), tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x - math.random(-50, 50), tar1.y, tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x , tar1.y - math.random(-50, 50), tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
-          MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x - math.random(-50, 50), tar1.y - math.random(-50, 50), tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
+          for y = 0, 1 do
+            MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x - math.random(-100, 100), tar1.y - math.random(-100, 100), tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
+            MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(tar1.x, tar1.y, tar1.z + 4.0, tar1.x + math.random(-100, 100), tar1.y + math.random(-100, 100), tar1.z + math.random(10, 15), 200, 0, weap, 0, false, false, firw.speed)
+            FIRE.ADD_EXPLOSION(tar1.x + math.random(-100, 100), tar1.y + math.random(-100, 100), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false)
+            FIRE.ADD_EXPLOSION(tar1.x - math.random(-100, 100), tar1.y - math.random(-100, 100), tar1.z + math.random(50, 75), 38, 1, false, false, 0, false) 
+        end
+
+
           if not players.exists(pid) then
               util.stop_thread()
           end
@@ -1933,6 +2225,7 @@ end)
         menu.trigger_commands("bail".. players.get_name(pid))
         menu.trigger_commands("autoheal".. players.get_name(pid))
         menu.trigger_commands("arm".. players.get_name(pid))
+        menu.trigger_commands("givevehgodmode".. players.get_name(pid))
     end, nil, nil, COMMANDPERM_FRIENDLY)
 
     AClang.action(plamenu, 'TP Player to Waypoint', {'tele'}, 'Teleports Player to the waypoint the player sets on their map(stand users must be in a vehicle) can be used by others and will reset your waypoint if one is set', function ()

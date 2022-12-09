@@ -1,6 +1,38 @@
---------------------------------------------Tables-----------------------------------------------------------
+ --------------------------------------------Tables-----------------------------------------------------------
 LANG_SETTINGS = {}
 local AClang = require ('resources/AcjokerScript/AClangLib')
+
+Objn = {
+    AClang.trans('Batmobile'),
+    AClang.trans('Ramp Buggy'),
+    AClang.trans('Phantom Wedge'),
+    AClang.trans('BR8'),
+    AClang.trans('Topless Female'),
+    AClang.trans('Naked Cultist'),
+    AClang.trans('Go kart'),
+    AClang.trans('Space Docker'),
+    AClang.trans('P-996 LAZER'),
+    AClang.trans('Dildo'),
+    AClang.trans('Christmas Tree'),
+    AClang.trans('Trash Can'),
+}
+
+Objl = {
+    'vigilante',
+    'dune4',
+    'phantom2',
+    'openwheel1',
+    'a_f_y_topless_01',
+    'a_m_m_acult_01',
+    'veto',
+    'dune2',
+    'lazer',
+    'prop_cs_dildo_01',
+    'xm_prop_x17_xmas_tree_int',
+    'prop_barrel_03d',
+}
+
+
 
 
 VEHICLE_ALIASES = {
