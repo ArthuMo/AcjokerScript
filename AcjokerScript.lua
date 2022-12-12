@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 0.1 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 0.11 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')
@@ -19,7 +19,6 @@ SEC = ENTITY.SET_ENTITY_COORDS
 local playerid = players.user()
 local playerped = players.user_ped()
 local set = {alert = true}
-
 
 AClang.action(menu.my_root(), 'Restart Script', {}, 'Restarts the script to check for updates', function ()
     util.restart_script()
@@ -801,7 +800,7 @@ end
                     current_preview.rotation.z,
                     2, true
             )
-            ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(current_preview.handle,  true, true)
+            ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(current_preview.handle,  false, true)
             ENTITY.SET_ENTITY_ALPHA(current_preview.handle, 206, false)
             ENTITY.FREEZE_ENTITY_POSITION(current_preview.handle, true)
             ENTITY.SET_ENTITY_INVINCIBLE(current_preview.handle, true)
@@ -1820,6 +1819,8 @@ end)
 
 
 
+
+
  local menus = {}
 
  local current_preview = nil
@@ -1854,7 +1855,7 @@ end)
             Streament(hash)
             local handle = entities.create_vehicle(hash, {x=0, y=0, z=0}, 0)
             if handle then
-                ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(handle , true, true)
+                ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(handle , false, true)
                 ENTITY.SET_ENTITY_INVINCIBLE(handle, true)
                 ENTITY.SET_ENTITY_ALPHA(handle , 206, false)
                 ENTITY.FREEZE_ENTITY_POSITION(handle, true)
@@ -1973,7 +1974,7 @@ local function objams(obj_hash, obj, camcoords)
 
     if obj.prev then
 
-        ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(obj.prev ,  true, true)
+        ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(obj.prev , false, true)
         ENTITY.SET_ENTITY_ALPHA(obj.prev , 206, false)
         ENTITY.FREEZE_ENTITY_POSITION(obj.prev, true)
         ENTITY.SET_ENTITY_INVINCIBLE(obj.prev, true)
