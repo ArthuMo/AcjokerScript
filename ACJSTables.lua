@@ -15,6 +15,9 @@ Objn = {
     AClang.trans('Dildo'),
     AClang.trans('Christmas Tree'),
     AClang.trans('Trash Can'),
+    AClang.trans('Yule Monster'),
+    AClang.trans('Rabbit'),
+    AClang.trans('Furry'),
 }
 
 Objl = {
@@ -30,6 +33,9 @@ Objl = {
     'prop_cs_dildo_01',
     'xm_prop_x17_xmas_tree_int',
     'prop_barrel_03d',
+    'U_M_M_YuleMonster',
+    'A_C_Rabbit_02',
+    'IG_Furry',
 }
 
 
@@ -1576,14 +1582,19 @@ Extob = {
 SPClist = {
     'Lester',
     'Trevor',
-    'Jesus'
+    'Jesus',
+    'Furry',
+    'Yule Monster'
+
 }
 
 
 SPC = {
     'ig_lestercrest',
     'player_two',
-    'u_m_m_jesus_01'
+    'u_m_m_jesus_01',
+    'IG_Furry',
+    'U_M_M_YuleMonster'
 }
 
 
@@ -2129,6 +2140,12 @@ Csplist = {
     'Traffic Warden',
     'Undercover',
     'Vagos Funeral Speaker',
+    'DrFriedlander 2',
+    'Nervous Ron 2',
+    'Chef 3',
+    'Dax',
+    'Lab Rat',
+    'Luchadora',
 }
 
 CSP = {
@@ -2268,6 +2285,12 @@ CSP = {
     'csb_trafficwarden',
     'csb_undercover',
     'csb_vagspeak',
+    'CS_DrFriedlander_02',
+    'CS_NervousRon_02',
+    'CSB_Chef_03',
+    'CSB_Dax',
+    'CSB_Labrat',
+    'CSB_Luchadora',
 
 }
 
@@ -3271,6 +3294,25 @@ Dlcplist = {
     'Male Studio Assist',
     'Studio Producer',
     'Studio Sound Engineer',
+    'Dr Friedlander 2',
+    'Nervous Ron 2',
+    'Chef 3',
+    'Dax',
+    'Luchadora',
+    'Hippy Leader',
+    'Lab Rat',
+    'Furry',
+    'Fooliganz 1',
+    'Fooliganz 2',
+    'Acid Lab Cook',
+    'Gun Van Seller',
+    'Fooliganz',
+    'General Street',
+    'Yule Monster',
+    'Hazmat Worker',
+    'Friedlander Goons',
+    'Fooliganz',
+    'BankRobber',
 }
 
 Dlcp = {
@@ -3442,4 +3484,23 @@ Dlcp = {
     'S_M_M_StudioAssist_02',
     'S_M_M_StudioProd_01',
     'S_M_M_StudioSouEng_02',
+    'IG_DrFriedlander_02',
+    'IG_NervousRon_02',
+    'IG_Chef_03',
+    'IG_Dax',
+    'IG_Luchadora',
+    'IG_HippyLeader',
+    'IG_Labrat',
+    'IG_Furry',
+    'IG_Fooliganz_01',
+    'IG_Fooliganz_02',
+    'IG_AcidLabCook',
+    'IG_GunVanSeller',
+    'G_F_M_Fooliganz_01',
+    'A_F_M_GenStreet_01',
+    'U_M_M_YuleMonster',
+    'S_M_M_HazmatWorker_01',
+    'G_M_M_FriedlanderGoons_01',
+    'G_M_M_Fooliganz_01',
+    'A_M_M_BankRobber_01',
 }

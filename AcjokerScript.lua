@@ -9,16 +9,17 @@
    
 --github
 
-local localVer = 0.11 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 0.12 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')
 require ('resources/AcjokerScript/ACJSTables')
 LANG_SETTINGS = {}
 SEC = ENTITY.SET_ENTITY_COORDS
-local playerid = players.user()
-local playerped = players.user_ped()
+
+
 local set = {alert = true}
+
 
 AClang.action(menu.my_root(), 'Restart Script', {}, 'Restarts the script to check for updates', function ()
     util.restart_script()
@@ -101,7 +102,7 @@ function SF() --Scaleform Full credits to aaron
     sf:draw_fullscreen()
 end
 
-function SFlsd() --Scaleform Full credits to aaron
+function SFlsd() 
     local scaleform = require('ScaleformLib')
     local sf = scaleform('instructional_buttons')
     HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
@@ -113,6 +114,24 @@ function SFlsd() --Scaleform Full credits to aaron
     sf.CLEAR_ALL()
     sf.TOGGLE_MOUSE_BUTTONS(false)
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 86, true), AClang.str_trans('Lazers'))
+    sf.DRAW_INSTRUCTIONAL_BUTTONS()
+    sf:draw_fullscreen()
+end
+
+function SFfly()
+    local scaleform = require('ScaleformLib')
+    local sf = scaleform('instructional_buttons')
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
+---@diagnostic disable-next-line: param-type-mismatch
+    memory.write_int(memory.script_global(1645739+1121), 1)
+    sf.CLEAR_ALL()
+    sf.TOGGLE_MOUSE_BUTTONS(false)
+    sf.SET_DATA_SLOT(2,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 76, true), AClang.str_trans('Fly forward or backward twice as fast'))
+    sf.SET_DATA_SLOT(1,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 88, true), AClang.str_trans('Backward'))
+    sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 87, true), AClang.str_trans('Forward'))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
@@ -369,7 +388,7 @@ function GetControl(vic, spec, pid)
     if not players.exists(pid) then
         util.stop_thread()
     end
-    if pid == playerid then
+    if pid == players.user() then
         return
     end    
     local tick = 0
@@ -400,7 +419,7 @@ end
 function Disbet(pid)
     local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
     local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
-    local play = ENTITY.GET_ENTITY_COORDS(playerped, true)
+    local play = ENTITY.GET_ENTITY_COORDS(players.user_ped(), true)
     local disbet = SYSTEM.VDIST2(play.x, play.y, play.z, tar1.x, tar1.y, tar1.z)
     return disbet
 end
@@ -847,7 +866,7 @@ end
 
 local function tpToBlip(blip)
     local pos = HUD.GET_BLIP_COORDS(blip)
-    SEC(playerped, pos.x, pos.y, pos.z, false, false, false, false)
+    SEC(players.user_ped(), pos.x, pos.y, pos.z, false, false, false, false)
 end
 
 local properties = {}
@@ -894,7 +913,7 @@ end)
 local vteles = AClang.list(TeleRoot, 'Vehicle Teleports', {}, '')
 
 AClang.action(vteles, 'TP into Avenger', {'tpaven'}, 'Teleport into Avengers holding area/facility', function ()
-    SEC(playerped, 514.31335, 4750.5264, -68.99592, false, false, false, false)
+    SEC(players.user_ped(), 514.31335, 4750.5264, -68.99592, false, false, false, false)
     end)
 
 AClang.action(vteles, 'TP into Kosatka', {'tpkosatka'}, 'MUST HAVE CALLED IN Teleport to Kosatka Cayo Perico Heist board', function ()
@@ -904,12 +923,12 @@ AClang.action(vteles, 'TP into Kosatka', {'tpkosatka'}, 'MUST HAVE CALLED IN Tel
         if set.alert then
             AClang.toast('Kosatka not found') 
         end
-    else    SEC(playerped, 1561.1543, 385.98312, -49.68535, false, false, false, false)
+    else    SEC(players.user_ped(), 1561.1543, 385.98312, -49.68535, false, false, false, false)
     end
     end)
 
 AClang.action(vteles, 'TP into MOC', {'tpMOC'}, 'Teleport into MOC command center/bunker', function ()
-    SEC(playerped, 1103.3782, -3011.6018, -38.999435, false, false, false, false)
+    SEC(players.user_ped(), 1103.3782, -3011.6018, -38.999435, false, false, false, false)
     end)
 
 AClang.action(vteles, 'TP into Terrorbyte', {'tpterro'}, 'Teleport to Terrorbyte Business control', function ()
@@ -919,7 +938,7 @@ AClang.action(vteles, 'TP into Terrorbyte', {'tpterro'}, 'Teleport to Terrorbyte
         if set.alert then
             AClang.toast('Terrorbyte not found')
         end
-    else    SEC(playerped, -1421.2347, -3012.9988, -79.04994, false, false, false, false)
+    else    SEC(players.user_ped(), -1421.2347, -3012.9988, -79.04994, false, false, false, false)
     end
     end)
 
@@ -933,7 +952,7 @@ AClang.action(cargoteles, 'TP to Special Cargo', {'tpscargo'}, 'Teleport to Spec
                 AClang.toast('No Special Cargo Found')  
             end
         else
-            SEC(playerped, cPickup.x, cPickup.y, cPickup.z, false, false, false, false)
+            SEC(players.user_ped(), cPickup.x, cPickup.y, cPickup.z, false, false, false, false)
         end
     end)
 
@@ -945,7 +964,7 @@ AClang.action(cargoteles, 'TP to Vehicle Cargo', {'tpvcargo'}, 'Teleport to Vehi
                 AClang.toast('No Vehicle Cargo Found')
             end
         else
-            SEC(playerped, vPickup.x, vPickup.y, vPickup.z, false, false, false, false)
+            SEC(players.user_ped(), vPickup.x, vPickup.y, vPickup.z, false, false, false, false)
         end
     end)
 
@@ -955,7 +974,7 @@ AClang.action(intteles, 'TP to PC', {'tpdesk'}, 'Teleport to PC at the Desk', fu
     local pcD = HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(521))
     HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(521))
         if pcD.x ~= 0 and pcD.y ~= 0 and pcD.z ~= 0 then
-            SEC(playerped, pcD.x- 1.0, pcD.y + 1.0 , pcD.z, false, false, false, false)
+            SEC(players.user_ped(), pcD.x- 1.0, pcD.y + 1.0 , pcD.z, false, false, false, false)
         else
             if set.alert then
                 AClang.toast('No PC Found')  
@@ -970,9 +989,9 @@ AClang.action(intteles, 'TP to PC', {'tpdesk'}, 'Teleport to PC at the Desk', fu
         HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(143))
         HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(480))
             if nigh1.x ~= 0 and nigh1.y ~= 0 and nigh1.z ~= 0 then
-                SEC(playerped, nigh1.x, nigh1.y, nigh1.z, false, false, false, false)
+                SEC(players.user_ped(), nigh1.x, nigh1.y, nigh1.z, false, false, false, false)
             elseif nigh2.x ~= 0 and nigh2.y ~= 0 and nigh2.z ~= 0 then
-                SEC(playerped, nigh2.x, nigh2.y, nigh2.z, false, false, false, false)
+                SEC(players.user_ped(), nigh2.x, nigh2.y, nigh2.z, false, false, false, false)
             else 
                 if set.alert then
                 AClang.toast('No Person Found')
@@ -987,9 +1006,9 @@ AClang.action(intteles, 'TP to PC', {'tpdesk'}, 'Teleport to PC at the Desk', fu
         HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(108))
         HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(207))
             if saf1.x ~= 0 and saf1.y ~= 0 and saf1.z ~= 0 then
-                SEC(playerped, saf1.x - 1.0, saf1.y + 1.0 , saf1.z, false, false, false, false)
+                SEC(players.user_ped(), saf1.x - 1.0, saf1.y + 1.0 , saf1.z, false, false, false, false)
             elseif saf2.x ~= 0 and saf2.y ~= 0 and saf2.z ~= 0 then
-                SEC(playerped, saf2.x, saf2.y + 1.0 , saf2.z, false, false, false, false)
+                SEC(players.user_ped(), saf2.x, saf2.y + 1.0 , saf2.z, false, false, false, false)
             else
                 if set.alert then
                     AClang.toast('No Safe Found')  
@@ -1011,7 +1030,7 @@ AClang.action(TeleRoot, 'TP to MC Product', {'tpMCproduct'}, 'Teleport to MC Clu
         if pPickup.x == 0 and pPickup.y == 0 and pPickup.z == 0 then
 
         elseif pPickup.x ~= 0 and pPickup.y ~= 0 and pPickup.z ~= 0 then
-            SEC(playerped, pPickup.x - 1.5, pPickup.y , pPickup.z, false, false, false, false)
+            SEC(players.user_ped(), pPickup.x - 1.5, pPickup.y , pPickup.z, false, false, false, false)
             if set.alert then
                 AClang.toast('TP to MC Product')   
             end
@@ -1020,7 +1039,7 @@ AClang.action(TeleRoot, 'TP to MC Product', {'tpMCproduct'}, 'Teleport to MC Clu
         if hPickup.x == 0 and hPickup.y == 0 and hPickup.z == 0 then
 
         elseif hPickup.x ~= 0 and hPickup.y ~= 0 and hPickup.z ~= 0 then
-            SEC(playerped, hPickup.x- 1.5, hPickup.y, hPickup.z, false, false, false, false)
+            SEC(players.user_ped(), hPickup.x- 1.5, hPickup.y, hPickup.z, false, false, false, false)
             if set.alert then
                 AClang.toast('TP to Heli')
             end
@@ -1028,7 +1047,7 @@ AClang.action(TeleRoot, 'TP to MC Product', {'tpMCproduct'}, 'Teleport to MC Clu
         if bPickup.x == 0 and bPickup.y == 0 and bPickup.z == 0 then
 
         elseif bPickup.x ~= 0 and bPickup.y ~= 0 and bPickup.z ~= 0 then
-            SEC(playerped, bPickup.x, bPickup.y, bPickup.z + 1.0 , false, false, false, false)
+            SEC(players.user_ped(), bPickup.x, bPickup.y, bPickup.z + 1.0 , false, false, false, false)
             if set.alert then
                 AClang.toast('TP to Boat')
             end
@@ -1036,7 +1055,7 @@ AClang.action(TeleRoot, 'TP to MC Product', {'tpMCproduct'}, 'Teleport to MC Clu
         if plPickup.x == 0 and plPickup.y == 0 and plPickup.z == 0 then
 
         elseif plPickup.x ~= 0 and plPickup.y ~= 0 and plPickup.z ~= 0 then
-            SEC(playerped, plPickup.x, plPickup.y + 1.5, plPickup.z - 1, false, false, false, false)
+            SEC(players.user_ped(), plPickup.x, plPickup.y + 1.5, plPickup.z - 1, false, false, false, false)
             if set.alert then
                 AClang.toast('TP to Plane')
             end
@@ -1060,21 +1079,21 @@ AClang.action(TeleRoot, 'TP to Bunker Supplies/Sale', {'tpBSupplies'}, 'Teleport
                         HUD.GET_BLIP_COORDS(HUD.GET_NEXT_BLIP_INFO_ID(423))
             if sPickup.x == 0 and sPickup.y == 0 and sPickup.z == 0 then
             elseif sPickup.x ~= 0 and sPickup.y ~= 0 and sPickup.z ~= 0 then
-                SEC(playerped, sPickup.x, sPickup.y + 2.0, sPickup.z - 1.0, false, false, false, false)
+                SEC(players.user_ped(), sPickup.x, sPickup.y + 2.0, sPickup.z - 1.0, false, false, false, false)
                 if set.alert then
                     AClang.toast('TP to Supplies')
                 end
             end
             if dPickup.x == 0 and dPickup.y == 0 and dPickup.z == 0 then
             elseif dPickup.x ~= 0 and dPickup.y ~= 0 and dPickup.z ~= 0 then
-                SEC(playerped, dPickup.x, dPickup.y, dPickup.z, false, false, false, false)
+                SEC(players.user_ped(), dPickup.x, dPickup.y, dPickup.z, false, false, false, false)
                 if set.alert then
                     AClang.toast('TP to Dune')
                 end
             end
             if fPickup.x == 0 and fPickup.y == 0 and fPickup.z == 0 then
             elseif fPickup.x ~= 0 and fPickup.y ~= 0 and fPickup.z ~= 0 then
-                SEC(playerped, fPickup.x, fPickup.y, fPickup.z + 1.0 , false, false, false, false)
+                SEC(players.user_ped(), fPickup.x, fPickup.y, fPickup.z + 1.0 , false, false, false, false)
                 if set.alert then
                     AClang.toast('TP to Flatbed')
                 end
@@ -1094,7 +1113,7 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
                     AClang.toast('No Payhone Found')
                 end
                 else
-                    SEC(playerped, payPhon.x, payPhon.y, payPhon.z + 1, false, false, false, false)
+                    SEC(players.user_ped(), payPhon.x, payPhon.y, payPhon.z + 1, false, false, false, false)
             end
     end)
 
@@ -1107,7 +1126,7 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
             AClang.toast('Dock Not Found')
            end
             elseif eDock.x ~= 0 and eDock.y ~= 0 and eDock.z ~= 0 then
-                PED.SET_PED_COORDS_KEEP_VEHICLE(playerped, 1169.5736, -2971.932, 5.9021106)
+                PED.SET_PED_COORDS_KEEP_VEHICLE(players.user_ped(), 1169.5736, -2971.932, 5.9021106)
             end
         end
     end)
@@ -1116,20 +1135,20 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
 
     local forw = {amount = 0.5} --credits to lance#8011
     AClang.action(forwteles, 'TP Foward', {'tpforw'}, 'Teleport Forward your set amount', function ()
-        if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
+        if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             return
         end
-        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
-            SEC(playerped, fv.x , fv.y, fv.z, false, false, false, false)
+        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), 0, forw.amount, -1.0)
+            SEC(players.user_ped(), fv.x , fv.y, fv.z, false, false, false, false)
     end)
 
      AClang.toggle_loop(forwteles, 'TP Foward Toggle', {''}, 'Teleport Forward toggle for your gamepad RB and DPAD Down', function ()
-        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
-        if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
+        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), 0, forw.amount, -1.0)
+        if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             return
         end
         if PAD.IS_CONTROL_PRESSED(0, 187) or PAD.IS_CONTROL_PRESSED(0, 47) or PAD.IS_CONTROL_PRESSED(0, 19) and PAD.IS_CONTROL_PRESSED(0, 44) then
-            SEC(playerped, fv.x , fv.y, fv.z, false, false, false, false)
+            SEC(players.user_ped(), fv.x , fv.y, fv.z, false, false, false, false)
         else util.yield()
         end
         util.yield(250)
@@ -1141,8 +1160,8 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
 
 
     AClang.toggle_loop(TeleRoot, 'Levitate Toggle', {''}, 'Leveitate toggle for your gamepad RB and DPAD Down', function ()
-        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerped, 0, forw.amount, -1.0)
-        if PED.IS_PED_IN_ANY_VEHICLE(playerped, false) then
+        local fv = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), 0, forw.amount, -1.0)
+        if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
             return
         end
         if  PAD.IS_CONTROL_PRESSED(0, 44) then
@@ -1181,19 +1200,19 @@ local plighm = AClang.list(plscm, 'Lights', {}, '')
         menu.delete(m)
     end
     vehmenu = {}
-    if not players.exists(playerid) then
+    if not players.exists(players.user()) then
         util.stop_thread()
     end
-    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     if PED.IS_PED_IN_ANY_VEHICLE(pedm, false) then
         for _, v in pairs(Vehopts) do
             local current = VEHICLE.GET_VEHICLE_MOD(vmod, v[1] -1)
-            local maxmods = Getmodcou(playerid, v[1] - 1)
+            local maxmods = Getmodcou(players.user(), v[1] - 1)
             if maxmods > 0  then
                 local modnames = v[2]
                 local s = menu.slider(pbodym, modnames , {''}, '',  -1, maxmods  , current, 1, function (mod)
-                    Changemod(playerid, v[1] -1, mod)
+                    Changemod(players.user(), v[1] -1, mod)
                 end)
               table.insert(vehmenu, s)
             util.yield()
@@ -1219,49 +1238,49 @@ local pcolor = {}
 AClang.list_select(pcolm, 'Primary Color', {''}, 'Changes the Primary Color on the Vehicle', Mainc, 1, 
 function (t)
     pcolor.prim = t - 1
-        Changecolor(playerid, pcolor)
+        Changecolor(players.user(), pcolor)
 end)
 
 AClang.list_select(pcolm, 'Secondary Color', {''}, 'Changes the Secondary Color on the Vehicle', Mainc, 1, 
 function (t)
     pcolor.sec = t - 1
-        Changecolor(playerid, pcolor)
+        Changecolor(players.user(), pcolor)
 end)
 
 AClang.list_select(pcolm, 'Pearlescent Color', {''}, 'Changes the Pearlescent Color on the Vehicle', Mainc, 1, 
 function (t)
     pcolor.per = t - 1
-        Changewhepercolor(playerid, pcolor)
+        Changewhepercolor(players.user(), pcolor)
 end)
 
 AClang.list_select(pcolm, 'Wheel Color', {''}, 'Changes the Wheel Color on the Vehicle', Mainc, 1, 
 function (t)
     pcolor.whe = t - 1
-        Changewhepercolor(playerid, pcolor)
+        Changewhepercolor(players.user(), pcolor)
 end)
 
 AClang.list_select(pcolm, 'Interior Color', {''}, 'Changes the Interior Color on the Vehicle', Mainc, 1, 
 function (t)
     pcolor.int = t - 1
-        Changeintcolor(playerid, pcolor.int)
+        Changeintcolor(players.user(), pcolor.int)
 end)
 
 AClang.list_select(pcolm, 'Dashboard Color', {''}, 'Changes the Dashboard Color on the Vehicle', Mainc, 1, 
 function (t)
     pcolor.das = t - 1
-        Changedashcolor(playerid, pcolor.das)
+        Changedashcolor(players.user(), pcolor.das)
 end)
 
 AClang.list_select(plighm, 'Neons', {''}, 'Changes the Neons to different colors', Mainc, 1, 
 function(c)
     local ncolor = c - 1
-        Changeneon(playerid, ncolor)
+        Changeneon(players.user(), ncolor)
 end)
 
 AClang.list_select(plscm, 'Window Tints', {''}, 'Changes the Tint on the Vehicle', Til, 1, 
 function (t)
     local tint = t - 1
-        Changetint(playerid, tint)
+        Changetint(players.user(), tint)
 end)
 
 AClang.list_select(plighm, 'Headlights', {''}, 'Changes the Headlights to different colors', Lighc, 1, 
@@ -1269,7 +1288,7 @@ AClang.list_select(plighm, 'Headlights', {''}, 'Changes the Headlights to differ
 function(c)
     local hcolor = c - 1
 
-        Changehead(playerid, hcolor)
+        Changehead(players.user(), hcolor)
 
 end)
 
@@ -1279,7 +1298,7 @@ end)
 local pnrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
 
 AClang.action(plighm, 'Change RGB Neons', {}, 'Change the Color for the Neons to RGB of your choice', function ()
-    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     RGBNeonKit(pedm)
     local red = pnrgb.color.r * 255
@@ -1295,14 +1314,14 @@ end)
 AClang.list_select(pwmenu, 'Bennys Bespoke', {''}, 'Changes the wheels to Bennys Bespoke wheels', Bbw, 1, 
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 9, wheel)
+        Changewheel(players.user(), 9, wheel)
 end)
 
 
 AClang.list_select(pwmenu, 'Bennys Originals', {''}, 'Changes the wheels to Bennys Originals wheels', Bow, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 8, wheel)
+        Changewheel(players.user(), 8, wheel)
 
 end)
 
@@ -1310,7 +1329,7 @@ end)
 AClang.list_select(pwmenu, 'Bike', {''}, 'Changes the wheels to Bike(motorcycle) wheels', Bw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 6, wheel)
+        Changewheel(players.user(), 6, wheel)
 
 end)
 
@@ -1318,21 +1337,21 @@ end)
 AClang.list_select(pwmenu, 'High End', {''}, 'Changes the wheels to High End wheels', Hew, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 7, wheel)
+        Changewheel(players.user(), 7, wheel)
 end)
 
 
 AClang.list_select(pwmenu, 'Lowrider', {''}, 'Changes the wheels to Lowrider wheels', Lw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 2, wheel)
+        Changewheel(players.user(), 2, wheel)
     
 end)
 
 AClang.list_select(pwmenu, 'Muscles', {''}, 'Changes the wheels to Muscle wheels', Mw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 1, wheel)
+        Changewheel(players.user(), 1, wheel)
 
 end)
 
@@ -1340,59 +1359,59 @@ end)
 AClang.list_select(pwmenu, 'Offroad', {''}, 'Changes the wheels to Offroad wheels', Orw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 4, wheel)
+        Changewheel(players.user(), 4, wheel)
 end)
 
 
 AClang.list_select(pwmenu, 'Racing(Formula 1 Wheels)', {''}, 'Changes the wheels to Racing(Formula 1 Wheels) wheels', Rw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 10, wheel)
+        Changewheel(players.user(), 10, wheel)
 end)
 
 
 AClang.list_select(pwmenu, 'Sport', {''}, 'Changes the wheels to Sport wheels', Spw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 0, wheel)
+        Changewheel(players.user(), 0, wheel)
 end)
 
 
 AClang.list_select(pwmenu, 'Street', {''}, 'Changes the wheels to Street wheels', Stw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 11, wheel)
+        Changewheel(players.user(), 11, wheel)
 end)
 
 
 AClang.list_select(pwmenu, 'SUV', {''}, 'Changes the wheels to SUV wheels', Suw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 3, wheel)
+        Changewheel(players.user(), 3, wheel)
     
 end)
 
 AClang.list_select(pwmenu, 'Tracks', {''}, 'Changes the wheels to Track wheels', Trw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 12, wheel)
+        Changewheel(players.user(), 12, wheel)
 end)
 
 
 AClang.list_select(pwmenu, 'Tuner', {''}, 'Changes the wheels to Tuner wheels', Tuw, 1,
 function(w)
     local wheel = w - 1
-        Changewheel(playerid, 5, wheel)
+        Changewheel(players.user(), 5, wheel)
 end)
 
 local pwinmenu = AClang.list(vehroot, 'Windows', {}, '')
 
 AClang.action(pwinmenu, 'Roll Up All Windows', {'upwin'}, 'Rolls up all windows at once', function ()
-        Rollaup(playerid)
+        Rollaup(players.user())
 end)
 
 AClang.action(pwinmenu, 'Roll Down All Windows', {'downwin'}, 'Rolls up all windows at once', function ()
-        Rolladown(playerid)
+        Rolladown(players.user())
 end)
 
 
@@ -1426,9 +1445,9 @@ local rgb = {cus = 100}
     
 
     AClang.toggle_loop(rgbvm, 'Custom RGB Synced', {}, 'Change the vehicle color and neon lights to custom RGB with a synced color', function ()
-       if PED.IS_PED_IN_ANY_VEHICLE(playerped, true) ~= 0 then
-        local vmod = PED.GET_VEHICLE_PED_IS_IN(playerped, true)
-        RGBNeonKit(playerped)
+       if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), true) ~= 0 then
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
+        RGBNeonKit(players.user_ped())
         local red = (math.random(0, 255))
         local green = (math.random(0, 255))
         local blue = (math.random(0, 255))
@@ -1460,9 +1479,9 @@ local rgb = {cus = 100}
           {145, 11}, --purple
           {142, 12} --blacklight
         }
-       if PED.IS_PED_IN_ANY_VEHICLE(playerped) ~= 0 then
-        local vmod = PED.GET_VEHICLE_PED_IS_IN(playerped, true)
-        RGBNeonKit(playerped)
+       if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) ~= 0 then
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), true)
+        RGBNeonKit(players.user_ped())
         local rcolor = math.random(1, 12)
         VEHICLE.TOGGLE_VEHICLE_MOD(vmod, 22, true)
         VEHICLE.SET_VEHICLE_NEON_INDEX_COLOUR(vmod, color[rcolor][1])
@@ -1501,7 +1520,7 @@ local rgb = {cus = 100}
         end)
      
        util.create_tick_handler(function ()
-            if PED.IS_PED_IN_VEHICLE(playerped, Lsdcar, false) ==true then
+            if PED.IS_PED_IN_VEHICLE(players.user_ped(), Lsdcar, false) ==true then
             VEHICLE.SET_VEHICLE_DIRT_LEVEL(Lsdcar, 0)
             ENTITY.SET_ENTITY_INVINCIBLE(Lsdcar, true)
             VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(Lsdcar, false)
@@ -1562,11 +1581,11 @@ local rgb = {cus = 100}
     SDspawn = AClang.toggle_loop(sdroot, 'Spawn Lazer Space Docker', {'lsdspawn'}, 'Space Docker that can shoot lazers', function ()
 
         Streament(lsd.hash)
-        local pedSi = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
-        local pCoor = ENTITY.GET_ENTITY_COORDS(playerped)
+        local pedSi = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+        local pCoor = ENTITY.GET_ENTITY_COORDS(players.user_ped())
         local pH = ENTITY.GET_ENTITY_HEADING(pCoor)
     
-            if players.is_in_interior(playerid) ==true then
+            if players.is_in_interior(players.user()) ==true then
                 if set.alert then
                     AClang.toast('Lazer Space Docker will not Spawn in interior')
                 end
@@ -1574,7 +1593,7 @@ local rgb = {cus = 100}
                 return
             end
             
-        if PED.IS_PED_IN_VEHICLE(playerped, Lsdcar, true) ==false and PED.IS_PED_IN_ANY_VEHICLE(playerped) ==true then
+        if PED.IS_PED_IN_VEHICLE(players.user_ped(), Lsdcar, true) ==false and PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) ==true then
             local curcar = entities.get_user_vehicle_as_handle()
             ENTITY.SET_ENTITY_AS_MISSION_ENTITY(curcar)
             entities.delete_by_handle(curcar)
@@ -1586,7 +1605,7 @@ local rgb = {cus = 100}
             end
 
     
-            elseif PED.IS_PED_IN_VEHICLE(playerped, Lsdcar, true) ==true then
+            elseif PED.IS_PED_IN_VEHICLE(players.user_ped(), Lsdcar, true) ==true then
                 local weap = util.joaat(lsd.weap)
                 WEAPON.REQUEST_WEAPON_ASSET(weap)
             
@@ -1602,14 +1621,14 @@ local rgb = {cus = 100}
                 end
 
 
-            elseif PED.IS_PED_IN_ANY_VEHICLE(playerped) ==false and not ENTITY.DOES_ENTITY_EXIST(Lsdcar) then
+            elseif PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) ==false and not ENTITY.DOES_ENTITY_EXIST(Lsdcar) then
                 SDcreate(pCoor, pedSi)
                      if set.alert then
                         AClang.toast('Lazer Space Docker Spawned')
                      end
             end
     
-    if PED.IS_PED_GETTING_INTO_A_VEHICLE(playerped) ==false and PED.IS_PED_IN_VEHICLE(playerped, Lsdcar , false) ==false
+    if PED.IS_PED_GETTING_INTO_A_VEHICLE(players.user_ped()) ==false and PED.IS_PED_IN_VEHICLE(players.user_ped(), Lsdcar , false) ==false
                 then
                     if set.alert then
                         AClang.toast('Player has left the Lazer Space Docker and it has been deleted')
@@ -1634,7 +1653,7 @@ local charroot = AClang.list(vehroot, 'Charger', {}, 'Duke O Death with Electro 
 local charger = {charg = util.joaat('dukes2'), emp = util.joaat('hei_prop_heist_emp')}
 local function Ccreate(pCoor, pedSi)
 
-        FFchar = VEHICLE.CREATE_VEHICLE(charger.charg, pCoor.x, pCoor.y, pCoor.z, 0, true, true, false)
+        FFchar = VEHICLE.CREATE_VEHICLE(charger.charg, pCoor.x, pCoor.y, pCoor.z + 1, 0, true, true, false)
         PED.SET_PED_INTO_VEHICLE(pedSi, FFchar, -1)
         VEHICLE.SET_VEHICLE_COLOURS(FFchar, 118, 0)
         Vmod(FFchar, 'Mopar')
@@ -1657,7 +1676,7 @@ local function Ccreate(pCoor, pedSi)
     local magval = {scale = 5000, nodam = true}
     function Magout()
         if  PAD.IS_CONTROL_PRESSED(0, 86) then
-        local car = ENTITY.GET_ENTITY_COORDS(playerped)
+        local car = ENTITY.GET_ENTITY_COORDS(players.user_ped())
         for x = 0, 10 do
             FIRE.ADD_EXPLOSION(car.x + x, car.y, car.z, 81, magval.scale, false, true, 0.0, magval.nodam)
         end
@@ -1677,12 +1696,10 @@ function Yeet()
     if #closeveh >= 5 then return end
     if  PAD.IS_CONTROL_PRESSED(0, 72) and PAD.IS_CONTROL_PRESSED(0, 76) then
         for _, pveh in ipairs(entities.get_all_vehicles_as_handles()) do
-        if ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(pveh, FFchar, 17) then
             if disbet >= 5 then
                 table.insert(closeveh, pveh)
             end
             if #closeveh >= 50 then break end
-        end
         for _, cv in ipairs(closeveh) do
             if cv ~= car then
                 ENTITY.FREEZE_ENTITY_POSITION(FFchar, true)
@@ -1710,7 +1727,7 @@ end
         magval.scale = s
     end)    
       util.create_tick_handler(function ()
-            if PED.IS_PED_IN_VEHICLE(playerped, FFchar, false) ==true then
+            if PED.IS_PED_IN_VEHICLE(players.user_ped(), FFchar, false) ==true then
             VEHICLE.SET_VEHICLE_DIRT_LEVEL(FFchar, 0)
             ENTITY.SET_ENTITY_INVINCIBLE(FFchar, true)
             VEHICLE.SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(FFchar, false)
@@ -1722,11 +1739,10 @@ end
 
     Streament(charger.charg)
     Streament(charger.emp)
-    local pedSi = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
-    local pCoor = ENTITY.GET_ENTITY_COORDS(playerped)
-    local pH = ENTITY.GET_ENTITY_HEADING(pCoor)
+    
 
-        if players.is_in_interior(playerid) ==true then
+
+        if players.is_in_interior(players.user()) ==true then
             if set.alert then
                 AClang.toast('Charger will not Spawn in interior')
             end
@@ -1734,7 +1750,7 @@ end
             return
         end
 
-    if PED.IS_PED_IN_VEHICLE(playerped, FFchar, true) ==false and PED.IS_PED_IN_ANY_VEHICLE(playerped) ==true then
+    if PED.IS_PED_IN_VEHICLE(players.user_ped(), FFchar, true) ==false and PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) ==true then
         local curcar = entities.get_user_vehicle_as_handle()
         ENTITY.SET_ENTITY_AS_MISSION_ENTITY(curcar)
         entities.delete_by_handle(curcar)
@@ -1742,21 +1758,25 @@ end
             AClang.toast('Fuck that car')
         end
         for i = 1, 1 do
+            local pedSi = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+            local pCoor = ENTITY.GET_ENTITY_COORDS(players.user_ped(), true)
             Ccreate(pCoor, pedSi)
         end
         
 
-        elseif PED.IS_PED_IN_VEHICLE(playerped, FFchar, true) ==true then
+        elseif PED.IS_PED_IN_VEHICLE(players.user_ped(), FFchar, true) ==true then
             Magout()
             Yeet()
-        elseif PED.IS_PED_IN_ANY_VEHICLE(playerped) ==false then
+        elseif PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) ==false then
+            local pedSi = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+            local pCoor = ENTITY.GET_ENTITY_COORDS(players.user_ped(), true)
                 Ccreate(pCoor, pedSi)
                  if set.alert then
                     AClang.toast('Charger Spawned')
                  end
         end
 
-if PED.IS_PED_GETTING_INTO_A_VEHICLE(playerped) ==false and PED.IS_PED_IN_VEHICLE(playerped, FFchar , false) ==false
+if PED.IS_PED_GETTING_INTO_A_VEHICLE(players.user_ped()) ==false and PED.IS_PED_IN_VEHICLE(players.user_ped(), FFchar , false) ==false
             then
                 if set.alert then
                     AClang.toast('Player has left Charger and it has been deleted')
@@ -1784,7 +1804,7 @@ end)
 
 AClang.toggle_loop(vehroot, 'Stick to Walls', {'sticktg'}, 'Makes it to where the vehicle sticks to walls(using horn boost on the lowest setting helps get up on the walls)', function ()
     local curcar = entities.get_user_vehicle_as_handle()
-    if PED.IS_PED_IN_ANY_VEHICLE(playerped) then
+    if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) then
         ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(curcar, 1, 0, 0, - 0.5, 0, true, true, true, true)
         VEHICLE.MODIFY_VEHICLE_TOP_SPEED(curcar, 40)
     else
@@ -1797,7 +1817,7 @@ end)
 local horn = {speed = 40}
 AClang.toggle_loop(vehroot, 'Horn Boost', {'horn'}, 'Boost the car when the horn is pressed you can hold it down to go continously', function ()
         local vmod = entities.get_user_vehicle_as_handle()
-        if PLAYER.IS_PLAYER_PRESSING_HORN(playerid) then
+        if PLAYER.IS_PLAYER_PRESSING_HORN(players.user()) then
             VEHICLE.SET_VEHICLE_FORWARD_SPEED(vmod, horn.speed)
         end
 end)
@@ -1816,8 +1836,68 @@ AClang.toggle_loop(vehroot, 'Unlimited Submarine Crush Depth', {'subdepth'}, 'In
     end
 end)
 
+local fly = {speed = 100, coll = false}
+local function vehflight(curcar, speed)
+    
+    local camr = CAM.GET_GAMEPLAY_CAM_ROT(0)
+    
+    ENTITY.SET_ENTITY_ROTATION(curcar, camr.x, camr.y, camr.z, 1, true)
 
+if PAD.IS_CONTROL_PRESSED(0, 71) then
+    ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+    VEHICLE.SET_VEHICLE_FORWARD_SPEED(curcar, speed)
+    if PAD.IS_CONTROL_PRESSED(0, 76) then
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+        VEHICLE.SET_VEHICLE_FORWARD_SPEED(curcar, 2 * speed)
+    
+    end
 
+elseif PAD.IS_CONTROL_PRESSED(0, 72) then
+    ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+    VEHICLE.SET_VEHICLE_FORWARD_SPEED(curcar, - speed)
+    if PAD.IS_CONTROL_PRESSED(0, 76) then
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+        VEHICLE.SET_VEHICLE_FORWARD_SPEED(curcar, - 2 * speed)
+    
+    end
+    else ENTITY.FREEZE_ENTITY_POSITION(curcar, true)
+end
+    
+end
+local flyroot = AClang.list(vehroot, 'Vehicle Fly', {}, 'Fly your vehicle')
+
+Vflight = AClang.toggle_loop(flyroot, 'Vehicle Flight', {'vfly'}, 'Turn on Vehicle Flight (best to have this as a hotkey for easy access)', function ()
+    SFfly()
+    local curcar = entities.get_user_vehicle_as_handle()
+    if fly.coll then
+        ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(curcar , false, true)
+        else 
+            ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(curcar , true, true) 
+    end
+    
+    if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped()) then
+       vehflight(curcar, fly.speed) 
+       
+    else 
+        AClang.toast('You are not in a vehicle flight off')
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, false) 
+        menu.set_value(Vflight, false)
+    end
+end, function ()
+    local curcar = entities.get_user_vehicle_as_handle()
+    VEHICLE.SET_VEHICLE_ON_GROUND_PROPERLY(curcar, 5.0)
+    ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+    ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(curcar , true, true) 
+    menu.set_value(Discol, false)
+end)
+
+AClang.slider(flyroot, 'Change how fast you fly', {'flyspeed'}, 'Change Speed for Vehicle Flight (actual speed is roughly double the number in MPH)', 10, 150, 40, 10, function (s)
+   fly.speed = s
+ end)
+
+Discol = AClang.toggle(flyroot, 'Disable Collision', {'discol'}, 'Disable the Collision with other objects when you are flying', function (on)
+    fly.coll = on
+end)
 
 
 
@@ -1849,7 +1929,7 @@ end)
         end, nil, nil, COMMANDPERM_SPAWN)
 
         menu.on_focus(alias_menu_item, function ()
-          --local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
+          --local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
           --local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
             local hash = util.joaat(vehicle)
             Streament(hash)
@@ -1893,7 +1973,7 @@ AClang.action(onlineroot, 'Snowball Fight', {}, 'Gives everyone in the lobby Sno
         local plyr = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(plist[i])
         WEAPON.GIVE_DELAYED_WEAPON_TO_PED(plyr, snowballs, 20, true)
         WEAPON.SET_PED_AMMO(plyr, snowballs, 20)
-        players.send_sms(plist[i], playerid, AClang.str_trans('Snowball Fight! You now have snowballs'))
+        players.send_sms(plist[i], players.user(), AClang.str_trans('Snowball Fight! You now have snowballs'))
         util.yield()
     end
    
@@ -1907,15 +1987,15 @@ AClang.action(onlineroot, 'Murica', {}, 'Gives everyone in the lobby Firework La
         local plyr = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(plist[i])
         WEAPON.GIVE_DELAYED_WEAPON_TO_PED(plyr, fireworks, 20, true)
         WEAPON.SET_PED_AMMO(plyr, fireworks, 20)
-        players.send_sms(plist[i], playerid, AClang.str_trans('Murica f*** ya! You now have Fireworks'))
+        players.send_sms(plist[i], players.user(), AClang.str_trans('Murica f*** ya! You now have Fireworks'))
         util.yield()
     end
    
 end)
 
 AClang.toggle_loop(onlineroot, 'Money Trail', {}, 'Everywhere you walk fake money appears', function ()
-    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(playerid)
-    local tar1 = ENTITY.GET_ENTITY_COORDS(playerped, true)
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+    local tar1 = ENTITY.GET_ENTITY_COORDS(players.user_ped(), true)
     Streamptfx('scr_exec_ambient_fm')
     if TASK.IS_PED_WALKING(targets) or TASK.IS_PED_RUNNING(targets) or TASK.IS_PED_SPRINTING(targets) then
         GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD('scr_ped_foot_banknotes', tar1.x, tar1.y, tar1.z - 1, 0, 0, 0, 1.0, true, true, true)
@@ -1924,8 +2004,8 @@ AClang.toggle_loop(onlineroot, 'Money Trail', {}, 'Everywhere you walk fake mone
 end)
 
 AClang.action(onlineroot, 'Stop Spectating', {'sspect'}, 'Stop Spectating anyone in the lobby', function ()
-    Specon(playerid)
-    Specoff(playerid)
+    Specon(players.user())
+    Specoff(players.user())
 end)
 
 AClang.action(onlineroot, 'Stop Sounds', {'ssound'}, 'Stop all sounds incase they are going off constantly', function ()
@@ -1952,8 +2032,8 @@ end)
 
 AClang.toggle_loop(onlineroot, 'Ultra Jump', {}, 'Keep going higher the longer you press jump (can also be used to fly)', function ()
         if PAD.IS_CONTROL_PRESSED(0, 22) then
-            PED.SET_PED_CAN_RAGDOLL(playerped, false)
-            ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(playerped, 1, 0.5, 0.5, 0.5, 0, 0, 0, 0, true, true, true, true)
+            PED.SET_PED_CAN_RAGDOLL(players.user_ped(), false)
+            ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(players.user_ped(), 1, 0.5, 0.5, 0.5, 0, 0, 0, 0, true, true, true, true)
         end
 end)
 
@@ -1963,13 +2043,13 @@ local function objams(obj_hash, obj, camcoords)
     local CV = CAM.GET_GAMEPLAY_CAM_RELATIVE_HEADING()
     if STREAMING.IS_MODEL_A_VEHICLE(obj_hash) then
         obj.prev = VEHICLE.CREATE_VEHICLE(obj_hash, camcoords.x, camcoords.y, camcoords.z, CV, true, true, false)
-        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, playerped, false)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, players.user_ped(), false)
       elseif STREAMING.IS_MODEL_A_PED(obj_hash) then
         obj.prev = entities.create_ped(1, obj_hash, camcoords, CV)
-        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, playerped, false)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, players.user_ped(), false)
       elseif STREAMING.IS_MODEL_VALID(obj_hash) then
         obj.prev = OBJECT.CREATE_OBJECT(obj_hash, camcoords.x, camcoords.y, camcoords.z, true, true, true)
-        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, playerped, false)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(obj.prev, players.user_ped(), false)
     end
 
     if obj.prev then
@@ -2023,7 +2103,7 @@ end
 local function oshot(hash, camcoords, rot)
     if not ENTITY.DOES_ENTITY_EXIST(obj_shot) then
         local objs = OBJECT.CREATE_OBJECT(hash, camcoords.x, camcoords.y, camcoords.z, true, true, true)
-        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(objs, playerped, false)
+        ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(objs, players.user_ped(), false)
         util.yield(20)
         ENTITY.SET_ENTITY_ROTATION(objs, rot.x, rot.y, rot.z, 0, true)
         
@@ -2031,7 +2111,7 @@ local function oshot(hash, camcoords, rot)
         table.insert(objtab, objs)
         else
             local sobjs = OBJECT.CREATE_OBJECT(hash, camcoords.x, camcoords.y, camcoords.z, true, true, true)
-            ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(sobjs, playerped, false)
+            ENTITY.SET_ENTITY_NO_COLLISION_ENTITY(sobjs, players.user_ped(), false)
             util.yield(20)
             ENTITY.SET_ENTITY_ROTATION(sobjs, rot.x, rot.y, rot.z, 0, true)
             ENTITY.APPLY_FORCE_TO_ENTITY(sobjs, 2, camcoords.x ,  15000, camcoords.z , 0, 0, 0, 0,  true, false, true, false, true)
@@ -2063,7 +2143,7 @@ local function objshots(hash, obj, camcoords)
                 end
             end
             local carc = ENTITY.GET_ENTITY_COORDS(car)
-            local tar2 = ENTITY.GET_ENTITY_COORDS(playerped)
+            local tar2 = ENTITY.GET_ENTITY_COORDS(players.user_ped())
             local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, carc.x, carc.y, carc.z)
             if disbet > 15000 then
                 entities.delete_by_handle(car)
@@ -2083,7 +2163,7 @@ local function objshots(hash, obj, camcoords)
             end
                 
                     local pedc = ENTITY.GET_ENTITY_COORDS(ped)
-                    local tar2 = ENTITY.GET_ENTITY_COORDS(playerped)
+                    local tar2 = ENTITY.GET_ENTITY_COORDS(players.user_ped())
                     local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, pedc.x, pedc.y, pedc.z)
                     if disbet > 15000 then
                         entities.delete_by_handle(ped)
@@ -2110,7 +2190,7 @@ local function objshots(hash, obj, camcoords)
         end
 
                 local objc = ENTITY.GET_ENTITY_COORDS(objs)
-                local tar2 = ENTITY.GET_ENTITY_COORDS(playerped)
+                local tar2 = ENTITY.GET_ENTITY_COORDS(players.user_ped())
                 local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, objc.x, objc.y, objc.z)
 
                 if disbet > 15000 then
@@ -2133,7 +2213,7 @@ local obj = {expl = false}
 OBJgun = AClang.toggle_loop(objgun, 'Custom Object Gun', {'objgun'}, 'Fires the object you have selected', function ()
    local hash = util.joaat(obj_hash)
     Streament(hash)
-    if PLAYER.IS_PLAYER_FREE_AIMING(playerid) then
+    if PLAYER.IS_PLAYER_FREE_AIMING(players.user()) then
         local rot = CAM.GET_GAMEPLAY_CAM_ROT(0)
         local camcoords = get_offset_from_camera(10)
         if not ENTITY.DOES_ENTITY_EXIST(obj.prev) then
@@ -2143,10 +2223,10 @@ OBJgun = AClang.toggle_loop(objgun, 'Custom Object Gun', {'objgun'}, 'Fires the 
         end
         ENTITY.SET_ENTITY_ROTATION(obj.prev, rot.x, rot.y, rot.z, 0, true)
         
-    elseif ENTITY.DOES_ENTITY_EXIST(obj.prev) and not PLAYER.IS_PLAYER_FREE_AIMING(playerid) then
+    elseif ENTITY.DOES_ENTITY_EXIST(obj.prev) and not PLAYER.IS_PLAYER_FREE_AIMING(players.user()) then
         entities.delete_by_handle(obj.prev)
     end
-    if PED.IS_PED_SHOOTING(playerped) then
+    if PED.IS_PED_SHOOTING(players.user_ped()) then
         local camcoords = get_offset_from_camera(15)
         objshots(hash, obj, camcoords)
         entities.delete_by_handle(obj.prev)
