@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 0.12 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 0.13 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')
@@ -19,6 +19,7 @@ SEC = ENTITY.SET_ENTITY_COORDS
 
 
 local set = {alert = true}
+
 
 
 AClang.action(menu.my_root(), 'Restart Script', {}, 'Restarts the script to check for updates', function ()
@@ -129,6 +130,27 @@ function SFfly()
     memory.write_int(memory.script_global(1645739+1121), 1)
     sf.CLEAR_ALL()
     sf.TOGGLE_MOUSE_BUTTONS(false)
+    sf.SET_DATA_SLOT(2,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 76, true), AClang.str_trans('Fly forward or backward twice as fast'))
+    sf.SET_DATA_SLOT(1,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 88, true), AClang.str_trans('Backward'))
+    sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 87, true), AClang.str_trans('Forward'))
+    sf.DRAW_INSTRUCTIONAL_BUTTONS()
+    sf:draw_fullscreen()
+end
+function SFfly2()
+    local scaleform = require('ScaleformLib')
+    local sf = scaleform('instructional_buttons')
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
+---@diagnostic disable-next-line: param-type-mismatch
+    memory.write_int(memory.script_global(1645739+1121), 1)
+    sf.CLEAR_ALL()
+    sf.TOGGLE_MOUSE_BUTTONS(false)
+    sf.SET_DATA_SLOT(6,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 62, true), AClang.str_trans('Down'))
+    sf.SET_DATA_SLOT(5,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 61, true), AClang.str_trans('Up'))
+    sf.SET_DATA_SLOT(4,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 34, true), AClang.str_trans('Left'))
+    sf.SET_DATA_SLOT(3,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 35, true), AClang.str_trans('Right'))
     sf.SET_DATA_SLOT(2,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 76, true), AClang.str_trans('Fly forward or backward twice as fast'))
     sf.SET_DATA_SLOT(1,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 88, true), AClang.str_trans('Backward'))
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 87, true), AClang.str_trans('Forward'))
@@ -1836,8 +1858,11 @@ AClang.toggle_loop(vehroot, 'Unlimited Submarine Crush Depth', {'subdepth'}, 'In
     end
 end)
 
-local fly = {speed = 100, coll = false}
+local fly = {speed = 100, coll = false, stop = true, contr = false}
 local function vehflight(curcar, speed)
+    if fly.stop then
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, true)
+    end
     
     local camr = CAM.GET_GAMEPLAY_CAM_ROT(0)
     
@@ -1860,14 +1885,34 @@ elseif PAD.IS_CONTROL_PRESSED(0, 72) then
         VEHICLE.SET_VEHICLE_FORWARD_SPEED(curcar, - 2 * speed)
     
     end
-    else ENTITY.FREEZE_ENTITY_POSITION(curcar, true)
+
 end
+
+
+if fly.contr then
+    SFfly2()
+    if PAD.IS_CONTROL_PRESSED(0, 61) then
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(curcar, 1, 0, 0, speed, 0, true, true, true, true)
+    elseif PAD.IS_CONTROL_PRESSED(0, 62) then
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(curcar, 1, 0, 0, - speed, 0, true, true, true, true)
+    elseif PAD.IS_CONTROL_PRESSED(0, 64) then
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(curcar, 1, speed/2, 0, 0, 0, true, true, true, true)
+    elseif PAD.IS_CONTROL_PRESSED(0, 63) then
+        ENTITY.FREEZE_ENTITY_POSITION(curcar, false)
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(curcar, 1, - speed/2, 0, 0, 0, true, true, true, true)
+    end
+else SFfly()
+end
+
     
 end
 local flyroot = AClang.list(vehroot, 'Vehicle Fly', {}, 'Fly your vehicle')
 
 Vflight = AClang.toggle_loop(flyroot, 'Vehicle Flight', {'vfly'}, 'Turn on Vehicle Flight (best to have this as a hotkey for easy access)', function ()
-    SFfly()
+    
     local curcar = entities.get_user_vehicle_as_handle()
     if fly.coll then
         ENTITY.SET_ENTITY_COMPLETELY_DISABLE_COLLISION(curcar , false, true)
@@ -1899,7 +1944,13 @@ Discol = AClang.toggle(flyroot, 'Disable Collision', {'discol'}, 'Disable the Co
     fly.coll = on
 end)
 
+AClang.toggle(flyroot, 'Disable Stop', {''}, 'Disable stopping after letting go of the button', function (on)
+    fly.stop = not on
+end)
 
+AClang.toggle(flyroot, 'Add more controls', {''}, 'Add up, down, left and right controls.', function (on)
+    fly.contr = on
+end)
 
  local menus = {}
 
@@ -3660,8 +3711,8 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
                     f:write(a)
                     f:close()
                 end)
-                util.yield(500)
                 async_http.dispatch() 
+                util.yield(500)
             end
             util.yield(1000)
 
