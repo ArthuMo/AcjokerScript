@@ -461,3 +461,7 @@ t(f('Activate the list of vehicle name aliases used for spawning, you can use th
 t(f('Windows Menu'), '窗口菜单')
 t(f('Roll Up Individual Windows'), '收起单个窗口')
 t(f('Roll Down Individual Windows'), '打开单个窗口')
+t(f('Disable Stop'), '禁用停止')
+t(f('Disable stopping after letting go of the button'), '松开按钮后禁用载具停止')
+t(f('Add more controls'), '添加更多控制')
+t(f('Add up, down, left and right controls.'), '添加向上/向下/向左/向右的控制')

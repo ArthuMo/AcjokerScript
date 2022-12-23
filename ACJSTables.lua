@@ -1,6 +1,25 @@
- --------------------------------------------Tables-----------------------------------------------------------
+--------------------------------------------Tables-----------------------------------------------------------
 LANG_SETTINGS = {}
 local AClang = require ('resources/AcjokerScript/AClangLib')
+
+Leyen = {
+    AClang.trans('Tactical Rifle'),
+    AClang.trans('Heavy Sniper MK2'),
+    AClang.trans('Combat MG MK2'),
+    AClang.trans('Special Carbine MK2'),
+    AClang.trans('Railgun'),
+    AClang.trans('Rockets'),
+}
+
+Leyel = {
+    'WEAPON_TACTICALRIFLE',
+    'WEAPON_HEAVYSNIPER_MK2',
+    'WEAPON_COMBATMG_MK2',
+    'WEAPON_SPECIALCARBINE_MK2',
+    'weapon_railgun',
+    'WEAPON_RPG'
+}
+
 
 Objn = {
     AClang.trans('Batmobile'),
