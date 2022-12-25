@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 0.14 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 0.15 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')
@@ -739,41 +739,10 @@ function Getmodcou(pid, mod)
     
 end
 
-function CombineTables(table1, table2, table3, table4, table5, table6, table7, table8, table9, table10, table11, result)
-	for _, v in ipairs(table1) do
+function Combinetab(result, ...)
+    for _, v in ipairs(...) do
 		table.insert(result, v)
 	end
-	for _, v in ipairs(table2) do
-		table.insert(result, v)
-	end
-    for _, v in ipairs(table3) do
-		table.insert(result, v)
-	end
-	for _, v in ipairs(table4) do
-		table.insert(result, v)
-	end
-    for _, v in ipairs(table5) do
-		table.insert(result, v)
-	end
-	for _, v in ipairs(table6) do
-		table.insert(result, v)
-	end
-    for _, v in ipairs(table7) do
-		table.insert(result, v)
-	end
-	for _, v in ipairs(table8) do
-		table.insert(result, v)
-	end
-    for _, v in ipairs(table9) do
-		table.insert(result, v)
-	end
-	for _, v in ipairs(table10) do
-		table.insert(result, v)
-	end
-    for _, v in ipairs(table11) do
-		table.insert(result, v)
-	end
-
 end
 
 --memory stuff skidded from heist control
@@ -920,6 +889,9 @@ end
         MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY(leye.x, leye.y, leye.z, cama.x, cama.y,  cama.z, 200, 0, weap, players.user_ped(), true, false, 1000, players.user_ped())
 
     end
+
+
+
 
 
 -------------------------------------------------------------------------------------------------------
@@ -1505,9 +1477,13 @@ local lsrmenu = AClang.list(selfroot, 'Lazer Eyes', {}, '')
 
 local lazereyes = false
 local impact = v3.new()
-local lazer = {exp = false, bull = 'WEAPON_TACTICALRIFLE'}
+local lazer = {exp = false, bull = 'WEAPON_TACTICALRIFLE', crosshair = true}
 AClang.toggle_loop(lsrmenu, 'Lazer Eyes', {'Leyeson'}, 'Shoot lazers out of your eyes also works in vehicles', function (on)
     lazereyes = on
+    if lazer.crosshair then
+        HUD.DISPLAY_SNIPER_SCOPE_THIS_FRAME()
+    end
+    
     local weap = util.joaat(lazer.bull)
     local camrot = CAM.GET_FINAL_RENDERED_CAM_ROT(2)
     WEAPON.REQUEST_WEAPON_ASSET(weap)
@@ -1536,6 +1512,9 @@ AClang.list_select(lsrmenu, 'Change Bullets', {'lebullets'}, 'Change the Bullets
     lazer.bull = Leyel[bulsel] 
 end)
 
+AClang.toggle(lsrmenu, 'No Crosshair', {''}, 'Turn off crosshair with Lazer Eyes', function (on)
+    lazer.crosshair = not on
+end)
 
 
 
@@ -3480,7 +3459,7 @@ end, 'toreador')
         end
     end)
     local pcages = {}
-    CombineTables(AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp, pcages)
+    Combinetab(pcages, AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp)
     local rcage_table = {}
     local rpedca =  AClang.toggle_loop(pcagem, 'Random Ped Cage', {'PCAGE'}, 'Traps Player in a Cage of Random Peds', function ()
       local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
