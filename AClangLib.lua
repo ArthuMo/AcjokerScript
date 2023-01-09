@@ -49,10 +49,10 @@ local AClang = {}
 
 function AClang.trans(txt)
     if txt == nil or #txt < 1 then return '' end
-
+    lang.register(txt)
     local label = lang.find(txt)
     if label == 0 then
-        label = lang.register(txt)
+            label = lang.find_registered(txt)
     end
     return label
 end
@@ -197,7 +197,7 @@ function AClang.slider_text(root, name, tableCommands, description, ...)
     return menu.slider_text(root, AClang.trans(name), tableCommands, AClang.trans(description), ...)
 end
 
-LOADING_SCRIPT = false
+
 
 return AClang
 

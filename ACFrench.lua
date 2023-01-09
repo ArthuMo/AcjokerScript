@@ -1,6 +1,6 @@
  --Full credits to akatozi#0691 and BloodyStall_#1881 for the translations Thank You
 lang.set_translate('fr')
-local f = lang.find
+local f = lang.find_registered
 local t = lang.translate
 
 

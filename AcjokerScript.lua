@@ -9,7 +9,7 @@
    
 --github
 
-local localVer = 0.15 -- all credits for the updater go to Prisuhm#7717 Thank You
+local localVer = 0.16 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')

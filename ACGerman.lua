@@ -1,7 +1,7 @@
  -- Full credits to - THEKING -#8311 for the translations Thank You
 lang.set_translate('de')
 
-local f = lang.find
+local f = lang.find_registered
 local t = lang.translate
 
 t(f('Kosatka not found'), 'Kosatka wurde nicht gefunden')

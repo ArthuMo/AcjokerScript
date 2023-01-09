@@ -1,7 +1,7 @@
 -- All credits go to Laavi#2058 for the translations Thank You!
 lang.set_translate('nl') 
 
-local f = lang.find
+local f = lang.find_registered
 local t = lang.translate
 
 t(f('Kosatka not found'), 'Kosatka niet gevonden')

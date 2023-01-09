@@ -1,7 +1,7 @@
 --poor translation done by deepl 
 lang.set_translate('lt')
 
-local f = lang.find
+local f = lang.find_registered
 local t = lang.translate
 
 t(f('Kosatka not found'), 'Kosatka nerastas')
