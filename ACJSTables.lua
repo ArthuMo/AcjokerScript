@@ -2,21 +2,33 @@
 LANG_SETTINGS = {}
 local AClang = require ('resources/AcjokerScript/AClangLib')
 
+Seats = {
+    'Any Available Seat',
+    'Driver',
+    'Front Right Passenger',
+    'Back Left Passenger',
+    'Back Right Passenger',
+    'Further Back Left Passenger', 
+    'Further Back Right Passenger', 
+}
+
+
+
 Leyen = {
+    AClang.trans('Railgun'),
     AClang.trans('Tactical Rifle'),
     AClang.trans('Heavy Sniper MK2'),
     AClang.trans('Combat MG MK2'),
     AClang.trans('Special Carbine MK2'),
-    AClang.trans('Railgun'),
     AClang.trans('Rockets'),
 }
 
 Leyel = {
+    'weapon_railgun',
     'WEAPON_TACTICALRIFLE',
     'WEAPON_HEAVYSNIPER_MK2',
     'WEAPON_COMBATMG_MK2',
     'WEAPON_SPECIALCARBINE_MK2',
-    'weapon_railgun',
     'WEAPON_RPG'
 }
 

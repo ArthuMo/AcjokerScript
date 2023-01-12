@@ -8,8 +8,9 @@
    -------------------------------------------------------------------------
    
 --github
-
-local localVer = 0.16 -- all credits for the updater go to Prisuhm#7717 Thank You
+local LOADING_START = util.current_time_millis()
+LOADING_SCRIPT = true
+local localVer = 0.17 -- all credits for the updater go to Prisuhm#7717 Thank You
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')
@@ -17,22 +18,20 @@ require ('resources/AcjokerScript/ACJSTables')
 LANG_SETTINGS = {}
 SEC = ENTITY.SET_ENTITY_COORDS
 local set = {alert = true}
+local my = menu.my_root() 
 
-
-
-
-AClang.action(menu.my_root(), 'Restart Script', {}, 'Restarts the script to check for updates', function ()
+AClang.action(my, 'Restart Script', {}, 'Restarts the script to check for updates', function ()
     util.restart_script()
 end)
 
-AClang.action(menu.my_root(), 'Player Options', {}, 'Redirects you to the Player list in Stand for the Trolling and Friendly options', function ()
+AClang.action(my, 'Player Options', {}, 'Redirects you to the Player list in Stand for the Trolling and Friendly options', function ()
     menu.ref_by_path("Players"):trigger()
 end)
 
-local selfroot = AClang.list(menu.my_root(), 'Self', {}, '')
-local onlineroot = AClang.list(menu.my_root(), 'Online', {}, '')
-local vehroot = AClang.list(menu.my_root(), 'Vehicles', {}, '')
-local setroot = AClang.list(menu.my_root(), 'Settings', {}, '')
+local selfroot = AClang.list(my, 'Self', {}, '')
+local onlineroot = AClang.list(my, 'Online', {}, '')
+local vehroot = AClang.list(my, 'Vehicles', {}, '')
+local setroot = AClang.list(my, 'Settings', {}, '')
 
 AClang.toggle(setroot, 'Alerts Off', {'ACAlert'}, 'Turn off the alerts you get from AcjokerScript', function (on)
     set.alert = not on
@@ -519,6 +518,10 @@ function Fixveh(pid)
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FIXED(vmod)
+    VEHICLE.SET_VEHICLE_ENGINE_HEALTH(vmod, 1000)
+    ENTITY.SET_ENTITY_INVINCIBLE(vmod, true)
+    VEHICLE.SET_VEHICLE_IS_CONSIDERED_BY_PLAYER(vmod, true)
+    ENTITY.SET_ENTITY_HEALTH(vmod, 200)
     if set.alert then
     AClang.toast('Vehicle Repaired')
     end
@@ -740,10 +743,14 @@ function Getmodcou(pid, mod)
 end
 
 function Combinetab(result, ...)
-    for _, v in ipairs(...) do
-		table.insert(result, v)
-	end
+    for i, t in pairs({...}) do
+        for _, v in pairs(t) do
+            table.insert(result, v)
+        end
+    end
 end
+
+
 
 --memory stuff skidded from heist control
     local Int_PTR = memory.alloc_int()
@@ -891,10 +898,116 @@ end
     end
 
 
+    function Atkrspawn(invinc, invis, weap, pid, hash)
+        local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local tar1 = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(targets, 1, 0, 0)
+        local mdl = util.joaat(hash)
+        Streament(mdl)
+        local attacker = entities.create_ped(1, mdl, tar1, 0)
+        if invinc then
+            ENTITY.SET_ENTITY_INVINCIBLE(attacker, true)
+        end
+        PED.SET_PED_COMBAT_ABILITY(attacker, 2)
+        PED.SET_PED_RANDOM_PROPS(attacker)
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 5, true)--always fight
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 13, true)--aggressive
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 21, true)--can chase
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 27, true)--perf acc
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 27, true)--dis bull react
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 58, true)--disable flee
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 63, false)-- flee from invinc off
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 71, true)--allow charge beyond defense area
+        TASK.TASK_COMBAT_HATED_TARGETS_AROUND_PED(attacker, 300.0, 0)
+        WEAPON.GIVE_WEAPON_TO_PED(attacker, util.joaat(weap), 9999, true, true)
+        if invis then
+            ENTITY.SET_ENTITY_VISIBLE(attacker, false, 0)
+        end
+        WEAPON.SET_PED_INFINITE_AMMO_CLIP(attacker, true)
+        TASK.TASK_GO_TO_ENTITY(attacker, targets,  -1, -1, 500.0, 0, 0)
+        TASK.TASK_COMBAT_PED(attacker, targets, 0, 16)
+        TASK.TASK_AIM_GUN_AT_ENTITY(attacker, targets, -1, true)
+        TASK.TASK_SHOOT_AT_ENTITY(attacker, targets, -1, util.joaat('FIRING_PATTERN_FULL_AUTO'))
+        PED.SET_PED_KEEP_TASK(attacker, true)
+        PED.SET_PED_RELATIONSHIP_GROUP_HASH(attacker, util.joaat('rgfm_aihateplyrlikeallai'))
+        PED.SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(attacker, true)
+        if not players.exists(pid) then
+            util.stop_thread()
+        end
+        return attacker
+    end
 
+    function Atk(invinc, invis, attacker, weap, pid, targets)
+        if invinc then
+            ENTITY.SET_ENTITY_INVINCIBLE(attacker, true)
+        end
+        if invis then
+            ENTITY.SET_ENTITY_VISIBLE(attacker, false, 0)
+        end
+
+        PED.SET_PED_COMBAT_ABILITY(attacker, 2)
+        PED.SET_PED_RANDOM_PROPS(attacker)
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 5, true)--always fight
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 13, true)--aggressive
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 21, true)--can chase
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 27, true)--perf acc
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 27, true)--dis bull react
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 58, true)--disable flee
+        PED.SET_PED_COMBAT_ATTRIBUTES(attacker, 71, true)--allow charge beyond defense area
+        TASK.TASK_COMBAT_HATED_TARGETS_AROUND_PED(attacker, 300.0, 0)
+        WEAPON.GIVE_WEAPON_TO_PED(attacker, util.joaat(weap), 9999, true, true)
+        WEAPON.SET_PED_INFINITE_AMMO_CLIP(attacker, true)
+        TASK.TASK_GO_TO_ENTITY(attacker, targets,  -1, -1, 500.0, 0, 0)
+        TASK.TASK_COMBAT_PED(attacker, targets, 0, 16)
+        TASK.TASK_AIM_GUN_AT_ENTITY(attacker, targets, -1, true)
+        TASK.TASK_SHOOT_AT_ENTITY(attacker, targets, -1, util.joaat('FIRING_PATTERN_FULL_AUTO'))
+        PED.SET_PED_KEEP_TASK(attacker, true)
+        PED.SET_PED_RELATIONSHIP_GROUP_HASH(attacker, util.joaat('rgfm_aihateplyrlikeallai'))
+        if not players.exists(pid) then
+            util.stop_thread()
+        end
+    end
+
+    function Atkrfol(targets, atkr, tar1, atkset, pid)
+        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+        local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tar1.x, tar1.y, tar1.z)
+        if disbet <= 1  then
+        util.yield(1000)
+        elseif disbet >= 1  then
+            for index, atkrs in ipairs(atkr) do
+                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(atkrs)
+                entities.delete_by_handle(atkrs)
+            end
+            atkr = {}
+            for i = 1, atkset.num do
+                local atkrs = Atkrspawn(atkset.invinc, atkset.invis, atkset.weap, pid , atkset.model)
+                local nid = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(atkrs)
+               -- entities.set_can_migrate(nid, false)
+                table.insert(atkr, atkrs)
+            end
+        util.yield(1000)
+        
+        
+        end
+    end
+
+
+function RepairGod(veh)
+    VEHICLE.SET_VEHICLE_FIXED(veh)
+    VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, 1000)
+    ENTITY.SET_ENTITY_INVINCIBLE(veh, true)
+    VEHICLE.SET_VEHICLE_IS_CONSIDERED_BY_PLAYER(veh, true)
+    ENTITY.SET_ENTITY_HEALTH(veh, 200)
+end
 
 
 -------------------------------------------------------------------------------------------------------
+local atkhash = {}
+
+if atkhash  == 0 then
+    Combinetab(atkhash, AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp)
+
+
+end
 
 
 -------------------------------- Teleports---------------------------------------------------
@@ -1271,35 +1384,35 @@ local function objams(obj_hash, obj, camcoords)
         end
 end
 local objtab = {}
-local veh
-local ped
+local vsh
+local psh
 local obj_shot
 local function vshot(hash, camcoords, CV, rot)
-    if not ENTITY.DOES_ENTITY_EXIST(veh) then
-        veh = entities.create_vehicle(hash, camcoords, CV)
-        ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 0, true)
-        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1000)
-        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, true)
-        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_NON_SCRIPT_PLAYERS(veh, true)
-        table.insert(objtab, veh)
+    if not ENTITY.DOES_ENTITY_EXIST(vsh) then
+        vsh = entities.create_vehicle(hash, camcoords, CV)
+        ENTITY.SET_ENTITY_ROTATION(vsh, rot.x, rot.y, rot.z, 0, true)
+        VEHICLE.SET_VEHICLE_FORWARD_SPEED(vsh, 1000)
+        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(vsh, true)
+        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_NON_SCRIPT_PLAYERS(vsh, true)
+        table.insert(objtab, vsh)
     else
             local veh_sec = entities.create_vehicle(hash, camcoords, CV)
             ENTITY.SET_ENTITY_ROTATION(veh_sec, rot.x, rot.y, rot.z, 0, true)
             VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh_sec, 1000)
-            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, true)
-            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_NON_SCRIPT_PLAYERS(veh, true)
+            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(vsh, true)
+            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_NON_SCRIPT_PLAYERS(vsh, true)
             table.insert(objtab, veh_sec)
     end
 
 end
 local function pshot(hash, camcoords, CV, rot)
-    if not ENTITY.DOES_ENTITY_EXIST(ped) then
-        ped = entities.create_ped(1, hash, camcoords, CV)
-        ENTITY.SET_ENTITY_INVINCIBLE(ped, true)
+    if not ENTITY.DOES_ENTITY_EXIST(psh) then
+        psh = entities.create_ped(1, hash, camcoords, CV)
+        ENTITY.SET_ENTITY_INVINCIBLE(psh, true)
         util.yield(30)
-        ENTITY.SET_ENTITY_ROTATION(ped, rot.x, rot.y, rot.z, 0, true)
-        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(ped, 1, 0, 5000, 0, 0, true, true, true, true)
-        table.insert(objtab, ped)
+        ENTITY.SET_ENTITY_ROTATION(psh, rot.x, rot.y, rot.z, 0, true)
+        ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(psh, 1, 0, 5000, 0, 0, true, true, true, true)
+        table.insert(objtab, psh)
     else
         local sped = entities.create_ped(1, hash, camcoords, CV)
         ENTITY.SET_ENTITY_INVINCIBLE(sped, true)
@@ -1371,11 +1484,11 @@ local function objshots(hash, obj, camcoords)
                 entities.delete_by_handle(psho)
             end
                 
-                    local pedc = ENTITY.GET_ENTITY_COORDS(ped)
+                    local pedc = ENTITY.GET_ENTITY_COORDS(psh)
                     local tar2 = ENTITY.GET_ENTITY_COORDS(players.user_ped())
                     local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, pedc.x, pedc.y, pedc.z)
                     if disbet > 15000 then
-                        entities.delete_by_handle(ped)
+                        entities.delete_by_handle(psh)
                     end
         end
         if i >= 40 then
@@ -1548,18 +1661,316 @@ AClang.toggle_loop(selfroot, 'Ultra Jump', {}, 'Keep going higher the longer you
     end
 end)
 
-
+AClang.toggle_loop(selfroot, 'Turn Radio Off', {'radoff'}, 'Turn off the radio completely(only for you)', function ()
+    local veh = PED.GET_VEHICLE_PED_IS_IN(players.user_ped())
+    if PED.IS_PED_IN_ANY_VEHICLE(players.user_ped(), false) then
+        AUDIO.SET_VEHICLE_RADIO_ENABLED(veh, false)
+        util.yield()
+    end
+end, function ()
+    local veh = PED.GET_VEHICLE_PED_IS_IN(players.user_ped())
+    AUDIO.SET_VEHICLE_RADIO_ENABLED(veh, true)
+end)
 
 
 
 
 
  ------------------------------------------
+  -- From GridSpawn credits to Tonk
+local  colour = {r=0,g=255,b=0,a=255}
+if colour == nil then
+    colour = {r=255,g=0,b=0,a=255}
+end
+local minimum = memory.alloc()
+local maximum = memory.alloc()
+local upVector_pointer = memory.alloc()
+local rightVector_pointer = memory.alloc()
+local forwardVector_pointer = memory.alloc()
+local position_pointer = memory.alloc()
+local draw_bounding_box = function (entity, colour)
+    ENTITY.GET_ENTITY_MATRIX(entity, rightVector_pointer, forwardVector_pointer, upVector_pointer, position_pointer);
+    local forward_vector = v3.new(forwardVector_pointer)
+    local right_vector = v3.new(rightVector_pointer)
+    local up_vector = v3.new(upVector_pointer)
+
+    MISC.GET_MODEL_DIMENSIONS(ENTITY.GET_ENTITY_MODEL(entity), minimum, maximum)
+    local minimum_vec = v3.new(minimum)
+    local maximum_vec = v3.new(maximum)
+    local dimensions = {x = maximum_vec.y - minimum_vec.y, y = maximum_vec.x - minimum_vec.x, z = maximum_vec.z - minimum_vec.z}
+
+    local top_right =           ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entity,       maximum_vec.x, maximum_vec.y, maximum_vec.z)
+    local top_right_back =      {x = forward_vector.x * -dimensions.y + top_right.x,        y = forward_vector.y * -dimensions.y + top_right.y,         z = forward_vector.z * -dimensions.y + top_right.z}
+    local bottom_right_back =   {x = up_vector.x * -dimensions.z + top_right_back.x,        y = up_vector.y * -dimensions.z + top_right_back.y,         z = up_vector.z * -dimensions.z + top_right_back.z}
+    local bottom_left_back =    {x = -right_vector.x * dimensions.x + bottom_right_back.x,  y = -right_vector.y * dimensions.x + bottom_right_back.y,   z = -right_vector.z * dimensions.x + bottom_right_back.z}
+    local top_left =            {x = -right_vector.x * dimensions.x + top_right.x,          y = -right_vector.y * dimensions.x + top_right.y,           z = -right_vector.z * dimensions.x + top_right.z}
+    local bottom_right =        {x = -up_vector.x * dimensions.z + top_right.x,             y = -up_vector.y * dimensions.z + top_right.y,              z = -up_vector.z * dimensions.z + top_right.z}
+    local bottom_left =         {x = forward_vector.x * dimensions.y + bottom_left_back.x,  y = forward_vector.y * dimensions.y + bottom_left_back.y,   z = forward_vector.z * dimensions.y + bottom_left_back.z}
+    local top_left_back =       {x = up_vector.x * dimensions.z + bottom_left_back.x,       y = up_vector.y * dimensions.z + bottom_left_back.y,        z = up_vector.z * dimensions.z + bottom_left_back.z}
+
+    GRAPHICS.DRAW_LINE(
+        top_right.x, top_right.y, top_right.z,
+        top_right_back.x, top_right_back.y, top_right_back.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        top_right.x, top_right.y, top_right.z,
+        top_left.x, top_left.y, top_left.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        top_right.x, top_right.y, top_right.z,
+        bottom_right.x, bottom_right.y, bottom_right.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        bottom_left_back.x, bottom_left_back.y, bottom_left_back.z,
+        bottom_right_back.x, bottom_right_back.y, bottom_right_back.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        bottom_left_back.x, bottom_left_back.y, bottom_left_back.z,
+        bottom_left.x, bottom_left.y, bottom_left.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        bottom_left_back.x, bottom_left_back.y, bottom_left_back.z,
+        top_left_back.x, top_left_back.y, top_left_back.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        top_left_back.x, top_left_back.y, top_left_back.z,
+        top_right_back.x, top_right_back.y, top_right_back.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        top_left_back.x, top_left_back.y, top_left_back.z,
+        top_left.x, top_left.y, top_left.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        bottom_right_back.x, bottom_right_back.y, bottom_right_back.z,
+        top_right_back.x, top_right_back.y, top_right_back.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        bottom_left.x, bottom_left.y, bottom_left.z,
+        top_left.x, top_left.y, top_left.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        bottom_left.x, bottom_left.y, bottom_left.z,
+        bottom_right.x, bottom_right.y, bottom_right.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+    GRAPHICS.DRAW_LINE(
+        bottom_right_back.x, bottom_right_back.y, bottom_right_back.z,
+        bottom_right.x, bottom_right.y, bottom_right.z,
+       colour.r, colour.g, colour.b, colour.a
+    )
+end
+
+local function create_cam(veh) --credits to Hexarobi for the functions and help with them.
+    local cam_pos = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(veh, 0, 2, 5)
+    local camera = CAM.CREATE_CAM_WITH_PARAMS(
+        "DEFAULT_SCRIPTED_CAMERA",
+        cam_pos.x, cam_pos.y, cam_pos.z,
+        0.0, 0.0, 0.0, 70.0, false, false
+    )
+    CAM.POINT_CAM_AT_ENTITY(camera, veh, 0, 0, 0, true)
+    CAM.SET_CAM_ACTIVE(camera, true)
+    CAM.RENDER_SCRIPT_CAMS(true, true, 1000, true, true, 0)
+    util.yield(1000)
+    CAM.STOP_CAM_POINTING(camera)
+    return camera
+end
+
+local function destroy_cam(camera)
+    CAM.RENDER_SCRIPT_CAMS(false, false, 1000, true, false, 0)
+    CAM.DESTROY_CAM(camera, true)
+    CAM.DESTROY_ALL_CAMS(true)
+end
+
+local selected_vehicle
+local nearby_vehicle_cam
+
+local function focus_on_nearby_vehicle(vehicle)
+    util.yield(1000)
+    selected_vehicle = vehicle
+
+    nearby_vehicle_cam = create_cam(selected_vehicle)
+end
+
+local function blur_from_nearby_vehicle(vehicle)
+    if selected_vehicle ~= selected_vehicle then
+            selected_vehicle = nil
+    destroy_cam(nearby_vehicle_cam)
+    end
+    nearby_vehicle_cam = nil
+    util.yield(1000)
+
+end
+function humanReadableNumber(num)
+    return tostring(math.floor(num)):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+end
+
+local menus = {}
+local nearby_vehicle_menus = {}
+
+
+local function rebuild_nearby_vehicles_menu()
+    for _, nearby_vehicle_menu in pairs(nearby_vehicle_menus) do
+        if nearby_vehicle_menu:isValid() then
+            menu.delete(nearby_vehicle_menu)
+        end
+    end
+    local handles = entities.get_all_vehicles_as_handles()
+    menu.on_focus(menus.vehlist, function ()
+     if CAM.DOES_CAM_EXIST(nearby_vehicle_cam) then
+         destroy_cam(nearby_vehicle_cam)
+         selected_vehicle = nil
+         menus.nearby_menu = {}
+     end
+    end) 
+
+ for _, nearby_vehicle_menu in pairs(nearby_vehicle_menus) do
+     if nearby_vehicle_menu:isValid() then
+         menu.delete(nearby_vehicle_menu)
+     end
+ end
+
+
+local player_pos = ENTITY.GET_ENTITY_COORDS(players.user_ped())
+ table.sort(handles, function(a,b)
+     local pos_a = ENTITY.GET_ENTITY_COORDS(a, true)
+     local pos_b = ENTITY.GET_ENTITY_COORDS(b, true)
+     return SYSTEM.VDIST2(player_pos.x, player_pos.y, player_pos.z, pos_b.x, pos_b.y, pos_b.z) > SYSTEM.VDIST2(player_pos.x, player_pos.y, player_pos.z, pos_a.x, pos_a.y, pos_a.z)
+ end)
+    for _, handle in handles do
+    
+
+        local entity_pos = ENTITY.GET_ENTITY_COORDS(handle, 1)
+        local dist = SYSTEM.VDIST(player_pos.x, player_pos.y, player_pos.z, entity_pos.x, entity_pos.y, entity_pos.z)
+        if dist <= 750 and ENTITY.GET_ENTITY_HEALTH(handle) ~= 0 and ENTITY.GET_ENTITY_SPEED(handle) <= 0 then
+            local mod = ENTITY.GET_ENTITY_MODEL(handle)
+            local vname = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(mod)
+            local vmodel = VEHICLE.GET_MAKE_NAME_FROM_VEHICLE_MODEL(mod)
+            menus.nearby_menu = menu.list(menus.vehlist, vname..' '..vmodel..' '..humanReadableNumber(dist)..' meters')
+            menus.seatmen = AClang.list(menus.nearby_menu, 'Takeover Seat', {}, "")
+            local seatnum = VEHICLE.GET_VEHICLE_MODEL_NUMBER_OF_SEATS(mod) + 1
+            for i = 1, seatnum do
+                local text = Seats[i] or ("Extra Seat" .. (i - 1))
+                AClang.action(menus.seatmen, text, {''}, '', function ()
+                    local ped = VEHICLE.GET_PED_IN_VEHICLE_SEAT(handle, i - 3)
+                    if PED.IS_PED_A_PLAYER(ped) then
+                        AClang.toast('Players Vehicle Seat Occupied')
+                    else
+                    if ped > 0 then 
+                        PED.SET_PED_INTO_VEHICLE(ped, handle, -2)
+                    end
+                        PED.SET_PED_INTO_VEHICLE(players.user_ped(), handle, i -3)
+                        VEHICLE.SET_VEHICLE_ENGINE_ON(handle, true, true, false)
+                    end
+                end)
+            end
+
+            menus.rep = AClang.action(menus.nearby_menu, 'Repair and Godmode', {''}, 'Repair the engine and body of the Vehicle and set Godmode', function ()
+                RepairGod(handle)
+            end)
+
+            menus.max = AClang.action(menus.nearby_menu, 'Max Out The Vehicle', {''}, 'Max out the Vehicle and increase speed', function ()
+                Vmod(handle, 'Acjoker')
+            end)
+        
+            menus.exp = AClang.action(menus.nearby_menu, 'Explode Vehicle', {''}, 'Explode the Vehicle', function ()
+                local car = ENTITY.GET_ENTITY_COORDS(handle)
+                FIRE.ADD_EXPLOSION(car.x, car.y, car.z, 81, 5000, false, true, 0.0, false)
+            end)
+        
+            menus.yeet = AClang.action(menus.nearby_menu, 'Yeet', {''}, 'Yeet the Vehicle', function ()
+                ENTITY.APPLY_FORCE_TO_ENTITY(handle, 1, math.random(1, 100) * 100, math.random(1, 100)* 100, math.random(1, 100)* 100, 0.0, 0.0, 0.0, 0, false, false, true, false, false)
+            end)
+
+            menus.del = AClang.action(menus.nearby_menu, 'Delete', {''}, 'Yeet the Vehicle', function ()
+                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(handle)
+                entities.delete_by_handle(handle)
+                destroy_cam(nearby_vehicle_cam)
+                menu.focus(menus.vehlist)
+            end)
+
+
+
+            table.insert(nearby_vehicle_menus, menus.nearby_menu)
+            menu.on_focus(menus.nearby_menu, function ()
+            destroy_cam(nearby_vehicle_cam)
+            menus.create_from_nearby_vehicle = {}
+            end)
+                menu.on_focus(menus.nearby_menu, function(direction) if direction ~= 0 then focus_on_nearby_vehicle(handle) end end)
+                menu.on_blur(menus.nearby_menu, function(direction) if direction ~= 0 then blur_from_nearby_vehicle(handle) end end)
+
+        end
+    end
+end
+
+menus.create_from_nearby_vehicle = menu.list(vehroot, "Nearby Vehicles", {}, "")
+local brgb = {color= {r= 0, g = 1, b = 0, a = 1}}
+ AClang.colour(menus.create_from_nearby_vehicle, 'Box Color', {''}, 'Choose the Box color to be changed to', brgb.color, false, function(ncolor)
+    brgb.color = ncolor
+end)
+    menus.vehlist = AClang.list(menus.create_from_nearby_vehicle, 'Vehicles List', {}, 'Vehicle must not be moving', function ()
+        rebuild_nearby_vehicles_menu()
+end)
+menus.refreshl = AClang.action(menus.vehlist, 'Refresh List', {''}, 'Refresh list of vehicles', function ()
+    if CAM.DOES_CAM_EXIST(nearby_vehicle_cam) then
+        destroy_cam(nearby_vehicle_cam)
+        selected_vehicle = nil
+ 
+    end
+    for _, nearby_vehicle_menu in pairs(nearby_vehicle_menus) do
+        if nearby_vehicle_menu:isValid() then
+            menu.delete(nearby_vehicle_menu)
+        end
+    end
+    rebuild_nearby_vehicles_menu()
+end)
+
+local function nearby_vehicle_tick()
+    if menu.is_open() then
+        if selected_vehicle then
+        
+            local color = {
+                r = brgb.color.r * 255,
+                g = brgb.color.g * 255,
+                b = brgb.color.b * 255,
+                a = brgb.color.a * 255
+            }
+            draw_bounding_box(selected_vehicle, color)
+        end
+    end
+
+end
+util.create_tick_handler(nearby_vehicle_tick)
+menu.on_focus(vehroot, function ()
+    destroy_cam(nearby_vehicle_cam)
+    selected_vehicle = nil
+    nearby_vehicle_cam = nil
+end)
+menu.on_focus(menus.refreshl, function ()
+    destroy_cam(nearby_vehicle_cam)
+    selected_vehicle = nil
+    nearby_vehicle_cam = nil
+end)
+
+
 
 
 
  --------------------------------------------------------
 -- Vehicles
+
+
+
+
 
 local plscm = AClang.list(vehroot, 'Los Santos Customs', {}, '')
 
@@ -2322,7 +2733,7 @@ end)
 
 
 
- local menus = {}
+
 
  local current_preview = nil
 --Vehicle Aliases added by Hexarobi
@@ -2878,15 +3289,16 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
            util.yield(1000)
         end)
     end)
-    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+
     AClang.toggle_loop(pvehmenu, 'Slow Vehicle Down', {'slowv'}, 'Does not freeze them just slows down the vehicles velocity', function ()
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         Specon(pid)
         GetPlayVeh(pid, function ()
             Stopveh(pid)
         end)
         return spec
     end, function ()
-        
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         if not spec then
             Specoff(pid)
         end
@@ -2928,6 +3340,7 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
 
     
     local trollm = AClang.list(menu.player_root(pid), 'Trolling', {}, '' )
+    local atkmenu = AClang.list(trollm, 'Attackers', {}, '')
     local pcagem = AClang.list(trollm, 'Cages', {}, '')
     local cplaym = AClang.list(trollm, 'Vehicular Assault', {}, '')
     local jplaym = AClang.list(trollm, 'Juggle Player', {}, '')
@@ -3007,6 +3420,7 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
 
         if PED.IS_PED_IN_ANY_VEHICLE(targets, true) then
             while PED.IS_PED_IN_ANY_VEHICLE(targets, true) do
+                local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
                 Delcar(targets, spec, pid)
                 util.yield(100)
             end
@@ -3333,6 +3747,188 @@ AClang.slider(jplaym, 'Juggle Rate', {'jugglerate'}, 'Adjust rate at which vehic
 
 end, 'toreador')
 
+local atkr = {}
+local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+local atkset = {model = 'a_m_y_methhead_01', invis = false, invinc = true, weap = 'weapon_railgun', num = 1}
+local atkrtog = AClang.toggle_loop(atkmenu, 'Spawn Attacker', {'spatkr'}, 'Spawn attacker on the person', function ()
+    if not players.exists(pid) then
+        
+        util.stop_thread()
+    end
+
+    if not spec then
+        Specon(pid)
+    end
+
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    Delcar(targets, spec, pid)
+    if not ENTITY.DOES_ENTITY_EXIST(atkr.atkrs) then
+        for i = 1, atkset.num do
+            atkr.atkrs = Atkrspawn(atkset.invinc, atkset.invis, atkset.weap, pid , atkset.model)
+            local nid = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(atkr.atkrs)
+            --entities.set_can_migrate(nid, false)
+            table.insert(atkr, atkr.atkrs)
+        end
+    else
+        return atkr.atkrs
+    end
+
+
+            local tar1 = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(targets, 1, 0, 0)
+            Atkrfol(targets, atkr, tar1, atkset, pid)
+            for _, atk in ipairs(atkr) do
+                
+                if not PED.IS_PED_DEAD_OR_DYING(targets, 1) then
+                    Atk(atkset.invinc, atkset.invis, atk, atkset.weap, pid, targets)
+                   end
+                
+                
+                util.yield(100)
+                if  PED.IS_PED_DEAD_OR_DYING(targets, 1) then
+                    for _, atkrs in ipairs(atkr) do
+                        ENTITY.SET_ENTITY_AS_MISSION_ENTITY(atkrs)
+                        entities.delete_by_handle(atkrs)
+                    end
+                    
+                    util.yield(8000)
+                    for i = 1, atkset.num do
+                        local atkrs = Atkrspawn(atkset.invinc, atkset.invis, atkset.weap, pid , atkset.model)
+                        local nid = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(atkrs)
+                        --entities.set_can_migrate(nid, false)
+                        table.insert(atkr, atkrs)
+                        Atk(atkset.invinc, atkset.invis, atk, atkset.weap, pid, targets)
+                    end
+                end
+                
+        end  
+
+
+
+
+
+
+end, function ()
+    if not players.exists(pid) then
+        if set.alert then
+            AClang.toast('You made them rage quit')
+        end
+
+
+           for index, atk in ipairs(atkr) do
+        ENTITY.SET_ENTITY_AS_MISSION_ENTITY(atk)
+        entities.delete_by_handle(atk)
+    end
+        
+    while atkr ~= 0 do
+        util.stop_thread()
+        util.yield()
+    end
+    
+    atkr = {}
+
+    else
+        if not spec then
+            Specoff(pid)
+        end    
+        for index, atk in ipairs(atkr) do
+            ENTITY.SET_ENTITY_AS_MISSION_ENTITY(atk)
+            entities.delete_by_handle(atk)
+        end
+            
+        while atkr ~= 0 do
+            util.stop_thread()
+            util.yield()
+        end
+        
+        atkr = {}
+    end
+
+end)
+
+
+menus.atkrch = AClang.list(atkmenu, 'Change Attacker', {''}, 'Change the Weapon of the Attackers')
+
+    AClang.list_action(menus.atkrch, 'Special Peds', {''}, 'Changes Peds to One of the Custom Pedcages', SPClist, function(pedsel)
+        atkset.model = SPC[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Ambient Female NPCs', {''}, 'Changes Peds to Ambient Females', AfClist, function(pedsel)
+        atkset.model = AfC[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Ambient Male NPCs', {''}, 'Changes Peds to Ambient Males', AMClist, function(pedsel)
+        atkset.model = AMC[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Cutscene Peds', {''}, 'Changes Peds to Cutscene Peds(dont usually speak)', Csplist, function(pedsel)
+        atkset.model = CSP[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Gang Members', {''}, 'Changes Peds to Gang Members', GMlist, function(pedsel)
+        atkset.model = GM[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Multiplayer Peds', {''}, 'Changes Peds to Multiplayer Peds', Mpplist, function(pedsel)
+        atkset.model = Mpp[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Multiplayer Scenario Females', {''}, 'Changes Peds to Multiplayer Scenario Females', MSFlist, function(pedsel)
+        atkset.model = MSF[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Multiplayer Scenario Males', {''}, 'Changes Peds to Multiplayer Scenario Males', MCMlist, function(pedsel)
+        atkset.model = MCM[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Story Mode Characters', {''}, 'Changes Peds to Story Mode Characters', SMClist, function(pedsel)
+        atkset.model = SMC[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Story Scenario Females', {''}, 'Changes Peds to Story Scenario Females', Ssflist, function(pedsel)
+        atkset.model = Ssf[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'Story Scenario Males', {''}, 'Changes Peds to Story Scenario Males', Ssmlist, function(pedsel)
+        atkset.model = Ssm[pedsel]
+    end)
+
+    AClang.list_action(menus.atkrch, 'DLC Peds', {''}, 'Changes Peds to Peds from the DLCs', Dlcplist, function(pedsel)
+        atkset.model = Dlcp[pedsel]
+    end)
+
+
+
+AClang.slider(atkmenu, 'Number of Attackers', {''}, 'Number of attackers to send', 1, 20, 1, 1, function (s)
+    atkset.num = s
+end)
+
+AClang.toggle(atkmenu, 'Invincible Attackers Off', {''}, 'Make the Attackers not Invincible anymore', function (on)
+    atkset.invinc = not on
+end)
+
+AClang.toggle(atkmenu, 'Invisible Attackers', {''}, 'Make the Attackers Invisible', function (on)
+    atkset.invis = on
+end)
+
+AClang.list_select(atkmenu, 'Attacker Weapon', {''}, 'Change the Weapon of the Attackers', Leyen, 1, function (w)
+    atkset.weap = Leyel[w]
+end)
+
+AClang.action(atkmenu, 'Delete Attackers', {'delatkr'}, 'Delete Attackers', function ()
+    
+    util.yield(100)
+     for index, atk in ipairs(atkr) do
+         ENTITY.SET_ENTITY_AS_MISSION_ENTITY(atk)
+         entities.delete_by_handle(atk)
+     end
+     menu.set_value(atkrtog, false)
+     while atkr ~= 0 do
+         util.stop_thread()
+         util.yield()
+     end
+     
+     atkr = {}
+ end)
 
 
 
@@ -3458,8 +4054,8 @@ end, 'toreador')
                  end
         end
     end)
-    local pcages = {}
-    Combinetab(pcages, AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp)
+    
+    
     local rcage_table = {}
     local rpedca =  AClang.toggle_loop(pcagem, 'Random Ped Cage', {'PCAGE'}, 'Traps Player in a Cage of Random Peds', function ()
       local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
@@ -3467,8 +4063,8 @@ end, 'toreador')
       local pname = PLAYER.GET_PLAYER_NAME(pid)
       if not rcage_table[pid] then
           local rpeds = {}
-          local rpedind = math.random(1, #pcages)
-          local rpedset = pcages[rpedind]
+          local rpedind = math.random(1, #atkhash)
+          local rpedset = atkhash[rpedind]
           local pedhash = util.joaat(rpedset)
           local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
           Delcar(targets, spec, pid)
@@ -3827,7 +4423,7 @@ async_http.init("raw.githubusercontent.com", "/acjoker8818/AcjokerScript/main/Ac
     response = true
     if localVer ~= currentVer then
         AClang.toast("New AcjokerScript version is available, update the lua to get the newest version.")
-        AClang.action(menu.my_root(), AClang.str_trans("Update Lua"), {}, "", function()
+        AClang.action(my, AClang.str_trans("Update Lua"), {}, "", function()
             while response do
                 util.toast('Downloading AcjokerScript Files')
                 util.yield()
@@ -3909,4 +4505,6 @@ until response
 
 util.keep_running()
 
+util.log('Loaded AcjokerScript in '.. util.current_time_millis() - LOADING_START ..' ms.')
 
+LOADING_SCRIPT = false
