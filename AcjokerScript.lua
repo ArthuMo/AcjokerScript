@@ -9,7 +9,7 @@
 --github
 local LOADING_START = util.current_time_millis()
 LOADING_SCRIPT = true
-
+local SCRIPT_VERSION = "0.18b1"
 ---
 --- Auto-Updater Lib Install
 ---
@@ -83,7 +83,6 @@ for _, language in pairs(languages) do
 end
 
 auto_updater.run_auto_update(auto_update_config)
-local localVer = 0.17
 util.require_natives(1663599433)
 util.ensure_package_is_installed('lua/ScaleformLib')
 local AClang = require ('resources/AcjokerScript/AClangLib')
@@ -5133,7 +5132,7 @@ players.dispatch_on_join()
 
 
  -------------------
- AClang.action(setroot, 'Version Number', {}, tostring(localVer), function ()
+ AClang.action(setroot, 'Version Number', {}, tostring(SCRIPT_VERSION), function ()
  end)
 
  AClang.hyperlink(setroot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
@@ -5177,3 +5176,4 @@ util.keep_running()
 util.log('Loaded AcjokerScript in '.. util.current_time_millis() - LOADING_START ..' ms.')
 
 LOADING_SCRIPT = false
+
