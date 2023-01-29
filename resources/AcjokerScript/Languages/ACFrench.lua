@@ -198,7 +198,6 @@ t(f('For the tutorial I would have had a harder time without it'), "Pour le tuto
 t(f('For the ScaleformLib script and help with executing it'), "Pour le script ScaleformLib et l'aide pour le faire fonctionner")
 t(f('For their script it was a heavy influence on the Charger weapon'), "Pour leur script, ça a été une inspiration pour la Charger armée")
 t(f('For all the help with the script they are always a big help'), "Pour toute l'aide avec le script, ils sont toujours d'une grande aide")
-t(f('For the auto updater and help with it'), 'Pour le fonction de mise à jour automatique et son aide avec')
 t(f('For the Chinese translations'), 'Pour la traduction Chinoise')
 t(f('For the Portuguese translations'), 'Pour la traduction Portuguaise')
 t(f('For the German translations'), 'Pour la traduction Allemande')

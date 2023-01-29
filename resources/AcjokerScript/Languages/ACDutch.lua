@@ -122,3 +122,4 @@ t(f('Adjust rate at which vehicles shoot upwards'), 'Pas de frequentie aan waarm
 t(f('Enter Vehicle Hash to change Juggle Vehicle'), 'Voer voertuig Hash in om het voertuig te veranderen dat wordt gebruikt om te jongleren')
 t(f('Juggle Player'), 'Jongleer Speler')
 t(f(' is being juggled'), ' wordt gejongleerd')
+

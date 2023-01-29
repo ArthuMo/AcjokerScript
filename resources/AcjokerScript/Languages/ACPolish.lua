@@ -112,3 +112,4 @@ t(f('Changes Objects to Doors'), 'Zmiana obiektów na drzwi')
 t(f('Changes Objects to Interior Props'), 'Zmiana obiektów na rekwizyty wewnętrzne')
 t(f('Exterior'), 'Zewnętrznie')
 t(f('Changes Objects to Exterior Props'), 'Zmiana obiektów na rekwizyty zewnętrzne')
+
