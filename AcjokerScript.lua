@@ -9,7 +9,7 @@
 --github
 local LOADING_START = util.current_time_millis()
 LOADING_SCRIPT = true
-local SCRIPT_VERSION = "0.18b1"
+local SCRIPT_VERSION = "0.19a1"
 ---
 --- Auto-Updater Lib Install
 ---
@@ -618,6 +618,20 @@ function Accelveh( speed, pid)
     end
 end
 
+function Topspeedveh(speed, pid)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
+    GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_MAX_SPEED(vmod, 100000)
+    VEHICLE.MODIFY_VEHICLE_TOP_SPEED(vmod, speed)
+    if set.alert then
+    AClang.toast('Vehicles Max Speed Modified')
+    end
+end
+
+
+
 function Stopveh(pid)
     local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
     local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
@@ -744,6 +758,36 @@ function Changetint(pid, tint)
         GetControl(vmod, spec, pid)
     VEHICLE.SET_VEHICLE_FIXED(vmod)
     VEHICLE.SET_VEHICLE_WINDOW_TINT(vmod, tint)
+end
+
+function ChangePRGB(pid, prgb)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+        GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
+    local red = prgb.color.r * 255
+    local green = prgb.color.g * 255
+    local blue = prgb.color.b * 255
+    VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(vmod, red, green, blue)
+end
+
+function ChangeSRGB(pid, psrgb)
+    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+    if not players.exists(pid) then
+        util.stop_thread()
+    end
+        GetControl(vmod, spec, pid)
+    VEHICLE.SET_VEHICLE_FIXED(vmod)
+    local red = psrgb.color.r * 255
+    local green = psrgb.color.g * 255
+    local blue = psrgb.color.b * 255
+    VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(vmod, red, green, blue)
 end
 
 
@@ -1101,7 +1145,6 @@ function Plneatkr(invinc, invis, pid, hash)
             PED.SET_PED_INTO_VEHICLE(plpilot , atkplne, -1)
             table.insert(plneatkr, plpilot)
             local seatnum = VEHICLE.GET_VEHICLE_MODEL_NUMBER_OF_SEATS(plne) - 1
-            util.toast(seatnum)
                 for j = 1, seatnum do
                     if ENTITY.DOES_ENTITY_EXIST(atkplne) then
                         util.yield(10)
@@ -1182,7 +1225,6 @@ function Heliatkr(invinc, invis, pid, hash)
         PED.SET_PED_INTO_VEHICLE(pilot , atkheli, -1)
         table.insert(heliatkr, pilot)
         local seatnum = VEHICLE.GET_VEHICLE_MODEL_NUMBER_OF_SEATS(heli) - 1
-        util.toast(seatnum)
             for j = 1, seatnum do
                 if ENTITY.DOES_ENTITY_EXIST(atkheli) then
                     util.yield(10)
@@ -1265,7 +1307,6 @@ function Vehatkr(invinc, invis, pid, hash)
         PED.SET_PED_INTO_VEHICLE(driver , vatkr, -1)
         table.insert(vehatkr, driver)
         local seatnum = VEHICLE.GET_VEHICLE_MODEL_NUMBER_OF_SEATS(vhash) - 1
-        util.toast(seatnum)
             for j = 1, seatnum do
                 if ENTITY.DOES_ENTITY_EXIST(vatkr) then
                     util.yield(10)
@@ -1315,6 +1356,122 @@ function Vehatkr(invinc, invis, pid, hash)
        
 
     return vatkr, driver
+    end
+end
+
+local ped_hash =  {SPC, AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp}
+local ped_names = {SPClist, AMClist, AfClist, Csplist, GM, Mpplist, MSFlist, MCMlist, SMClist, Ssflist, Ssmlist, Dlcplist}
+
+function PedList(menusel, action_function)
+    for i, description in pairs(Pedlistname) do
+        menu.list_action(menusel, description[1], {''}, description[2], ped_names[i], function(pedsel)
+            action_function(ped_hash[i][pedsel])
+        end)
+    end
+end
+function Atkrrefresh()
+    if not players.exists(pid) or atkset.atkrdelete then
+        util.stop_thread()
+    end
+        local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        for _, atk in pairs(spawatk) do
+            local tar1 = ENTITY.GET_ENTITY_COORDS(atk)
+            local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+            local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tar1.x, tar1.y, tar1.z)
+            local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+            if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
+                Delcar(targets, spec, pid)
+            end
+             if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or disbet >= 1000 then
+                    DelEnt(spawatk)
+                    atkset.p = 0
+                    spawatk = {}
+                    util.yield(8000)
+                    while atkset.p < atkset.count and players.exists(pid) do
+                        local atkr = Atkrspawn(atkset.invinc, atkset.invis, pid , atkset.model)
+                        NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
+                        NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
+                        table.insert(spawatk, atkr)
+                        atkset.p = atkset.p + 1
+                        if #spawatk == atkset.count then
+                            return
+                        end
+                    end
+                end
+    end
+end 
+
+function Refreshplnes()
+    if not players.exists(pid) or platkset.plnedelete then
+        util.stop_thread()
+    end
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    for key, plne in pairs(plneveh) do
+        local tarv = ENTITY.GET_ENTITY_COORDS(plne)
+        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+        platkset.disbetplne = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
+            Delcar(targets, spec, pid)
+        end
+        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or platkset.disbetplne >= 1000000 then
+            DelEnt(plneveh)
+            DelEnt(plneatkr)
+        plneveh = {}
+        plneatkr = {}
+        platkset.p = 0
+            util.yield(8000)
+            while platkset.p < platkset.plcount and players.exists(pid)  do
+                local veh, pil = Plneatkr(platkset.invinc, platkset.invis, pid, platkset.plane)
+                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(veh), true)
+                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(veh), players.user(), true)
+                table.insert(plneveh, veh)
+                table.insert(plneatkr, pil)
+                util.yield(150)
+                platkset.p = platkset.p + 1
+                if #plneveh == platkset.plcount then
+                    return
+                end
+            end
+        end  
+    end
+end
+function RefreshHeli()
+    if not players.exists(pid) or heliatkset.helidelete then
+        util.stop_thread()
+    end
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    for key, heli in pairs(heliveh) do
+        local tarv = ENTITY.GET_ENTITY_COORDS(heli)
+        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+        heliatkset.disbetheli = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
+            Delcar(targets, spec, pid)
+        end
+
+        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or heliatkset.disbetheli >= 340000  then
+
+            DelEnt(heliatkr)
+            DelEnt(heliveh)
+        
+            heliatkr = {}
+            heliveh = {}
+            heliatkset.h = 0
+            util.yield(8000)
+            while heliatkset.h < heliatkset.hlcount and players.exists(pid) do
+                local atk, pil = Heliatkr(heliatkset.invinc, heliatkset.invis, pid, heliatkset.helicopter)
+                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
+                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
+                table.insert(heliveh, atk)
+                table.insert(heliatkr, pil)
+                util.yield(250)
+                heliatkset.h = heliatkset.h + 1
+                if #heliveh == heliatkset.hlcount then
+                    return
+                end
+            end
+        end
     end
 end
 
@@ -1627,6 +1784,8 @@ AClang.action(TeleRoot, 'TP to Payphone', {'tppayphone'}, 'Teleport to Payphone 
             end
         end
     end)
+
+
 
     local forwteles = AClang.list(TeleRoot, 'TP Forward Teleports', {}, '')
 
@@ -2349,6 +2508,25 @@ local plighm = AClang.list(plscm, 'Lights', {}, '')
 end)
 
 local pcolor = {}
+
+local prgb = {color= {r= 0, g = 1, b = 0, a = 1}}
+ AClang.colour(pcolm, 'Primary Color RGB', {''}, 'Changes the Primary Color on the Vehicle to RGB', prgb.color, false, function(prbgc)
+    prgb.color = prbgc
+    local red = prgb.color.r * 255
+    local green = prgb.color.g * 255
+    local blue = prgb.color.b * 255
+    local vmod = entities.get_user_vehicle_as_handle()
+    VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(vmod, red, green, blue)
+end)
+
+local psrgb = {color= {r= 1, g = 0, b = 0, a = 1}}
+ AClang.colour(pcolm, 'Secondary Color RGB', {''}, 'Changes the Secondary Color on the Vehicle to RGB', psrgb.color, false, function(prbgsc)
+    psrgb.color = prbgsc
+    local red = psrgb.color.r * 255
+    local green = psrgb.color.g * 255
+    local blue = psrgb.color.b * 255
+    VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(vmod, red, green, blue)
+end)
 
 AClang.list_select(pcolm, 'Primary Color', {''}, 'Changes the Primary Color on the Vehicle', Mainc, 1, 
 function (t)
@@ -3218,13 +3396,13 @@ end)
                     for index, vehicle in pairs(vehicles_list) do
                         if vehicle.hash == util.reverse_joaat(curated_item.hash) then
                             remove_vehicle(util.reverse_joaat(curated_item.hash))
-                            AClang.toast(util.reverse_joaat(curated_item.hash)..' removed')
+                            util.toast(util.reverse_joaat(curated_item.hash)..AClang.str_trans(' removed'))
                             return true
                         end
                     end
                     if STREAMING.IS_MODEL_A_VEHICLE(util.joaat(util.reverse_joaat(curated_item.hash))) then
                         add_vehicle(util.reverse_joaat(curated_item.hash))  
-                        AClang.toast(util.reverse_joaat(curated_item.hash)..' added')      
+                        util.toast(util.reverse_joaat(curated_item.hash)..AClang.str_trans(' added'))     
                     else
                         AClang.toast('Improper Vehicle Name (check the spelling)')
                     end
@@ -3269,11 +3447,17 @@ end)
         vehicle_menus = {}
         for _, vehicle_load in pairs(vload) do
             for i, v in pairs(vehicle_load ) do
-                local vehicle_menu = menu.action(root, v, {''}, v, function ()
-                    AUDIO.FORCE_USE_AUDIO_GAME_OBJECT(entities.get_user_vehicle_as_handle(), v)
-                    eng.soun = v
-                    menu.set_menu_name(menus.curvtog, 'Current Vehicle Sound '..eng.soun)
-                    AClang.toast('Vehicle Sound changed to '..eng.soun)
+                local vehicle_menu = menu.list(root, v, {''}, v)
+                AClang.action(vehicle_menu, 'Apply Sound', {}, 'Apply Vehicle Sound', function ()
+                        AUDIO.FORCE_USE_AUDIO_GAME_OBJECT(entities.get_user_vehicle_as_handle(), v)
+                        eng.soun = v
+                        menu.set_menu_name(menus.curvtog, 'Current Vehicle Sound '..eng.soun)
+                        AClang.toast('Vehicle Sound changed to '..eng.soun)
+                end)
+                AClang.action(vehicle_menu, 'Delete Sound', {}, 'Delete sound from your favorites(back out of the list for it to be removed)', function ()
+                    remove_vehicle(v)
+                    util.toast(v..AClang.str_trans(' removed'))
+                    return true
                 end)
                 menu.on_focus(vehicle_menu, function(direction) if direction ~= 0 then add_preview(util.joaat(v)) end end)
                 menu.on_blur(vehicle_menu, function(direction) if direction ~= 0 then remove_preview() end end)
@@ -3296,13 +3480,13 @@ end)
             for index, vehicle in pairs(vehicles_list) do
                 if vehicle.hash == favveh then
                     remove_vehicle(favveh)
-                    AClang.toast(favveh..' removed')
+                    util.toast(favveh..AClang.str_trans(' removed'))
                     return true
                 end
             end
             if STREAMING.IS_MODEL_A_VEHICLE(util.joaat(favveh)) then
                 add_vehicle(favveh)    
-                AClang.toast(favveh..' added')       
+                util.toast(favveh..AClang.str_trans(' added'))       
             else
                 AClang.toast('Improper Vehicle Name (check the spelling)')
             end
@@ -3333,7 +3517,43 @@ end)
 
 --------------------------------------------------------------
 
+AClang.action(onlineroot, 'Auto TP to Taxi Pickup', {'tptaxi'}, 'Auto teleports to the Taxi Pickup Person, picks them up and drops them off until you are not in a taxi anymore', function ()
 
+    util.create_tick_handler(function ()
+        local play_car = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
+        local vhash = ENTITY.GET_ENTITY_MODEL(play_car)
+        if util.reverse_joaat(vhash) ~= 'taxi' or play_car == 0  then
+            AClang.toast('Not in a taxi turning off auto teleport')
+            util.stop_thread()
+        end
+        local taxi_blip = HUD.GET_CLOSEST_BLIP_INFO_ID(280)
+        local taxi_ent = HUD.GET_BLIP_INFO_ID_ENTITY_INDEX(taxi_blip)
+        local taxi = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(taxi_ent, 0, 6, 0)
+        if HUD.DOES_BLIP_EXIST(HUD.GET_CLOSEST_BLIP_INFO_ID(280)) then
+            if taxi.x ~= 0 and taxi.y ~= 0 and taxi.z ~= 0 then
+                util.yield(500)
+                PED.SET_PED_COORDS_KEEP_VEHICLE(players.user_ped(), taxi.x, taxi.y, taxi.z, false, false, false, false)
+                util.yield(1500)
+                PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 86, 1)
+                while HUD.DOES_BLIP_EXIST(HUD.GET_CLOSEST_BLIP_INFO_ID(280)) do
+                    util.yield()
+                end
+                util.yield(500)
+                menu.trigger_commands('tpobjective')
+                
+            else
+                if set.alert then
+                AClang.toast('No Person Found')
+                end
+            end
+            else
+                util.yield()
+        end
+
+    end)
+
+
+    end)
 
 AClang.action(onlineroot, 'Snowball Fight', {}, 'Gives everyone in the lobby Snowballs and notifies them via text', function ()
     local plist = players.list()
@@ -3550,6 +3770,23 @@ end)
            
 
     local color = {}
+
+    local oprgb = {color= {r= 0, g = 1, b = 0, a = 1}}
+ AClang.colour(colm, 'Primary Color RGB', {''}, 'Changes the Primary Color on their Vehicle to RGB', oprgb.color, false, function(oprbgc)
+    oprgb.color = oprbgc
+    GetPlayVeh(pid, function ()
+        ChangePRGB(pid, oprgb)
+    end)
+end)
+
+local opsrgb = {color= {r= 1, g = 0, b = 0, a = 1}}
+ AClang.colour(colm, 'Secondary Color RGB', {''}, 'Changes the Secondary Color on their Vehicle to RGB', opsrgb.color, false, function(prbgsc)
+    opsrgb.color = prbgsc
+    GetPlayVeh(pid, function ()
+        ChangeSRGB(pid, opsrgb)
+    end)
+    
+end)
 
 
     AClang.list_select(colm, 'Primary Color', {''}, 'Changes the Primary Color on the Vehicle', Mainc, 1, 
@@ -3795,6 +4032,13 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
         end)
     end)
 
+    AClang.click_slider(pvehmenu, 'Change Vehicle Speed', {'vspeed'}, 'Increases the Vehicles top speed', 0, 100000, 40, 10, function (s)
+        local  speed = s
+         GetPlayVeh(pid, function ()
+            Topspeedveh( speed, pid)
+            util.yield(1000)
+         end)
+     end)
 
 
 
@@ -4313,18 +4557,49 @@ AClang.action(atkmenu, 'Spawn Attacker', {'spatkr'}, 'Spawn attacker on the pers
 end)
 
 
---menus.atkrch = AClang.list(atkmenu, 'Change Attacker', {''}, 'Change the Attackers you send')
-local ped_hash =  {SPC, AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp}
-local ped_names = {SPClist, AMClist, AfClist, Csplist, GM, Mpplist, MSFlist, MCMlist, SMClist, Ssflist, Ssmlist, Dlcplist}
 
-function PedList(menusel, action_function)
-    for i, description in pairs(Pedlistname) do
-        menu.list_action(menusel, description[1], {''}, description[2], ped_names[i], function(pedsel)
-            action_function(ped_hash[i][pedsel])
-        end)
+
+
+function Refreshveh()
+    
+    if not players.exists(pid) or vehatkset.vehdelete then
+        util.stop_thread()
+    end
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+   
+    for key, veh in pairs(atkveh) do
+        local tarv = ENTITY.GET_ENTITY_COORDS(veh)
+        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+        vehatkset.disbetveh = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
+            Delcar(targets, spec, pid)
+        end
+
+        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or vehatkset.disbetveh >= 1000  then
+            DelEnt(vehatkr)
+            DelEnt(atkveh)
+        
+            vehatkr = {}
+            atkveh = {}
+            vehatkset.atkv = 0
+            util.yield(8000)
+            while vehatkset.atkv < vehatkset.vlcount and players.exists(pid) do
+                local v, dri = Vehatkr(vehatkset.invinc, vehatkset.invis, pid, vehatkset.attkrveh)
+                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(v), true)
+                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(v), players.user(), true)
+                table.insert(atkveh, v)
+                table.insert(vehatkr, dri)
+                util.yield(250)
+                vehatkset.atkv = vehatkset.atkv + 1
+                if #atkveh == vehatkset.vlcount then
+                    return
+                end
+            end
+        end
+        
     end
 end
-
 menus.atkrch = AClang.list(atkmenu, 'Change Attacker', {''}, 'Change the Attackers you send', function ()
     PedList(menus.atkrch, function(model)
             atkset.model = model
@@ -4574,155 +4849,7 @@ AClang.action(vehatkrmenu, 'Delete Vehicle Attackers', {'delvehatkr'}, 'Delete V
  end)
 
     
- function Atkrrefresh()
-    if not players.exists(pid) or atkset.atkrdelete then
-        util.stop_thread()
-    end
-    util.toast('fuck off')
-        local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        for _, atk in pairs(spawatk) do
-            local tar1 = ENTITY.GET_ENTITY_COORDS(atk)
-            local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
-            local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tar1.x, tar1.y, tar1.z)
-            local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-            if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
-                Delcar(targets, spec, pid)
-            end
-             if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or disbet >= 1000 then
-                    DelEnt(spawatk)
-                    atkset.p = 0
-                    spawatk = {}
-                    util.yield(8000)
-                    while atkset.p < atkset.count and players.exists(pid) do
-                        local atkr = Atkrspawn(atkset.invinc, atkset.invis, pid , atkset.model)
-                        NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
-                        NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
-                        table.insert(spawatk, atkr)
-                        atkset.p = atkset.p + 1
-                        if #spawatk == atkset.count then
-                            return
-                        end
-                    end
-                end
-    end
-end 
 
-function Refreshplnes()
-    util.toast('fuck off')
-    if not players.exists(pid) or platkset.plnedelete then
-        util.stop_thread()
-    end
-    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-    for key, plne in pairs(plneveh) do
-        local tarv = ENTITY.GET_ENTITY_COORDS(plne)
-        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
-        platkset.disbetplne = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
-            Delcar(targets, spec, pid)
-        end
-        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or platkset.disbetplne >= 1000000 then
-            DelEnt(plneveh)
-            DelEnt(plneatkr)
-        plneveh = {}
-        plneatkr = {}
-        platkset.p = 0
-            util.yield(8000)
-            while platkset.p < platkset.plcount and players.exists(pid)  do
-                local veh, pil = Plneatkr(platkset.invinc, platkset.invis, pid, platkset.plane)
-                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(veh), true)
-                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(veh), players.user(), true)
-                table.insert(plneveh, veh)
-                table.insert(plneatkr, pil)
-                util.yield(150)
-                platkset.p = platkset.p + 1
-                if #plneveh == platkset.plcount then
-                    return
-                end
-            end
-        end  
-    end
-end
-function RefreshHeli()
-    util.toast('fuck off')
-    if not players.exists(pid) or heliatkset.helidelete then
-        util.stop_thread()
-    end
-    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-    for key, heli in pairs(heliveh) do
-        local tarv = ENTITY.GET_ENTITY_COORDS(heli)
-        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
-        heliatkset.disbetheli = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
-            Delcar(targets, spec, pid)
-        end
-
-        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or heliatkset.disbetheli >= 340000  then
-
-            DelEnt(heliatkr)
-            DelEnt(heliveh)
-        
-            heliatkr = {}
-            heliveh = {}
-            heliatkset.h = 0
-            util.yield(8000)
-            while heliatkset.h < heliatkset.hlcount and players.exists(pid) do
-                local atk, pil = Heliatkr(heliatkset.invinc, heliatkset.invis, pid, heliatkset.helicopter)
-                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
-                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
-                table.insert(heliveh, atk)
-                table.insert(heliatkr, pil)
-                util.yield(250)
-                heliatkset.h = heliatkset.h + 1
-                if #heliveh == heliatkset.hlcount then
-                    return
-                end
-            end
-        end
-    end
-end
-
-function Refreshveh()
-    
-    if not players.exists(pid) or vehatkset.vehdelete then
-        util.stop_thread()
-    end
-    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-   
-    for key, veh in pairs(atkveh) do
-        local tarv = ENTITY.GET_ENTITY_COORDS(veh)
-        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
-        vehatkset.disbetveh = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
-            Delcar(targets, spec, pid)
-        end
-
-        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or vehatkset.disbetveh >= 1000  then
-            DelEnt(vehatkr)
-            DelEnt(atkveh)
-        
-            vehatkr = {}
-            atkveh = {}
-            vehatkset.atkv = 0
-            util.yield(8000)
-            while vehatkset.atkv < vehatkset.vlcount and players.exists(pid) do
-                local v, dri = Vehatkr(vehatkset.invinc, vehatkset.invis, pid, vehatkset.attkrveh)
-                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(v), true)
-                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(v), players.user(), true)
-                table.insert(atkveh, v)
-                table.insert(vehatkr, dri)
-                util.yield(250)
-                vehatkset.atkv = vehatkset.atkv + 1
-                if #atkveh == vehatkset.vlcount then
-                    return
-                end
-            end
-        end
-        
-    end
-end
 
 menus.atkr_selmenu = AClang.list(vatkmenu, 'Change Pilot/Driver and Gunners', {}, '')
 
@@ -5132,8 +5259,7 @@ players.dispatch_on_join()
 
 
  -------------------
- AClang.action(setroot, 'Version Number', {}, tostring(SCRIPT_VERSION), function ()
- end)
+ menu.readonly(setroot, AClang.trans('Version Number'), tostring(SCRIPT_VERSION))
 
  AClang.hyperlink(setroot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
 
@@ -5147,10 +5273,6 @@ players.dispatch_on_join()
  AClang.action(Credroot, 'Nowiry', {}, 'For their script it was a heavy influence on the Charger weapon', function ()
  end)
  AClang.action(Credroot, 'hexarobi', {}, 'For all the help with the script they are always a big help', function ()
- end)
- AClang.action(Credroot, 'Prisuhm', {}, 'For the auto updater and help with it', function ()
- end)
- AClang.action(Credroot, 'lance', {}, 'For a couple functions in this script', function ()
  end)
  AClang.action(Credroot, '=)', {}, 'For the peeing animation for Trevor', function ()
  end)
@@ -5176,4 +5298,5 @@ util.keep_running()
 util.log('Loaded AcjokerScript in '.. util.current_time_millis() - LOADING_START ..' ms.')
 
 LOADING_SCRIPT = false
+
 
