@@ -469,4 +469,7 @@ t(f('Changes the Primary Color on their Vehicle to RGB'), 'Ändert die Primärfa
 t(f('Changes the Secondary Color on their Vehicle to RGB'), 'Ändert die Sekundärfarbe ihres Fahrzeugs zu RGB')
 t(f('Change Vehicle Speed'), 'Änderung der Fahrzeuggeschwindigkeit')
 t(f('Increases the Vehicles top speed'), 'Erhöht die Höchstgeschwindigkeit des Fahrzeugs')
+t(f('Apply Paint Selection'), 'Farbauswahl anwenden')
+t(f('Paints their vehicle the color you have selected above'), 'Lackiert das Fahrzeug in der oben ausgewählten Farbe')
+
 
