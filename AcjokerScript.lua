@@ -9,7 +9,7 @@
 --github
 local LOADING_START = util.current_time_millis()
 LOADING_SCRIPT = true
-local SCRIPT_VERSION = "0.19b1"
+local SCRIPT_VERSION = "0.19c1"
 ---
 --- Auto-Updater Lib Install
 ---
@@ -3521,16 +3521,25 @@ end)
 
 
 --------------------------------------------------------------
-
-AClang.action(onlineroot, 'Auto TP to Taxi Pickup', {'tptaxi'}, 'Auto teleports to the Taxi Pickup Person, picks them up and drops them off until you are not in a taxi anymore', function ()
-
-    util.create_tick_handler(function ()
+local curcoords = {}
+AClang.toggle_loop(onlineroot, 'Auto TP to Taxi Pickup', {'tptaxi'}, 'Auto teleports to the Taxi Pickup Person, picks them up and drops them off until you are not in a taxi anymore', function ()
+    if curcoords.x == nil then
+        curcoords = ENTITY.GET_ENTITY_COORDS(players.user_ped())
+    return curcoords
+    end
+    
+    
+    
         local play_car = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
         local vhash = ENTITY.GET_ENTITY_MODEL(play_car)
-        if util.reverse_joaat(vhash) ~= 'taxi' or play_car == 0  then
-            AClang.toast('Not in a taxi turning off auto teleport')
-            util.stop_thread()
+        if play_car == 0 or util.reverse_joaat(vhash) ~= 'taxi' then
+            
+            SEC(players.user_ped(), 895.1739, -179.2708, 74.70049, false, true, true, false)
+            util.yield(2500)
+            PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 51, 1)
+            util.yield(10000)
         end
+
         local taxi_blip = HUD.GET_CLOSEST_BLIP_INFO_ID(280)
         local taxi_ent = HUD.GET_BLIP_INFO_ID_ENTITY_INDEX(taxi_blip)
         local taxi = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(taxi_ent, 0, 6, 0)
@@ -3555,9 +3564,13 @@ AClang.action(onlineroot, 'Auto TP to Taxi Pickup', {'tptaxi'}, 'Auto teleports 
                 util.yield()
         end
 
-    end)
 
 
+
+    end, function ()
+        SEC(players.user_ped(), curcoords.x, curcoords.y, curcoords.z, false, true, true, false)
+            AClang.toast('Not in a taxi turning off auto teleport')
+            curcoords = {}
     end)
 
 AClang.action(onlineroot, 'Snowball Fight', {}, 'Gives everyone in the lobby Snowballs and notifies them via text', function ()
@@ -5299,6 +5312,7 @@ util.keep_running()
 util.log('Loaded AcjokerScript in '.. util.current_time_millis() - LOADING_START ..' ms.')
 
 LOADING_SCRIPT = false
+
 
 
 
