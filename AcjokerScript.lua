@@ -9,7 +9,7 @@
 --github
 local LOADING_START = util.current_time_millis()
 LOADING_SCRIPT = true
-local SCRIPT_VERSION = "0.19a1"
+local SCRIPT_VERSION = "0.19b1"
 ---
 --- Auto-Updater Lib Install
 ---
@@ -760,35 +760,7 @@ function Changetint(pid, tint)
     VEHICLE.SET_VEHICLE_WINDOW_TINT(vmod, tint)
 end
 
-function ChangePRGB(pid, prgb)
-    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
-    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-    if not players.exists(pid) then
-        util.stop_thread()
-    end
-        GetControl(vmod, spec, pid)
-    VEHICLE.SET_VEHICLE_FIXED(vmod)
-    local red = prgb.color.r * 255
-    local green = prgb.color.g * 255
-    local blue = prgb.color.b * 255
-    VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(vmod, red, green, blue)
-end
 
-function ChangeSRGB(pid, psrgb)
-    local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-    local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
-    local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-    if not players.exists(pid) then
-        util.stop_thread()
-    end
-        GetControl(vmod, spec, pid)
-    VEHICLE.SET_VEHICLE_FIXED(vmod)
-    local red = psrgb.color.r * 255
-    local green = psrgb.color.g * 255
-    local blue = psrgb.color.b * 255
-    VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(vmod, red, green, blue)
-end
 
 
 function Changecolor(pid, color)
@@ -1474,6 +1446,30 @@ function RefreshHeli()
         end
     end
 end
+
+function RGBpaintplayer(pid, oprgb, osprgb)
+    GetPlayVeh(pid, function ()
+        if not players.exists(pid) then
+            util.stop_thread()
+        end
+        local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, true)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+            GetControl(vmod, spec, pid)
+        VEHICLE.SET_VEHICLE_FIXED(vmod)
+        local red = math.floor(oprgb.color.r * 255)
+        local green = math.floor(oprgb.color.g * 255)
+        local blue = math.floor(oprgb.color.b * 255)
+        VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(vmod, red, green, blue)
+        local sred = math.floor(osprgb.color.r * 255)
+        local sgreen = math.floor(osprgb.color.g * 255)
+        local sblue = math.floor(osprgb.color.b * 255)
+        VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(vmod, sred, sgreen, sblue)
+end)
+end
+
+
+
 
 -------------------------------------------------------------------------------------------------------
 local atkhash = {}
@@ -2508,24 +2504,33 @@ local plighm = AClang.list(plscm, 'Lights', {}, '')
 end)
 
 local pcolor = {}
-
+local rgb_colors = {'Red', 'Green', 'Blue'}
 local prgb = {color= {r= 0, g = 1, b = 0, a = 1}}
- AClang.colour(pcolm, 'Primary Color RGB', {''}, 'Changes the Primary Color on the Vehicle to RGB', prgb.color, false, function(prbgc)
-    prgb.color = prbgc
-    local red = prgb.color.r * 255
-    local green = prgb.color.g * 255
-    local blue = prgb.color.b * 255
-    local vmod = entities.get_user_vehicle_as_handle()
-    VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(vmod, red, green, blue)
+ menus.uservehpai = AClang.colour(pcolm, 'Primary Color RGB', {''}, 'Changes the Primary Color on the Vehicle to RGB', prgb.color, false, function(prbgc)
+    for key, primcolor in pairs(rgb_colors) do
+        if menu.is_focused(menu.ref_by_path('Stand>Lua Scripts>AcjokerScript>Vehicles>Los Santos Customs>Vehicle Colors>Primary Color RGB>'..primcolor)) then
+            prgb.color = prbgc
+            local red = math.floor(prgb.color.r * 255)
+            local green = math.floor(prgb.color.g * 255)
+            local blue = math.floor(prgb.color.b * 255)
+            local vmod = entities.get_user_vehicle_as_handle()
+            VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(vmod, red, green, blue)
+        end
+    end
 end)
 
 local psrgb = {color= {r= 1, g = 0, b = 0, a = 1}}
- AClang.colour(pcolm, 'Secondary Color RGB', {''}, 'Changes the Secondary Color on the Vehicle to RGB', psrgb.color, false, function(prbgsc)
-    psrgb.color = prbgsc
-    local red = psrgb.color.r * 255
-    local green = psrgb.color.g * 255
-    local blue = psrgb.color.b * 255
-    VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(vmod, red, green, blue)
+ menus.uservehspai = AClang.colour(pcolm, 'Secondary Color RGB', {''}, 'Changes the Secondary Color on the Vehicle to RGB', psrgb.color, false, function(prbgsc)
+    for key, seccolor in pairs(rgb_colors) do
+        if menu.is_focused(menu.ref_by_path('Stand>Lua Scripts>AcjokerScript>Vehicles>Los Santos Customs>Vehicle Colors>Secondary Color RGB>'..seccolor)) then
+            psrgb.color = prbgsc
+            local red = math.floor(psrgb.color.r * 255)
+            local green = math.floor(psrgb.color.g * 255)
+            local blue = math.floor(psrgb.color.b * 255)
+            local vmod = entities.get_user_vehicle_as_handle()
+            VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(vmod, red, green, blue)
+        end 
+    end
 end)
 
 AClang.list_select(pcolm, 'Primary Color', {''}, 'Changes the Primary Color on the Vehicle', Mainc, 1, 
@@ -2594,9 +2599,9 @@ AClang.action(plighm, 'Change RGB Neons', {}, 'Change the Color for the Neons to
     local pedm = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
     local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
     RGBNeonKit(pedm)
-    local red = pnrgb.color.r * 255
-    local green = pnrgb.color.g * 255
-    local blue = pnrgb.color.b * 255
+    local red = math.floor(pnrgb.color.r * 255)
+    local green = math.floor(pnrgb.color.g * 255)
+    local blue = math.floor(pnrgb.color.b * 255)
     VEHICLE.SET_VEHICLE_NEON_COLOUR(vmod, red, green, blue)
 end)
 
@@ -3771,22 +3776,18 @@ end)
 
     local color = {}
 
-    local oprgb = {color= {r= 0, g = 1, b = 0, a = 1}}
- AClang.colour(colm, 'Primary Color RGB', {''}, 'Changes the Primary Color on their Vehicle to RGB', oprgb.color, false, function(oprbgc)
-    oprgb.color = oprbgc
-    GetPlayVeh(pid, function ()
-        ChangePRGB(pid, oprgb)
-    end)
+    local oprgb = {color= {r= 0, g = 0, b = 1, a = 1}}
+        AClang.colour(colm, 'Primary Color RGB', {''}, 'Changes the Primary Color on their Vehicle to RGB', oprgb.color, false, function(oprbgc)
+            oprgb.color = oprbgc
 end)
 
-local opsrgb = {color= {r= 1, g = 0, b = 0, a = 1}}
- AClang.colour(colm, 'Secondary Color RGB', {''}, 'Changes the Secondary Color on their Vehicle to RGB', opsrgb.color, false, function(prbgsc)
-    opsrgb.color = prbgsc
-    GetPlayVeh(pid, function ()
-        ChangeSRGB(pid, opsrgb)
-    end)
-    
+local opsrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
+        AClang.colour(colm, 'Secondary Color RGB', {''}, 'Changes the Secondary Color on their Vehicle to RGB', opsrgb.color, false, function(prbgsc)
+            opsrgb.color = prbgsc
 end)
+    AClang.action(colm, 'Apply Paint Selection', {}, 'Paints their vehicle the color you have selected above', function ()
+        RGBpaintplayer(pid, oprgb, opsrgb)
+    end)
 
 
     AClang.list_select(colm, 'Primary Color', {''}, 'Changes the Primary Color on the Vehicle', Mainc, 1, 
@@ -3881,9 +3882,9 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
             local vmod = PED.GET_VEHICLE_PED_IS_IN(pedm, false)
             GetControl(vmod, spec, pid)
             RGBNeonKit(pedm)
-            local red = nrgb.color.r * 255
-            local green = nrgb.color.g * 255
-            local blue = nrgb.color.b * 255
+            local red = math.floor(nrgb.color.r * 255)
+            local green = math.floor(nrgb.color.g * 255)
+            local blue = math.floor(nrgb.color.b * 255)
             VEHICLE.SET_VEHICLE_NEON_COLOUR(vmod, red, green, blue)
             if not spec then
                 Specoff(pid)
@@ -5298,5 +5299,6 @@ util.keep_running()
 util.log('Loaded AcjokerScript in '.. util.current_time_millis() - LOADING_START ..' ms.')
 
 LOADING_SCRIPT = false
+
 
 
