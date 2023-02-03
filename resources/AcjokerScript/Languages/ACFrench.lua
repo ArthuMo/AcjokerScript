@@ -128,7 +128,6 @@ t(f('Explode Player Loop'), 'Exploser en Boucle le joueur')
 t(f('Make it Rain'), 'Faire pleuvoir')
 t(f('Explode Player'), 'Exploser le joueur')
 t(f('The Full Monty'), 'La Totale')
-t(f('Activate ped cage, object cage, and explode loop at the same time'), 'Active en même temps les Cages de PNJ, les Cages et les Explosions')
 t(f('Make it Rain your choice of weapon in all directions'), 'Fait pleuvoir les armes de ton choix dans toutes les directions')
 t(f('Weapon Choices'), 'Choix des armes')
 t(f('Changes the weapon that rains down on them'), 'Change le type des Armes qui lui pleuvent dessus')
@@ -210,3 +209,4 @@ t(f('Spawn them a custom vehicle the default is toreador'), 'Leur faire apparaî
 t(f('Enter Vehicle Hash to change Vehicle given to player'), 'Entre le Hash du véhicule pour changer le véhicule donné au joueur')
 t(f('Randomize Paint'), 'Rendre la peinture aléatoire')
 t(f('Randomize the Paint of their vehicle'), 'Rendre la peinture de leur véhicule aléatoire')
+

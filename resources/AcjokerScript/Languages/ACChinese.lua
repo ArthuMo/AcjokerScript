@@ -129,7 +129,6 @@ t(f('Explode Player Loop'), '循环爆炸玩家')
 t(f('Make it Rain'), '在玩家身上下雨')
 t(f('Explode Player'), '爆炸玩家')
 t(f('The Full Monty'), '混合恶搞')
-t(f('Activate ped cage, object cage, and explode loop at the same time'), '同时启用Ped笼子,物体笼子,循环爆炸来恶搞玩家')
 t(f('Make it Rain your choice of weapon in all directions'), '启用下雨')
 t(f('Weapon Choices'), '类型')
 t(f('Changes the weapon that rains down on them'), '更改在玩家身上下雨的类型')
@@ -772,4 +771,5 @@ t(f('Make the Attackers Invisible'), '使Ped无敌')
 t(f('Attacker Weapon'), '敌人武器')
 t(f('Delete Attackers'), '删除敌人')
 t(f('Players Vehicle Seat Occupied'), '载具座位被占用')
+
 

@@ -126,7 +126,6 @@ t(f('Explode Player Loop'), 'Spieler explodieren loop')
 t(f('Make it Rain'), 'Lass es regnen')
 t(f('Explode Player'), 'Spieler explodieren loop')
 t(f('The Full Monty'), 'The Full Monty')
-t(f('Activate ped cage, object cage, and explode loop at the same time'), 'Aktiviert den Ped- und Objektkäfig sowie den Explosions-loop zur selben Zeit')
 t(f('Make it Rain your choice of weapon in all directions'), 'Lasse Waffen deiner Wahl in alle richtungen regnen')
 t(f('Weapon Choices'), 'Waffenauswahl')
 t(f('Changes the weapon that rains down on them'), 'Ändert die Waffe die auf sie herabregnet')
@@ -471,5 +470,6 @@ t(f('Change Vehicle Speed'), 'Änderung der Fahrzeuggeschwindigkeit')
 t(f('Increases the Vehicles top speed'), 'Erhöht die Höchstgeschwindigkeit des Fahrzeugs')
 t(f('Apply Paint Selection'), 'Farbauswahl anwenden')
 t(f('Paints their vehicle the color you have selected above'), 'Lackiert das Fahrzeug in der oben ausgewählten Farbe')
+
 
 

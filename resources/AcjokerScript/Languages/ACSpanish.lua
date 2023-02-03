@@ -113,3 +113,4 @@ t(f('Exterior'), 'Exteriores')
 t(f('Changes Objects to Exterior Props'), 'Cambia los objetos por puntales exteriores')
 t(f('Magnet Intensity'), 'Intensidad del imán')
 t(f('Changes Magnet to Push Away or Blow up'), 'Cambia el imán para empujar o explotar')
+

@@ -113,3 +113,4 @@ t(f('Changes Objects to Interior Props'), 'Zmiana obiektów na rekwizyty wewnęt
 t(f('Exterior'), 'Zewnętrznie')
 t(f('Changes Objects to Exterior Props'), 'Zmiana obiektów na rekwizyty zewnętrzne')
 
+

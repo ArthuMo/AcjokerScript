@@ -113,3 +113,4 @@ t(f('Changes Objects to Interior Props'), 'Pakeičia objektus į interjero rekvi
 t(f('Exterior'), 'Išorė')
 t(f('Changes Objects to Exterior Props'), 'Pakeičia objektus į eksterjero rekvizitus')
 
+
