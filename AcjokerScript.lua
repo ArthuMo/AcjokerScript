@@ -9,7 +9,7 @@
 --github
 local LOADING_START = util.current_time_millis()
 LOADING_SCRIPT = true
-local SCRIPT_VERSION = "0.19c1"
+local SCRIPT_VERSION = "0.20.1"
 ---
 --- Auto-Updater Lib Install
 ---
@@ -163,10 +163,9 @@ function Runanim(ent, animdict, anim)
     end
 end
 
-
-function SF() --Scaleform Full credits to aaron
-    local scaleform = require('ScaleformLib')
-    local sf = scaleform('instructional_buttons')
+local scaleform = require('ScaleformLib')
+local sf = scaleform('instructional_buttons')
+function Hudhide()
     HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
     HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
     HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
@@ -175,6 +174,11 @@ function SF() --Scaleform Full credits to aaron
     memory.write_int(memory.script_global(1645739+1121), 1)
     sf.CLEAR_ALL()
     sf.TOGGLE_MOUSE_BUTTONS(false)
+end
+
+
+function SF() --Scaleform Full credits to aaron
+    Hudhide()
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 86, true), AClang.str_trans('Push Away or Blow up'))
     sf.addButton(PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 76, true))
     sf.SET_DATA_SLOT(2,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 88, true) , AClang.str_trans("Yeet"))
@@ -183,81 +187,37 @@ function SF() --Scaleform Full credits to aaron
 end
 
 function SFlsd() 
-    local scaleform = require('ScaleformLib')
-    local sf = scaleform('instructional_buttons')
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
----@diagnostic disable-next-line: param-type-mismatch
-    memory.write_int(memory.script_global(1645739+1121), 1)
-    sf.CLEAR_ALL()
-    sf.TOGGLE_MOUSE_BUTTONS(false)
+    Hudhide()
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 86, true), AClang.str_trans('Lazers'))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
 
 function SFle() 
-    local scaleform = require('ScaleformLib')
-    local sf = scaleform('instructional_buttons')
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
----@diagnostic disable-next-line: param-type-mismatch
-    memory.write_int(memory.script_global(1645739+1121), 1)
-    sf.CLEAR_ALL()
-    sf.TOGGLE_MOUSE_BUTTONS(false)
+    Hudhide()
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 25, true), AClang.str_trans('Lazer Eyes'))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
 
 function SFlev() 
-    local scaleform = require('ScaleformLib')
-    local sf = scaleform('instructional_buttons')
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
----@diagnostic disable-next-line: param-type-mismatch
-    memory.write_int(memory.script_global(1645739+1121), 1)
-    sf.CLEAR_ALL()
-    sf.TOGGLE_MOUSE_BUTTONS(false)
+    Hudhide()
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 68, true), AClang.str_trans('Lazer Eyes'))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
 
 function SFfly()
-    local scaleform = require('ScaleformLib')
-    local sf = scaleform('instructional_buttons')
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
----@diagnostic disable-next-line: param-type-mismatch
-    memory.write_int(memory.script_global(1645739+1121), 1)
-    sf.CLEAR_ALL()
-    sf.TOGGLE_MOUSE_BUTTONS(false)
+    Hudhide()
     sf.SET_DATA_SLOT(2,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 76, true), AClang.str_trans('Fly forward or backward twice as fast'))
     sf.SET_DATA_SLOT(1,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 88, true), AClang.str_trans('Backward'))
     sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 87, true), AClang.str_trans('Forward'))
     sf.DRAW_INSTRUCTIONAL_BUTTONS()
     sf:draw_fullscreen()
 end
+
 function SFfly2()
-    local scaleform = require('ScaleformLib')
-    local sf = scaleform('instructional_buttons')
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
-    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
----@diagnostic disable-next-line: param-type-mismatch
-    memory.write_int(memory.script_global(1645739+1121), 1)
-    sf.CLEAR_ALL()
-    sf.TOGGLE_MOUSE_BUTTONS(false)
+    Hudhide()
     sf.SET_DATA_SLOT(6,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 62, true), AClang.str_trans('Down'))
     sf.SET_DATA_SLOT(5,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 61, true), AClang.str_trans('Up'))
     sf.SET_DATA_SLOT(4,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 34, true), AClang.str_trans('Left'))
@@ -284,8 +244,16 @@ function Pedspawn(pedhash, tar1)
     return pedS
 end
 
-function SetPedCoor(pedS, tarx, tary, tarz)
-    SEC(pedS, tarx, tary, tarz, false, true, true, false)
+function SetEntCoor(tar1, ent)
+    SEC(ent[1], tar1.x, tar1.y - 0.5, tar1.z - 1.0, false, true, true, false)
+    SEC(ent[2], tar1.x - 0.5, tar1.y - 0.5, tar1.z - 1.0, false, true, true, false)
+    SEC(ent[3], tar1.x - 0.5, tar1.y, tar1.z - 1.0, false, true, true, false)
+    SEC(ent[4], tar1.x - 0.5, tar1.y + 0.5, tar1.z - 1.0, false, true, true, false)
+    SEC(ent[5], tar1.x, tar1.y + 0.5, tar1.z - 1.0, false, true, true, false)
+    SEC(ent[6], tar1.x + 0.5, tar1.y + 0.5, tar1.z - 1.0, false, true, true, false)
+    SEC(ent[7], tar1.x + 0.5, tar1.y, tar1.z - 1.0, false, true, true, false)
+    SEC(ent[8], tar1.x + 0.5, tar1.y - 0.5, tar1.z - 1.0, false, true, true, false)
+    return ent
 end
 
 
@@ -1069,6 +1037,32 @@ function AddBlip(entity, blipSprite, colour)-- wiri function
 
 	return blip
 end
+
+function Atk(tab, targets, weapon, pilot)
+    for key, atkr in pairs(tab) do
+        local playerRelGroup = PED.GET_PED_RELATIONSHIP_GROUP_HASH(targets)
+        PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, util.joaat("ARMY"), playerRelGroup)
+        PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, playerRelGroup, util.joaat("ARMY"))
+        PED.SET_RELATIONSHIP_BETWEEN_GROUPS(0, util.joaat("ARMY"), util.joaat("ARMY"))
+        WEAPON.GIVE_WEAPON_TO_PED(atkr, util.joaat(weapon), -1, false, true)
+        
+        PED.SET_PED_COMBAT_ATTRIBUTES(atkr, 20, true)
+
+        PED.SET_PED_MAX_HEALTH(atkr, 500)
+        ENTITY.SET_ENTITY_HEALTH(atkr, 500, 0)
+        ENTITY.SET_ENTITY_INVINCIBLE(atkr, true)
+        PED.SET_PED_SHOOT_RATE(atkr, 1000)
+        PED.SET_PED_RELATIONSHIP_GROUP_HASH(atkr, util.joaat("ARMY"))
+        TASK.TASK_COMBAT_HATED_TARGETS_AROUND_PED(atkr, 200.0, 0)
+        TASK.TASK_COMBAT_PED(atkr , targets, 0, 16)
+        TASK.CONTROL_MOUNTED_WEAPON(atkr)
+        PED.SET_PED_KEEP_TASK(pilot, true)
+        PED.SET_PED_ACCURACY(atkr , 100.0)
+        PED.SET_PED_COMBAT_ABILITY(atkr , 2)
+    end
+end
+
+
 local pil_dri = {'S_M_M_Pilot_01'}
 local gunners = {'s_m_y_blackops_01', 's_m_y_blackops_02', 's_m_y_blackops_03'}
 local plneatkr = {}
@@ -1126,27 +1120,7 @@ function Plneatkr(invinc, invis, pid, hash)
                     end
                 end
 
-                for key, atkr in pairs(plneatkr) do
-                    local playerRelGroup = PED.GET_PED_RELATIONSHIP_GROUP_HASH(targets)
-                    PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, util.joaat("ARMY"), playerRelGroup)
-                    PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, playerRelGroup, util.joaat("ARMY"))
-                    PED.SET_RELATIONSHIP_BETWEEN_GROUPS(0, util.joaat("ARMY"), util.joaat("ARMY"))
-                    WEAPON.GIVE_WEAPON_TO_PED(atkr, util.joaat(platkset.weapon), -1, false, true)
-                    
-                    PED.SET_PED_COMBAT_ATTRIBUTES(atkr, 20, true)
-                    
-                    PED.SET_PED_MAX_HEALTH(atkr, 500)
-                    ENTITY.SET_ENTITY_HEALTH(atkr, 500, 0)
-                    ENTITY.SET_ENTITY_INVINCIBLE(atkr, true)
-                    PED.SET_PED_SHOOT_RATE(atkr, 1000)
-                    PED.SET_PED_RELATIONSHIP_GROUP_HASH(atkr, util.joaat("ARMY"))
-                    TASK.TASK_COMBAT_HATED_TARGETS_AROUND_PED(atkr, 200.0, 0)
-                    TASK.TASK_COMBAT_PED(atkr , targets, 0, 16)
-                    TASK.CONTROL_MOUNTED_WEAPON(atkr)
-                    PED.SET_PED_KEEP_TASK(plpilot, true)
-                    PED.SET_PED_ACCURACY(atkr , 100.0)
-                    PED.SET_PED_COMBAT_ABILITY(atkr , 2)
-                end
+                Atk(plneatkr, targets, platkset.weapon, plpilot)
             VEHICLE.SET_VEHICLE_FORWARD_SPEED(atkplne, 80)
             VEHICLE.CONTROL_LANDING_GEAR(atkplne, 3)
             TASK.TASK_PLANE_MISSION(plpilot , atkplne, 0, targets, 0, 0, 0, 6, 0.0, 0, 0.0, 50.0, 40.0)
@@ -1212,27 +1186,7 @@ function Heliatkr(invinc, invis, pid, hash)
             TASK.CONTROL_MOUNTED_WEAPON(pilot)
             
             
-            for key, atkr in pairs(heliatkr) do
-                local playerRelGroup = PED.GET_PED_RELATIONSHIP_GROUP_HASH(targets)
-                PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, util.joaat("ARMY"), playerRelGroup)
-                PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, playerRelGroup, util.joaat("ARMY"))
-                PED.SET_RELATIONSHIP_BETWEEN_GROUPS(0, util.joaat("ARMY"), util.joaat("ARMY"))
-                WEAPON.GIVE_WEAPON_TO_PED(atkr, util.joaat(heliatkset.weapon), -1, false, true)
-                
-				PED.SET_PED_COMBAT_ATTRIBUTES(atkr, 20, true)
-                
-				PED.SET_PED_MAX_HEALTH(atkr, 500)
-				ENTITY.SET_ENTITY_HEALTH(atkr, 500, 0)
-				ENTITY.SET_ENTITY_INVINCIBLE(atkr, true)
-				PED.SET_PED_SHOOT_RATE(atkr, 1000)
-				PED.SET_PED_RELATIONSHIP_GROUP_HASH(atkr, util.joaat("ARMY"))
-				TASK.TASK_COMBAT_HATED_TARGETS_AROUND_PED(atkr, 200.0, 0)
-                TASK.TASK_COMBAT_PED(atkr , targets, 0, 16)
-                TASK.CONTROL_MOUNTED_WEAPON(atkr)
-                PED.SET_PED_KEEP_TASK(pilot, true)
-                PED.SET_PED_ACCURACY(atkr , 100.0)
-                PED.SET_PED_COMBAT_ABILITY(atkr , 2)
-            end
+            Atk(heliatkr, targets, heliatkset.weapon, pilot)
             if hash == 'akula' or 'annihilator2' then
                 VEHICLE.SET_DEPLOY_FOLDING_WINGS(atkheli, true, true)
             end
@@ -1293,28 +1247,12 @@ function Vehatkr(invinc, invis, pid, hash)
 			TASK.TASK_VEHICLE_MISSION(driver, vatkr, 0, targets, 9, 150.0, 40.0, -1.0, 0, 10, -1.0, 16)
             TASK.CONTROL_MOUNTED_WEAPON(driver)
             
-            for key, atkr in pairs(vehatkr) do
-                local playerRelGroup = PED.GET_PED_RELATIONSHIP_GROUP_HASH(targets)
-                PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, util.joaat("ARMY"), playerRelGroup)
-                PED.SET_RELATIONSHIP_BETWEEN_GROUPS(5, playerRelGroup, util.joaat("ARMY"))
-                PED.SET_RELATIONSHIP_BETWEEN_GROUPS(0, util.joaat("ARMY"), util.joaat("ARMY"))
-                WEAPON.GIVE_WEAPON_TO_PED(atkr, util.joaat(vehatkset.weapon), -1, false, true)
-                
-				PED.SET_PED_COMBAT_ATTRIBUTES(atkr, 20, true)
-				PED.SET_PED_MAX_HEALTH(atkr, 500)
-				ENTITY.SET_ENTITY_HEALTH(atkr, 500, 0)
-				ENTITY.SET_ENTITY_INVINCIBLE(atkr, true)
-				PED.SET_PED_SHOOT_RATE(atkr, 1000)
-				PED.SET_PED_RELATIONSHIP_GROUP_HASH(atkr, util.joaat("ARMY"))
-				TASK.TASK_COMBAT_HATED_TARGETS_AROUND_PED(atkr, 200.0, 0)
-                TASK.TASK_COMBAT_PED(atkr , targets, 0, 16)
-                TASK.CONTROL_MOUNTED_WEAPON(atkr)
-                TASK.TASK_VEHICLE_DRIVE_WANDER(driver, vatkr, 10.0, 786603)
-                
-                PED.SET_PED_KEEP_TASK(driver, true)
-                PED.SET_PED_ACCURACY(atkr , 100.0)
-                PED.SET_PED_COMBAT_ABILITY(atkr , 2)
-            end
+
+            Atk(vehatkr, targets, vehatkset.weapon, driver)
+
+           
+            TASK.TASK_VEHICLE_DRIVE_WANDER(driver, vatkr, 10.0, 786603) 
+            PED.SET_PED_KEEP_TASK(driver, true)
             VEHICLE.SET_VEHICLE_FORWARD_SPEED(vatkr, 20)
             if hash == 'minitank' then
                 AddBlip(vatkr, 742, 1)
@@ -1341,111 +1279,7 @@ function PedList(menusel, action_function)
         end)
     end
 end
-function Atkrrefresh()
-    if not players.exists(pid) or atkset.atkrdelete then
-        util.stop_thread()
-    end
-        local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-        for _, atk in pairs(spawatk) do
-            local tar1 = ENTITY.GET_ENTITY_COORDS(atk)
-            local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
-            local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tar1.x, tar1.y, tar1.z)
-            local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-            if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
-                Delcar(targets, spec, pid)
-            end
-             if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or disbet >= 1000 then
-                    DelEnt(spawatk)
-                    atkset.p = 0
-                    spawatk = {}
-                    util.yield(8000)
-                    while atkset.p < atkset.count and players.exists(pid) do
-                        local atkr = Atkrspawn(atkset.invinc, atkset.invis, pid , atkset.model)
-                        NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
-                        NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
-                        table.insert(spawatk, atkr)
-                        atkset.p = atkset.p + 1
-                        if #spawatk == atkset.count then
-                            return
-                        end
-                    end
-                end
-    end
-end 
 
-function Refreshplnes()
-    if not players.exists(pid) or platkset.plnedelete then
-        util.stop_thread()
-    end
-    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-    for key, plne in pairs(plneveh) do
-        local tarv = ENTITY.GET_ENTITY_COORDS(plne)
-        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
-        platkset.disbetplne = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
-            Delcar(targets, spec, pid)
-        end
-        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or platkset.disbetplne >= 1000000 then
-            DelEnt(plneveh)
-            DelEnt(plneatkr)
-        plneveh = {}
-        plneatkr = {}
-        platkset.p = 0
-            util.yield(8000)
-            while platkset.p < platkset.plcount and players.exists(pid)  do
-                local veh, pil = Plneatkr(platkset.invinc, platkset.invis, pid, platkset.plane)
-                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(veh), true)
-                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(veh), players.user(), true)
-                table.insert(plneveh, veh)
-                table.insert(plneatkr, pil)
-                util.yield(150)
-                platkset.p = platkset.p + 1
-                if #plneveh == platkset.plcount then
-                    return
-                end
-            end
-        end  
-    end
-end
-function RefreshHeli()
-    if not players.exists(pid) or heliatkset.helidelete then
-        util.stop_thread()
-    end
-    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-    for key, heli in pairs(heliveh) do
-        local tarv = ENTITY.GET_ENTITY_COORDS(heli)
-        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
-        heliatkset.disbetheli = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
-        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
-        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
-            Delcar(targets, spec, pid)
-        end
-
-        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or heliatkset.disbetheli >= 340000  then
-
-            DelEnt(heliatkr)
-            DelEnt(heliveh)
-        
-            heliatkr = {}
-            heliveh = {}
-            heliatkset.h = 0
-            util.yield(8000)
-            while heliatkset.h < heliatkset.hlcount and players.exists(pid) do
-                local atk, pil = Heliatkr(heliatkset.invinc, heliatkset.invis, pid, heliatkset.helicopter)
-                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
-                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
-                table.insert(heliveh, atk)
-                table.insert(heliatkr, pil)
-                util.yield(250)
-                heliatkset.h = heliatkset.h + 1
-                if #heliveh == heliatkset.hlcount then
-                    return
-                end
-            end
-        end
-    end
-end
 
 function RGBpaintplayer(pid, oprgb, osprgb)
     GetPlayVeh(pid, function ()
@@ -1472,13 +1306,7 @@ end
 
 
 -------------------------------------------------------------------------------------------------------
-local atkhash = {}
 
-if atkhash  == 0 then
-    Combinetab(atkhash, AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp)
-
-
-end
 
 
 -------------------------------- Teleports---------------------------------------------------
@@ -3395,6 +3223,7 @@ end)
             
               curated_item.load_menu = menu.action(root_menu, curated_item.name or "Unknown", {}, util.reverse_joaat(curated_item.hash) or "", function()
                 menu.set_menu_name(menus.curvtog, 'Current Sound '..util.reverse_joaat(curated_item.hash))
+                AUDIO.FORCE_USE_AUDIO_GAME_OBJECT(entities.get_user_vehicle_as_handle(),  util.reverse_joaat(curated_item.hash))
                 AClang.toast('Vehicle Sound changed to '..util.reverse_joaat(curated_item.hash))
                 if util.reverse_joaat(curated_item.hash) ~= "" then
                     local vehicles_list = load_vehicles()
@@ -3414,7 +3243,7 @@ end)
                     return true
                 end
                 
-                AUDIO.FORCE_USE_AUDIO_GAME_OBJECT(entities.get_user_vehicle_as_handle(),  util.reverse_joaat(curated_item.hash))
+                
                 
                 
               end)
@@ -4146,14 +3975,22 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
     local ptfxmenu = AClang.list(trollm, 'PTFX Spam', {}, '')
 
 
-
-    AClang.action(trollm, 'The Full Monty', {}, 'Activate ped cage, object cage, and explode loop at the same time', function ()
+    local mir = {weap = 'WEAPON_SNOWBALL', speed = 1000}
+    AClang.action(trollm, 'The Full Monty', {}, 'Activate ped cage, object cage, explode loop, PTFX Spam, Make it Rain Rockets, Juggle Player, and Vehicular Assualt at the same time', function ()
         menu.trigger_commands("EXPL".. players.get_name(pid))
         menu.trigger_commands("PCAGE".. players.get_name(pid))
         menu.trigger_commands("ObjCage".. players.get_name(pid))
+        menu.trigger_commands("ptfxloop".. players.get_name(pid))
+        mir.weap = 'WEAPON_RPG'
+        menu.trigger_commands("rain".. players.get_name(pid))
+        menu.trigger_commands("SmashPla".. players.get_name(pid))
+        menu.set_value(menus.assaultrate, 100)
+        menu.trigger_commands("JuggleC".. players.get_name(pid))
+        menu.set_value(menus.jugglerate, 100)
+        set.alert = false
     end)
 
- local mir = {weap = 'WEAPON_SNOWBALL', speed = 1000}
+ 
   local mirloop =  AClang.toggle_loop(mrplaym, 'Make it Rain', {'rain'}, 'Make it Rain your choice of weapon in all directions', function ()
         local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
         local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
@@ -4198,7 +4035,13 @@ local nrgb = {color= {r= 0, g = 1, b = 0, a = 1}}
         menu.trigger_commands("FreeObjcage".. players.get_name(pid))
         menu.trigger_commands("EXPL".. players.get_name(pid)..' off')
         menu.trigger_commands("rain".. players.get_name(pid)..' off')
+        mir.weap = 'WEAPON_SNOWBALL'
         menu.trigger_commands("JuggleC".. players.get_name(pid)..' off')
+        menu.trigger_commands("ptfxloop".. players.get_name(pid)..' off')
+        menu.trigger_commands("SmashPla".. players.get_name(pid)..' off')
+        menu.set_value(menus.assaultrate, 1000)
+        menu.set_value(menus.jugglerate, 1000)
+        set.alert = true
     end)
 
 
@@ -4293,7 +4136,7 @@ end)
 
 
 local ptfx = {lib = 'scr_rcbarry2', sel = 'scr_clown_appears'}
-AClang.toggle_loop(ptfxmenu, 'PTFX Spam', {}, 'Spam your selection of Particle Effects', function ()
+AClang.toggle_loop(ptfxmenu, 'PTFX Spam', {'ptfxloop'}, 'Spam your selection of Particle Effects', function ()
     local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
     local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
     Streamptfx(ptfx.lib)
@@ -4468,7 +4311,7 @@ end)
         vehaset.vehasel = util.joaat(Vehha[vehsel])
     end)
 
-    AClang.slider(cplaym, 'Assault Rate', {'assaultrate'}, 'Adjust rate at which vehicles attack', 100, 4000, 1000, 100, function (ar)
+    menus.assaultrate =  AClang.slider(cplaym, 'Assault Rate', {'assaultrate'}, 'Adjust rate at which vehicles attack', 100, 4000, 1000, 100, function (ar)
         vehaset.vehra = ar
    
      end)
@@ -4528,7 +4371,7 @@ AClang.list_action(jclist, 'Vehicle List', {''}, 'Changes Vehicles used for Jugg
     juglset.jugsel = util.joaat(Vehha[jugsel])
 end)
 
-AClang.slider(jplaym, 'Juggle Rate', {'jugglerate'}, 'Adjust rate at which vehicles shoot upwards', 100, 4000, 1000, 100, function (jr)
+menus.jugglerate = AClang.slider(jplaym, 'Juggle Rate', {'jugglerate'}, 'Adjust rate at which vehicles shoot upwards', 100, 4000, 1000, 100, function (jr)
     juglset.jugr = jr
  end)
 
@@ -4570,7 +4413,111 @@ AClang.action(atkmenu, 'Spawn Attacker', {'spatkr'}, 'Spawn attacker on the pers
         end
 end)
 
+function Atkrrefresh()
+    if not players.exists(pid) or atkset.atkrdelete then
+        util.stop_thread()
+    end
+        local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+        for _, atk in pairs(spawatk) do
+            local tar1 = ENTITY.GET_ENTITY_COORDS(atk)
+            local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+            local disbet = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tar1.x, tar1.y, tar1.z)
+            local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+            if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
+                Delcar(targets, spec, pid)
+            end
+             if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or disbet >= 1000 then
+                    DelEnt(spawatk)
+                    atkset.p = 0
+                    spawatk = {}
+                    util.yield(8000)
+                    while atkset.p < atkset.count and players.exists(pid) do
+                        local atkr = Atkrspawn(atkset.invinc, atkset.invis, pid , atkset.model)
+                        NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
+                        NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
+                        table.insert(spawatk, atkr)
+                        atkset.p = atkset.p + 1
+                        if #spawatk == atkset.count then
+                            return
+                        end
+                    end
+                end
+    end
+end 
 
+function Refreshplnes()
+    if not players.exists(pid) or platkset.plnedelete then
+        util.stop_thread()
+    end
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    for key, plne in pairs(plneveh) do
+        local tarv = ENTITY.GET_ENTITY_COORDS(plne)
+        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+        platkset.disbetplne = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
+            Delcar(targets, spec, pid)
+        end
+        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or platkset.disbetplne >= 1000000 then
+            DelEnt(plneveh)
+            DelEnt(plneatkr)
+        plneveh = {}
+        plneatkr = {}
+        platkset.p = 0
+            util.yield(8000)
+            while platkset.p < platkset.plcount and players.exists(pid)  do
+                local veh, pil = Plneatkr(platkset.invinc, platkset.invis, pid, platkset.plane)
+                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(veh), true)
+                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(veh), players.user(), true)
+                table.insert(plneveh, veh)
+                table.insert(plneatkr, pil)
+                util.yield(150)
+                platkset.p = platkset.p + 1
+                if #plneveh == platkset.plcount then
+                    return
+                end
+            end
+        end  
+    end
+end
+function RefreshHeli()
+    if not players.exists(pid) or heliatkset.helidelete then
+        util.stop_thread()
+    end
+    local targets = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
+    for key, heli in pairs(heliveh) do
+        local tarv = ENTITY.GET_ENTITY_COORDS(heli)
+        local tar2 = ENTITY.GET_ENTITY_COORDS(targets)
+        heliatkset.disbetheli = SYSTEM.VDIST2(tar2.x, tar2.y, tar2.z, tarv.x, tarv.y, tarv.z)
+        local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
+        if PED.IS_PED_SITTING_IN_ANY_VEHICLE(targets) then
+            Delcar(targets, spec, pid)
+        end
+
+        if  PED.IS_PED_DEAD_OR_DYING(targets, 1) or heliatkset.disbetheli >= 340000  then
+
+            DelEnt(heliatkr)
+            DelEnt(heliveh)
+        
+            heliatkr = {}
+            heliveh = {}
+            heliatkset.h = 0
+            util.yield(8000)
+            while heliatkset.h < heliatkset.hlcount and players.exists(pid) do
+                local atk, pil = Heliatkr(heliatkset.invinc, heliatkset.invis, pid, heliatkset.helicopter)
+                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(NETWORK.VEH_TO_NET(atk), true)
+                NETWORK.SET_NETWORK_ID_ALWAYS_EXISTS_FOR_PLAYER(NETWORK.VEH_TO_NET(atk), players.user(), true)
+                table.insert(heliveh, atk)
+                table.insert(heliatkr, pil)
+                util.yield(250)
+                heliatkset.h = heliatkset.h + 1
+                if #heliveh == heliatkset.hlcount then
+                    return
+                end
+            end
+        end
+    end
+end
 
 
 
@@ -4731,11 +4678,6 @@ AClang.action(plnemenu, 'Delete Plane Attackers', {'delplatkr'}, 'Delete Plane A
  
     
     Delcar(targets, spec, pid)
-
-    
-
-
-
 
 end)
 
@@ -4913,14 +4855,8 @@ end)
             table.insert(peds,  spawned_ped)
         end
 
-    SetPedCoor(peds[1], tar1.x, tar1.y - 0.5, tar1.z - 1.0)
-    SetPedCoor(peds[2], tar1.x - 0.5, tar1.y - 0.5, tar1.z - 1.0)
-    SetPedCoor(peds[3], tar1.x - 0.5, tar1.y, tar1.z - 1.0)
-    SetPedCoor(peds[4], tar1.x - 0.5, tar1.y + 0.5, tar1.z - 1.0)
-    SetPedCoor(peds[5], tar1.x, tar1.y + 0.5, tar1.z - 1.0)
-    SetPedCoor(peds[6], tar1.x + 0.5, tar1.y + 0.5, tar1.z - 1.0)
-    SetPedCoor(peds[7], tar1.x + 0.5, tar1.y, tar1.z - 1.0)
-    SetPedCoor(peds[8], tar1.x + 0.5, tar1.y - 0.5, tar1.z - 1.0)
+    SetEntCoor(tar1, peds)
+
 
     if wall.invis then
         for index, ent in ipairs(peds) do
@@ -5021,7 +4957,8 @@ end)
                  end
         end
     end)
-    
+    local atkhash = {}
+
     
     local rcage_table = {}
     local rpedca =  AClang.toggle_loop(pcagem, 'Random Ped Cage', {'PCAGE'}, 'Traps Player in a Cage of Random Peds', function ()
@@ -5029,6 +4966,7 @@ end)
       local tar1 = ENTITY.GET_ENTITY_COORDS(targets, true)
       local pname = PLAYER.GET_PLAYER_NAME(pid)
       if not rcage_table[pid] then
+        Combinetab(atkhash, AMC, AfC, CSP, GM, Mpp, MSF, MCM, SMC, Ssf, Ssm, Dlcp)
           local rpeds = {}
           local rpedind = math.random(1, #atkhash)
           local rpedset = atkhash[rpedind]
@@ -5043,14 +4981,8 @@ end)
         end
 
   
-        SetPedCoor(rpeds[1], tar1.x, tar1.y - 0.5, tar1.z - 1.0)
-        SetPedCoor(rpeds[2], tar1.x - 0.5, tar1.y - 0.5, tar1.z - 1.0)
-        SetPedCoor(rpeds[3], tar1.x - 0.5, tar1.y, tar1.z - 1.0)
-        SetPedCoor(rpeds[4], tar1.x - 0.5, tar1.y + 0.5, tar1.z - 1.0)
-        SetPedCoor(rpeds[5], tar1.x, tar1.y + 0.5, tar1.z - 1.0)
-        SetPedCoor(rpeds[6], tar1.x + 0.5, tar1.y + 0.5, tar1.z - 1.0)
-        SetPedCoor(rpeds[7], tar1.x + 0.5, tar1.y, tar1.z - 1.0)
-        SetPedCoor(rpeds[8], tar1.x + 0.5, tar1.y - 0.5, tar1.z - 1.0)
+        SetEntCoor(tar1, rpeds)
+
   
         if wall.invis then
             for index, ent in ipairs(rpeds) do
@@ -5157,31 +5089,23 @@ end)
         local spec = menu.get_value(menu.ref_by_rel_path(menu.player_root(pid), "Spectate>Ninja Method"))
         Delcar(targets, spec, pid)
         
-local hsel = util.joaat(objset.mdl)
+        local hsel = util.joaat(objset.mdl)
         Streament(hsel)
         local obj_tab = {'o1', 'o2', 'o3', 'o4', 'o5', 'o6', 'o7', 'o8'}
         for _, spawned_obj in ipairs(obj_tab) do
             spawned_obj =  ObjFrezSpawn(hsel, tar1)
             table.insert(objs,  spawned_obj)
+
         end
         obj_table[pid] = objs
 
-        SetObjCo(objs[1], tar1.x, tar1.y - 0.5, tar1.z - 1.0)
-        SetObjCo(objs[2], tar1.x - 0.5, tar1.y - 0.5, tar1.z - 1.0)
-        SetObjCo(objs[3], tar1.x - 0.5, tar1.y, tar1.z - 1.0)
-        SetObjCo(objs[4], tar1.x - 0.5, tar1.y + 0.5, tar1.z - 1.0)
-        SetObjCo(objs[5], tar1.x, tar1.y + 0.5, tar1.z - 1.0)
-        SetObjCo(objs[6], tar1.x + 0.5, tar1.y + 0.5, tar1.z - 1.0)
-        SetObjCo(objs[7], tar1.x + 0.5, tar1.y, tar1.z - 1.0)
-        SetObjCo(objs[8], tar1.x + 0.5, tar1.y - 0.5, tar1.z - 1.0)
 
-        ENTITY.SET_ENTITY_ROTATION(objs[1], 0, 0, 180, 1, true)
-        ENTITY.SET_ENTITY_ROTATION(objs[2], 0, 0, 135, 1, true)
-        ENTITY.SET_ENTITY_ROTATION(objs[3], 0, 0, 90, 1, true)
-        ENTITY.SET_ENTITY_ROTATION(objs[4], 0, 0, 45, 1, true)
-        ENTITY.SET_ENTITY_ROTATION(objs[6], 0, 0, 315, 1, true)
-        ENTITY.SET_ENTITY_ROTATION(objs[7], 0, 0, 270, 1, true)
-        ENTITY.SET_ENTITY_ROTATION(objs[8], 0, 0, 225, 1, true)
+
+        SetEntCoor(tar1, objs)
+        local rot_tab = {180, 135, 90, 45, 0, 315, 270, 225}
+        for i = 1, #rot_tab do
+                ENTITY.SET_ENTITY_ROTATION(objs[i], 0, 0, rot_tab[i], 1, true)
+        end
 
         if wall.invis then
             for index, ent in ipairs(objs) do
@@ -5234,11 +5158,6 @@ end)
 
 
 
-
-
- 
-
-
  -----------------Object Actions----------
  -----signs---
  AClang.list_action(ObjSlist, 'Street Signs', {''}, 'Changes Objects to Street Signs', Siglist, function(objsel)
@@ -5278,6 +5197,8 @@ players.dispatch_on_join()
  AClang.hyperlink(setroot, 'Join the Discord', 'https://discord.gg/fn4uBbFNnA', 'Join the AcjokerScript Discord if you have any problems, want to suggest features, or want to help with translations')
 
  Credroot = AClang.list(setroot, 'Credits', {}, '')
+ AClang.action(Credroot, 'hexarobi', {}, 'For all the help with the script they are always a big help', function ()
+ end)
  AClang.action(Credroot, 'Jerry123', {}, 'For major help with multiple portions of the script and his LangLib for translations', function ()
  end)
  AClang.action(Credroot, 'Keramis', {}, 'For the tutorial I would have had a harder time without it', function ()
@@ -5285,8 +5206,6 @@ players.dispatch_on_join()
  AClang.action(Credroot, 'aaron', {}, 'For the ScaleformLib script and help with executing it', function ()
  end)
  AClang.action(Credroot, 'Nowiry', {}, 'For their script it was a heavy influence on the Charger weapon', function ()
- end)
- AClang.action(Credroot, 'hexarobi', {}, 'For all the help with the script they are always a big help', function ()
  end)
  AClang.action(Credroot, '=)', {}, 'For the peeing animation for Trevor', function ()
  end)
